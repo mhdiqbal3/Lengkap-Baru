@@ -26,7 +26,6 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-            // Arahkan ke dashboard jika sukses login
             return redirect()->intended('index');
         }
 
@@ -54,7 +53,6 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
-        // 1. Validasi data yang diinput
         $request->validate([
             'name'     => 'required|string|max:255',
             'username' => 'required|string|max:255|unique:users',
@@ -67,21 +65,54 @@ class AuthController extends Controller
             'password.confirmed' => 'Konfirmasi password tidak cocok.'
         ]);
 
-        // 2. Simpan ke Database
         User::create([
             'name'     => $request->name,
             'username' => $request->username,
             'email'    => $request->email,
             'no_hp'    => $request->no_hp,
             'password' => Hash::make($request->password),
-            'role'     => 'user', 
-            
-            // PERBAIKAN: Secara eksplisit mengatur foto menjadi null saat mendaftar
-            // Sistem akan otomatis menampilkan inisial nama karena nilainya kosong
-            'foto'     => null, 
+            'role'     => 'user',
+            'foto'     => null,
         ]);
 
-        // 3. Arahkan kembali ke halaman login dengan pesan sukses
         return redirect('/login')->with('success', 'Akun berhasil dibuat! Silakan masuk dengan akun Anda.');
+    }
+
+    // ==========================================
+    // BAGIAN LUPA PASSWORD (VIA USERNAME & NO HP)
+    // ==========================================
+    public function showLupaPasswordForm()
+    {
+        // Menampilkan view baru kita
+        return view('auth-lupa-password');
+    }
+
+    public function prosesLupaPassword(Request $request)
+    {
+        // Validasi input
+        $request->validate([
+            'username' => 'required',
+            'no_hp'    => 'required',
+            'password' => 'required|min:8|confirmed', // Pastikan password baru diisi dan dikonfirmasi
+        ]);
+
+        // Cari user yang username DAN no_hp nya cocok
+        $user = User::where('username', $request->username)
+            ->where('no_hp', $request->no_hp)
+            ->first();
+
+        // Jika tidak ketemu (salah ketik atau coba retas)
+        if (!$user) {
+            return back()->withErrors([
+                'username' => 'Maaf, Username atau Nomor HP tidak cocok dengan data kami.'
+            ]);
+        }
+
+        // Jika cocok, ubah passwordnya langsung
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        // Kembali ke login dan beri tahu berhasil
+        return redirect('/login')->with('success', 'Password berhasil diatur ulang! Silakan masuk dengan password baru Anda.');
     }
 }

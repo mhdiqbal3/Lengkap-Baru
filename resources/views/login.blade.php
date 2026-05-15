@@ -27,7 +27,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 
-<body class="bg-[#800000] flex h-screen items-center justify-center p-4">
+<body class="bg-[#800000] flex h-screen items-center justify-center p-4 font-sans">
 
     <div
         class="bg-white w-full max-w-4xl rounded-[2rem] shadow-2xl flex flex-col md:flex-row overflow-hidden border border-gray-100 min-h-[480px] max-h-[90vh]">
@@ -107,11 +107,8 @@
 
                     <div class="flex items-center justify-between mt-2">
                         <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" name="remember"
-                                class="w-3.5 h-3.5 text-ppks-maroon border-gray-300 rounded focus:ring-ppks-maroon focus:ring-2">
-                            <span class="text-[11px] font-semibold text-gray-600">Ingat Saya</span>
                         </label>
-                        <a href="#"
+                        <a href="{{ route('password.request') }}"
                             class="text-[11px] font-bold text-gray-400 hover:text-gray-800 transition-colors">Lupa
                             Password?</a>
                     </div>
@@ -166,24 +163,36 @@
                         "Setiap laporan yang masuk akan kami tangani dengan mengedepankan prinsip kerahasiaan, keadilan,
                         dan tanpa penghakiman kepada korban."
                     </p>
-                    <div class="mt-3 flex items-center gap-2">
-                        <div class="w-6 h-6 rounded-full bg-white flex items-center justify-center text-[#800000]">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z">
-                                </path>
-                            </svg>
-                        </div>
-                        <span class="text-white text-[10px] font-bold uppercase tracking-wider">Satgas PPKPT USN
-                            Kolaka</span>
+                    <div
+                        class="pt-6 text-center text-red-300 text-xs flex flex-col md:flex-row justify-between items-center">
+                        <p>&copy; {{ date('Y') }} Satgas PPKPT USN Kolaka</p>
                     </div>
                 </div>
-
             </div>
         </div>
 
     </div>
 
+    {{-- MODAL SUCCESS --}}
+    @if (session('success'))
+        <div class="fixed inset-0 z-[110] flex items-center justify-center bg-gray-900/60 backdrop-blur-sm px-4">
+            <div
+                class="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden text-center transform transition-all p-6">
+                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7">
+                        </path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">Berhasil!</h3>
+                <p class="text-gray-500 text-sm mb-6">{{ session('success') }}</p>
+                <button onclick="this.parentElement.parentElement.remove()" type="button"
+                    class="w-full py-2.5 bg-gray-100 text-gray-800 font-medium rounded-lg hover:bg-gray-200 transition-colors">
+                    Tutup
+                </button>
+            </div>
+        </div>
+    @endif
 </body>
 
 </html>

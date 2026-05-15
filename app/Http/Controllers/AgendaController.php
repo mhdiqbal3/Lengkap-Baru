@@ -7,19 +7,37 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 
 class AgendaController extends Controller
 {
     public function index()
     {
-        // Semua user yang login bisa melihat halaman index agenda
+        // Semua user yang login (Admin, Satgas, Masyarakat) bisa melihat daftar agenda
         $agendas = Agenda::orderBy('created_at', 'desc')->get();
         return view('agenda', compact('agendas'));
     }
 
+    /**
+     * Menampilkan detail agenda berdasarkan slug.
+     */
+    public function show($slug)
+    {
+        // Menggunakan firstOrFail agar mengembalikan model tunggal, bukan collection
+        $agenda = Agenda::where('slug', $slug)->firstOrFail();
+
+        // Mengambil data agenda lain untuk rekomendasi (perbaikan Undefined Variable)
+        $agendas_lain = Agenda::where('id', '!=', $agenda->id)
+            ->orderBy('created_at', 'desc')
+            ->take(3)
+            ->get();
+
+        return view('agenda-detail', compact('agenda', 'agendas_lain'));
+    }
+
     public function store(Request $request)
     {
-        // Izinkan Admin dan Satgas untuk menambah berita
+        // --- PERBAIKAN: Izinkan Admin DAN Satgas ---
         if (!in_array(Auth::user()->role, ['admin', 'satgas'])) {
             abort(403, 'Akses Ditolak.');
         }
@@ -27,13 +45,16 @@ class AgendaController extends Controller
         $request->validate([
             'judul' => 'required|string|max:255',
             'konten' => 'required|string',
-            'gambar' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
+            'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
         ]);
 
-        $data = $request->only(['judul', 'konten']);
+        $data = $request->only(['judul', 'konten', 'penulis', 'tanggal', 'status']);
 
-        if ($request->hasFile('gambar')) {
-            $file = $request->file('gambar');
+        // Otomatis buat slug
+        $data['slug'] = Str::slug($request->judul) . '-' . time();
+
+        if ($request->hasFile('thumbnail')) {
+            $file = $request->file('thumbnail');
             $fileName = time() . '_' . $file->getClientOriginalName();
             $destinationPath = public_path('assets/agenda');
 
@@ -42,7 +63,7 @@ class AgendaController extends Controller
             }
 
             $file->move($destinationPath, $fileName);
-            $data['gambar'] = 'assets/agenda/' . $fileName;
+            $data['thumbnail'] = 'assets/agenda/' . $fileName;
         }
 
         Agenda::create($data);
@@ -52,7 +73,7 @@ class AgendaController extends Controller
 
     public function update(Request $request, $id)
     {
-        // Izinkan Admin dan Satgas untuk mengubah berita
+        // --- PERBAIKAN: Izinkan Admin DAN Satgas ---
         if (!in_array(Auth::user()->role, ['admin', 'satgas'])) {
             abort(403, 'Akses Ditolak.');
         }
@@ -62,18 +83,23 @@ class AgendaController extends Controller
         $request->validate([
             'judul' => 'required|string|max:255',
             'konten' => 'required|string',
-            'gambar' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
+            'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
         ]);
 
-        $data = $request->only(['judul', 'konten']);
+        $data = $request->only(['judul', 'konten', 'penulis', 'tanggal', 'status']);
 
-        if ($request->hasFile('gambar')) {
-            // Hapus gambar lama jika ada
-            if ($agenda->gambar && File::exists(public_path($agenda->gambar))) {
-                File::delete(public_path($agenda->gambar));
+        // Update slug jika judul berubah
+        if ($agenda->judul !== $request->judul) {
+            $data['slug'] = Str::slug($request->judul) . '-' . time();
+        }
+
+        if ($request->hasFile('thumbnail')) {
+            // Hapus gambar lama
+            if ($agenda->thumbnail && File::exists(public_path($agenda->thumbnail))) {
+                File::delete(public_path($agenda->thumbnail));
             }
 
-            $file = $request->file('gambar');
+            $file = $request->file('thumbnail');
             $fileName = time() . '_' . $file->getClientOriginalName();
             $destinationPath = public_path('assets/agenda');
 
@@ -82,7 +108,7 @@ class AgendaController extends Controller
             }
 
             $file->move($destinationPath, $fileName);
-            $data['gambar'] = 'assets/agenda/' . $fileName;
+            $data['thumbnail'] = 'assets/agenda/' . $fileName;
         }
 
         $agenda->update($data);
@@ -92,16 +118,15 @@ class AgendaController extends Controller
 
     public function destroy($id)
     {
-        // Izinkan Admin dan Satgas untuk menghapus berita
+        // --- PERBAIKAN: Izinkan Admin DAN Satgas ---
         if (!in_array(Auth::user()->role, ['admin', 'satgas'])) {
             abort(403, 'Akses Ditolak.');
         }
 
         $agenda = Agenda::findOrFail($id);
 
-        // Hapus file gambar dari server jika ada
-        if ($agenda->gambar && File::exists(public_path($agenda->gambar))) {
-            File::delete(public_path($agenda->gambar));
+        if ($agenda->thumbnail && File::exists(public_path($agenda->thumbnail))) {
+            File::delete(public_path($agenda->thumbnail));
         }
 
         $agenda->delete();

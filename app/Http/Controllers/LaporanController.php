@@ -82,20 +82,19 @@ class LaporanController extends Controller
 
     public function store(Request $request)
     {
-        // 1. Tambahkan validasi untuk field baru
         $request->validate([
             'judul_lapor' => 'required|string|max:255',
             'jenis_kasus' => 'required|string',
-            'nama_korban' => 'required|string', // Karena tidak anonim, nama wajib diisi
+            'nama_korban' => 'required|string',
             'no_hp_korban' => 'required|string',
             'status_korban' => 'required|string',
-            'status_terlapor' => 'required|string', // Validasi baru
+            'status_terlapor' => 'required|string',
             'jenis_kelamin' => 'required|in:L,P',
             'disabilitas' => 'required|in:ya,tidak',
             'tanggal_kejadian' => 'required|date',
             'lokasi_kejadian' => 'required|string',
             'deskripsi' => 'required|string',
-            'link_video' => 'nullable|url', // Validasi baru (opsional, tapi harus berupa URL jika diisi)
+            'link_video' => 'nullable|url',
             'bukti' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
         ]);
 
@@ -115,8 +114,6 @@ class LaporanController extends Controller
                 $pathBukti = 'assets/bukti/' . $fileName;
             }
 
-            // Hapus logika $isAnonim = ...
-
             $lastLaporan = Laporan::where('kode_tiket', 'like', 'PPKS-%')->orderBy('id', 'desc')->first();
 
             if (!$lastLaporan) {
@@ -127,23 +124,22 @@ class LaporanController extends Controller
                 $newKodeTiket = 'PPKS-' . str_pad($newNumber, 3, '0', STR_PAD_LEFT);
             }
 
-            // 2. Simpan data ke database
             $laporan = Laporan::create([
                 'user_id' => Auth::id(),
                 'kode_tiket' => $newKodeTiket,
                 'judul_lapor' => $request->judul_lapor,
                 'jenis_kasus' => $request->jenis_kasus,
-                // 'is_anonim' dihapus
-                'nama_korban' => $request->nama_korban, // Langsung ambil dari request
+                'nama_korban' => $request->nama_korban,
                 'no_hp_korban' => $request->no_hp_korban,
                 'status_korban' => $request->status_korban,
-                'status_terlapor' => $request->status_terlapor, // Data baru
+                'status_terlapor' => $request->status_terlapor,
                 'jenis_kelamin' => $request->jenis_kelamin,
                 'disabilitas' => $request->disabilitas,
                 'tanggal_kejadian' => $request->tanggal_kejadian,
                 'lokasi_kejadian' => $request->lokasi_kejadian,
                 'deskripsi' => $request->deskripsi,
-                'link_video' => $request->link_video, // Data baru
+                // PERBAIKAN: Jika request link_video null, masukkan string kosong ''
+                'link_video' => $request->link_video ?? '',
                 'bukti' => $pathBukti,
                 'status' => 'Menunggu Verifikasi',
             ]);
@@ -188,7 +184,6 @@ class LaporanController extends Controller
 
     public function create()
     {
-        // PERBAIKAN: Melempar data peraturan dari Database
         $kontenPeraturan = KontenHalaman::where('halaman', 'peraturan')->first();
         return view('laporkan', compact('kontenPeraturan'));
     }
@@ -234,11 +229,14 @@ class LaporanController extends Controller
             'jenis_kasus' => 'required|string',
             'no_hp_korban' => 'required|string',
             'status_korban' => 'required|string',
+            // PERBAIKAN TAMBAHAN: pastikan form edit juga divalidasi
+            'status_terlapor' => 'required|string',
             'jenis_kelamin' => 'required|in:L,P',
             'disabilitas' => 'required|in:ya,tidak',
             'tanggal_kejadian' => 'required|date',
             'lokasi_kejadian' => 'required|string',
             'deskripsi' => 'required|string',
+            'link_video' => 'nullable|url',
             'bukti' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
         ]);
 
@@ -276,11 +274,14 @@ class LaporanController extends Controller
             'nama_korban' => $isAnonim ? null : $request->nama_korban,
             'no_hp_korban' => $request->no_hp_korban,
             'status_korban' => $request->status_korban,
+            // PERBAIKAN TAMBAHAN: masukkan data baru ke fungsi update juga
+            'status_terlapor' => $request->status_terlapor,
             'jenis_kelamin' => $request->jenis_kelamin,
             'disabilitas' => $request->disabilitas,
             'tanggal_kejadian' => $request->tanggal_kejadian,
             'lokasi_kejadian' => $request->lokasi_kejadian,
             'deskripsi' => $request->deskripsi,
+            'link_video' => $request->link_video ?? '',
             'bukti' => $pathBukti,
         ]);
 

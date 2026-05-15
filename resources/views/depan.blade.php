@@ -63,6 +63,29 @@
             return $dKontak[$key] ?? $default;
         };
 
+        // --- TAMBAHAN LOGIKA UNTUK BENTUK KEKERASAN (Menarik data dari Dashboard) ---
+        $kontenDashboard = \App\Models\KontenHalaman::where('halaman', 'dashboard')->first();
+        $dataDashboard =
+            $kontenDashboard && !empty($kontenDashboard->konten) ? json_decode($kontenDashboard->konten, true) : [];
+        $d = function ($key, $default) use ($dataDashboard) {
+            return $dataDashboard[$key] ?? $default;
+        };
+
+        $bentuk_titles = $dataDashboard['bentuk_item_titles'] ?? [
+            $d('ks_title', 'Kekerasan Seksual'),
+            $d('kf_title', 'Kekerasan Fisik'),
+            $d('kp_title', 'Kekerasan Psikologis'),
+        ];
+        $bentuk_descs = $dataDashboard['bentuk_item_descs'] ?? [
+            $d('ks_desc', 'Termasuk pelecehan verbal, fisik, hingga pemaksaan melalui media digital atau intimidasi.'),
+            $d('kf_desc', 'Tindakan kontak fisik yang menyakiti atau membahayakan nyawa orang lain secara sengaja.'),
+            $d(
+                'kp_desc',
+                'Ejekan, pengucilan, atau ancaman yang merusak kesehatan mental dan rasa percaya diri seseorang.',
+            ),
+        ];
+        // ----------------------------------------------------------------------------
+
         // Ekstrak URL Gambar Carousel
         $carouselUrls = isset($carousels)
             ? array_column($carousels, 'url')
@@ -301,6 +324,35 @@
                             <p class="text-gray-600 text-sm font-medium leading-relaxed">{{ $item['deskripsi'] }}</p>
                         </div>
                     </button>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    <section id="bentuk-kekerasan" class="py-16 bg-white border-t border-gray-100">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-10" data-aos="fade-up">
+                <span class="text-[#800000] font-bold tracking-widest uppercase text-[10px] mb-1 block">Waspada</span>
+                <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight">
+                    {{ $d('bentuk_title', 'Kenali Bentuk Kekerasan') }}</h2>
+                <div class="w-12 h-1.5 bg-[#800000] mx-auto mt-4 rounded-full"></div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                @foreach ($bentuk_titles as $index => $title)
+                    <div data-aos="fade-up" data-aos-delay="{{ $index * 100 }}"
+                        class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all">
+                        <div
+                            class="w-12 h-12 bg-red-100 text-[#800000] rounded-2xl flex items-center justify-center mb-4">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
+                                </path>
+                            </svg>
+                        </div>
+                        <h4 class="font-bold text-gray-800">{{ $title }}</h4>
+                        <p class="text-xs text-gray-500 mt-2 leading-relaxed">{{ $bentuk_descs[$index] ?? '' }}</p>
+                    </div>
                 @endforeach
             </div>
         </div>
@@ -581,7 +633,6 @@
         </div>
     </section>
 
-    <!-- BAGIAN AGENDA DENGAN LATAR WARNA PUTIH (bg-white) -->
     <section id="agenda" class="py-16 bg-white border-t border-gray-100">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="mb-10 text-center md:text-left flex flex-col md:flex-row justify-between items-end gap-4"
@@ -687,9 +738,9 @@
             </div>
             <div
                 class="border-t border-red-900 pt-6 text-center text-red-300 text-xs flex flex-col md:flex-row justify-between items-center">
-                <p>&copy; {{ date('Y') }} Satgas PPKS USN Kolaka. All rights reserved.</p>
-                <div class="mt-2 md:mt-0"><a href="{{ route('login') }}"
-                        class="hover:text-white transition font-bold">Sistem Admin</a></div>
+                <p>&copy; {{ date('Y') }} Satuan Tugas Pencegahan dan Penanganan Kekerasan di Lingkungan Perguruan
+                    Tinggi
+                    Universitas Sembilanbelas November Kolaka.</p>
             </div>
         </div>
     </footer>
@@ -719,14 +770,12 @@
         </div>
     </template>
 
-    <!-- MODAL POSTER (TANPA BINGKAI PUTIH) -->
     @if ($promoImage)
         <template x-teleport="body">
             <div x-show="showPromoModal" style="display: none;"
                 class="fixed inset-0 z-[10000] flex items-center justify-center bg-gray-900/90 backdrop-blur-sm p-4 md:p-10"
                 x-transition.opacity>
 
-                <!-- Tombol Close (Pojok Kanan Atas Layar) -->
                 <button @click="showPromoModal = false"
                     class="absolute top-4 right-4 md:top-8 md:right-8 text-white/70 hover:text-white bg-black/20 hover:bg-black/40 p-2 rounded-full backdrop-blur-md transition-colors focus:outline-none z-50">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -735,7 +784,6 @@
                     </svg>
                 </button>
 
-                <!-- Menampilkan Poster Langsung Tanpa Bingkai Putih -->
                 <div @click.away="showPromoModal = false"
                     class="relative w-full max-w-md flex flex-col items-center transform transition-all"
                     x-transition.scale>
@@ -746,18 +794,14 @@
         </template>
     @endif
 
-    <!-- PERBAIKAN MODAL CEK TIKET (Dibatasi Lebar & Tingginya) -->
-    <!-- PERBAIKAN MODAL CEK TIKET (Dibatasi Lebar & Tingginya, Tombol X Luar Dihapus) -->
     <template x-teleport="body">
         <div x-show="showResultModal" style="display: none;"
             class="fixed inset-0 z-[10000] flex items-center justify-center bg-gray-900/90 backdrop-blur-md p-4 sm:p-6"
             x-transition.opacity>
 
-            <!-- Pembungkus diberi batas lebar (max-w-3xl) dan posisi relatif -->
             <div @click.away="showResultModal = false" class="w-full max-w-3xl relative transform transition-all"
                 x-transition.scale>
 
-                <!-- Konten Modal dibatasi tingginya (max-h-85vh) agar bisa di-scroll -->
                 <div
                     class="w-full max-h-[85vh] overflow-y-auto custom-scroll bg-white rounded-[2rem] shadow-2xl overflow-hidden relative">
                     <div x-html="resultHtml" class="w-full"></div>

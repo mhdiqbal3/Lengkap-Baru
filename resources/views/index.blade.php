@@ -59,6 +59,8 @@
         }
 
         $isAdmin = Auth::check() && Auth::user()?->role === 'admin';
+        $isSatgas = Auth::check() && Auth::user()?->role === 'satgas';
+        $canViewSummary = $isAdmin || $isSatgas;
         $themeBg = 'bg-[#800000]';
     @endphp
 
@@ -96,7 +98,7 @@
             </button>
         </div>
 
-        @if ($isAdmin)
+        @if ($canViewSummary)
             <div class="bg-white rounded-3xl p-5 border border-gray-100 shadow-sm space-y-5">
                 <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-4 border-b border-gray-50 pb-4">
                     <div class="flex items-center gap-3">
@@ -218,7 +220,7 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
                 <div class="lg:col-span-2 bg-white p-7 rounded-3xl border border-gray-100 shadow-sm flex flex-col">
                     <div class="flex justify-between items-center mb-6">
                         <div>
@@ -251,7 +253,9 @@
                     </div>
                 </div>
             </div>
+        @endif
 
+        @if ($isAdmin)
             <div x-data="{ showCarouselModal: false }">
                 <button @click="showCarouselModal = true"
                     class="fixed bottom-6 right-6 z-50 bg-yellow-500 hover:bg-yellow-600 text-white p-4 rounded-full shadow-2xl flex items-center justify-center group transition transform hover:scale-110">
@@ -554,7 +558,7 @@
 @endsection
 
 @push('scripts')
-    @if ($isAdmin)
+    @if ($canViewSummary)
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script>
             const dashboardData = @json($stats);
