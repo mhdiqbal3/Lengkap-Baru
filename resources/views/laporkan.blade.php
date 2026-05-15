@@ -63,14 +63,13 @@
                 });
         }
     }">
-        <div class="mb-8 flex justify-between items-end">
+        <div class="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
             <div>
-                <h1 class="text-2xl font-bold text-gray-800 mb-2">Layanan Pengaduan
-                </h1>
+                <h1 class="text-2xl font-bold text-gray-800 mb-2">Layanan Pengaduan</h1>
                 <p class="text-gray-600">Satgas PPKPT Universitas Sembilanbelas November Kolaka</p>
             </div>
             <button @click="showPengaduan = true"
-                class="hidden md:flex px-6 py-2.5 bg-[#800000] text-white font-medium rounded-lg hover:bg-red-900 transition shadow-sm items-center gap-2">
+                class="flex w-full sm:w-auto justify-center px-6 py-2.5 bg-[#800000] text-white font-medium rounded-lg hover:bg-red-900 transition shadow-sm items-center gap-2">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                 </svg>
@@ -95,7 +94,7 @@
                     </div>
                     @if (auth()->check() && auth()->user()->role === 'admin')
                         <a href="{{ route('informasi.peraturan.edit') }}"
-                            class="inline-flex items-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-white px-5 py-2.5 rounded-lg font-bold text-sm transition shadow-md">
+                            class="inline-flex w-full md:w-auto justify-center items-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-white px-5 py-2.5 rounded-lg font-bold text-sm transition shadow-md">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
@@ -106,7 +105,6 @@
                     @endif
                 </div>
 
-                <!-- Loop Dinamis Peraturan -->
                 <div class="grid md:grid-cols-2 gap-6">
                     @foreach ($peraturan_items as $item)
                         <button
@@ -178,7 +176,6 @@
             </div>
         </section>
 
-        <!-- Modal Form Laporan & Kode Tiket Hasil -->
         <div x-show="showPengaduan" style="display: none;"
             class="fixed inset-0 z-[100] flex items-center justify-center bg-gray-900/60 backdrop-blur-sm"
             x-transition.opacity>

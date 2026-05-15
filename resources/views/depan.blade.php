@@ -211,6 +211,13 @@
                     class="block px-3 py-2 text-xs font-bold hover:text-[#800000]">Berita & Agenda</a>
                 <a href="#kontak" @click="open = false"
                     class="block px-3 py-2 text-xs font-bold hover:text-[#800000]">Kontak</a>
+
+                <div class="pt-4 mt-2 border-t border-gray-100">
+                    <a href="{{ route('login') }}"
+                        class="block w-full text-center bg-[#800000] text-white px-5 py-2.5 rounded-full font-bold text-xs hover:bg-red-900 transition shadow-sm">
+                        Login
+                    </a>
+                </div>
             </div>
         </div>
     </nav>
