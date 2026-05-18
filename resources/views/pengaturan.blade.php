@@ -5,6 +5,7 @@
 @section('content')
     <div class="max-w-6xl mx-auto pb-20" x-data="{ tabAktif: 'profil' }">
 
+        {{-- Banner Sederhana & Elegan --}}
         <div
             class="bg-gradient-to-r from-[#800000] to-red-900 rounded-[2rem] p-8 md:p-10 mb-8 shadow-lg text-white flex items-center justify-between relative overflow-hidden">
             <div class="relative z-10">
@@ -16,6 +17,7 @@
         </div>
 
         <div class="flex flex-col md:flex-row gap-8 items-start">
+
             {{-- Sisi Kiri: Navigasi Menu --}}
             <div class="w-full md:w-64 shrink-0">
                 <nav class="flex flex-col gap-2">
@@ -43,20 +45,23 @@
                 </nav>
             </div>
 
-            {{-- Sisi Kanan: Konten --}}
+            {{-- Sisi Kanan: Konten Formulir Utama --}}
             <div class="flex-1 w-full bg-white rounded-3xl border border-gray-100 shadow-sm p-8 md:p-10">
+
                 {{-- TAB PROFIL --}}
                 <div x-show="tabAktif === 'profil'" x-transition.opacity.duration.300ms>
                     <div class="mb-8 pb-6 border-b border-gray-100">
                         <h3 class="text-2xl font-bold text-gray-900 tracking-tight">Profil Publik</h3>
+                        <p class="text-sm text-gray-500 mt-1">Ini adalah informasi profil publik Anda yang terdaftar pada
+                            sistem.</p>
                     </div>
 
                     <form action="{{ route('pengaturan.profil') }}" method="POST" enctype="multipart/form-data"
                         class="space-y-8" x-data="{ photoPreview: null, removePhoto: false }">
                         @csrf
-                        {{-- Input tersembunyi untuk menandai hapus foto --}}
                         <input type="hidden" name="remove_foto" :value="removePhoto ? '1' : '0'">
 
+                        {{-- Upload Avatar --}}
                         <div class="flex items-center gap-6">
                             <div class="relative shrink-0">
                                 <div
@@ -71,13 +76,15 @@
                                         @else
                                             <div
                                                 class="w-full h-full flex items-center justify-center text-3xl font-black text-[#800000] bg-red-50">
-                                                {{ substr(Auth::user()->name, 0, 1) }}</div>
+                                                {{ substr(Auth::user()->name, 0, 1) }}
+                                            </div>
                                         @endif
                                     </template>
                                     <template x-if="removePhoto && !photoPreview">
                                         <div
                                             class="w-full h-full flex items-center justify-center text-3xl font-black text-[#800000] bg-red-50">
-                                            {{ substr(Auth::user()->name, 0, 1) }}</div>
+                                            {{ substr(Auth::user()->name, 0, 1) }}
+                                        </div>
                                     </template>
                                 </div>
                             </div>
@@ -86,42 +93,52 @@
                                     <input type="file" name="foto" class="hidden" x-ref="fotoInput" accept="image/*"
                                         @change="const file = $event.target.files[0]; if (file) { removePhoto = false; const reader = new FileReader(); reader.onload = (e) => { photoPreview = e.target.result; }; reader.readAsDataURL(file); }">
                                     <button type="button" @click="$refs.fotoInput.click()"
-                                        class="px-5 py-2.5 bg-white border border-gray-300 rounded-xl text-sm font-bold text-gray-700 hover:bg-gray-50 shadow-sm transition-all">Ganti
-                                        avatar</button>
+                                        class="px-5 py-2.5 bg-white border border-gray-300 rounded-xl text-sm font-bold text-gray-700 hover:bg-gray-50 transition-colors shadow-sm">
+                                        Ganti avatar
+                                    </button>
 
-                                    @if (Auth::user()->foto)
-                                        <button type="button" x-show="!removePhoto || photoPreview"
-                                            @click="removePhoto = true; photoPreview = null; $refs.fotoInput.value = ''"
-                                            class="px-5 py-2.5 bg-red-50 border border-red-100 rounded-xl text-sm font-bold text-red-600 hover:bg-red-100 shadow-sm transition-all">Hapus
-                                            Foto</button>
-                                    @endif
+                                    {{-- PERBAIKAN: Tombol Hapus Foto yang diperbaiki kondisinya --}}
+                                    <button type="button"
+                                        @click="removePhoto = true; photoPreview = null; $refs.fotoInput.value = ''"
+                                        class="px-5 py-2.5 bg-red-50 border border-red-100 rounded-xl text-sm font-bold text-red-600 hover:bg-red-100 transition-colors shadow-sm"
+                                        x-show="photoPreview || ('{{ Auth::user()->foto ? 'ada' : '' }}' !== '' && !removePhoto)"
+                                        style="display: none;">
+                                        Hapus Foto
+                                    </button>
                                 </div>
                                 <p class="text-xs text-gray-500 font-medium">Format JPG, GIF atau PNG. Maksimal 2MB.</p>
                             </div>
                         </div>
 
+                        {{-- Form Grid --}}
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div class="space-y-2">
                                 <label class="text-sm font-bold text-gray-700">Nama Lengkap</label>
                                 <input type="text" name="name" value="{{ Auth::user()->name }}" required
-                                    class="w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#800000]/20 focus:border-[#800000] focus:bg-white outline-none transition-all text-sm font-semibold shadow-sm">
+                                    class="w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#800000]/20 focus:border-[#800000] focus:bg-white outline-none transition-all text-sm text-gray-900 font-semibold shadow-sm">
                             </div>
                             <div class="space-y-2">
                                 <label class="text-sm font-bold text-gray-700">Username</label>
                                 <input type="text" name="username" value="{{ Auth::user()->username }}" required
-                                    class="w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#800000]/20 focus:border-[#800000] focus:bg-white outline-none transition-all text-sm font-semibold shadow-sm">
+                                    class="w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#800000]/20 focus:border-[#800000] focus:bg-white outline-none transition-all text-sm text-gray-900 font-semibold shadow-sm">
                             </div>
                             <div class="space-y-2 md:col-span-2">
                                 <label class="text-sm font-bold text-gray-700">Alamat Email</label>
                                 <input type="email" name="email" value="{{ Auth::user()->email }}" required
-                                    class="w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#800000]/20 focus:border-[#800000] focus:bg-white outline-none transition-all text-sm font-semibold shadow-sm">
+                                    class="w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#800000]/20 focus:border-[#800000] focus:bg-white outline-none transition-all text-sm text-gray-900 font-semibold shadow-sm">
+                            </div>
+                            <div class="space-y-2 md:col-span-2">
+                                <label class="text-sm font-bold text-gray-700">Role / Akses</label>
+                                <input type="text" value="{{ ucfirst(Auth::user()->role) }}" disabled
+                                    class="w-full px-5 py-3.5 bg-gray-100 border border-gray-200 rounded-xl text-sm text-gray-500 cursor-not-allowed font-bold">
                             </div>
                         </div>
 
                         <div class="pt-4 flex justify-end">
                             <button type="submit"
-                                class="px-8 py-3.5 bg-[#800000] text-white text-sm font-bold rounded-xl hover:bg-red-900 transition-colors shadow-md active:scale-95">Simpan
-                                Perubahan</button>
+                                class="px-8 py-3.5 bg-[#800000] text-white text-sm font-bold rounded-xl hover:bg-red-900 transition-colors shadow-md active:scale-95">
+                                Simpan Perubahan
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -130,19 +147,23 @@
                 <div x-show="tabAktif === 'keamanan'" x-transition.opacity.duration.300ms style="display: none;">
                     <div class="mb-8 border-b border-gray-100 pb-6">
                         <h3 class="text-2xl font-bold text-gray-900 tracking-tight">Keamanan Sandi</h3>
+                        <p class="text-sm text-gray-500 mt-1">Perbarui kata sandi Anda secara berkala untuk menjaga
+                            keamanan
+                            akun.</p>
                     </div>
 
                     <form action="{{ route('pengaturan.password') }}" method="POST" class="space-y-8">
                         @csrf
-                        <div class="space-y-6">
+
+                        <div class="space-y-6 w-full">
                             {{-- Current Password --}}
                             <div class="space-y-2" x-data="{ show: false }">
                                 <label class="text-sm font-bold text-gray-700">Kata Sandi Saat Ini</label>
                                 <div class="relative">
                                     <input :type="show ? 'text' : 'password'" name="current_password" required
-                                        class="w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#800000]/20 focus:border-[#800000] focus:bg-white outline-none transition-all text-sm font-semibold shadow-sm pr-12">
+                                        class="w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#800000]/20 focus:border-[#800000] focus:bg-white outline-none transition-all text-sm text-gray-900 font-semibold shadow-sm pr-12">
                                     <button type="button" @click="show = !show"
-                                        class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#800000]">
+                                        class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#800000] transition-colors p-1 rounded-md">
                                         <svg x-show="!show" class="w-5 h-5" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -159,15 +180,17 @@
                                 </div>
                             </div>
 
+                            <hr class="border-gray-100 my-4">
+
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 {{-- New Password --}}
                                 <div class="space-y-2" x-data="{ show: false }">
                                     <label class="text-sm font-bold text-gray-700">Kata Sandi Baru</label>
                                     <div class="relative">
                                         <input :type="show ? 'text' : 'password'" name="new_password" required
-                                            class="w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-xl pr-12 text-sm font-semibold">
+                                            class="w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#800000]/20 focus:border-[#800000] focus:bg-white outline-none transition-all text-sm text-gray-900 font-semibold shadow-sm pr-12">
                                         <button type="button" @click="show = !show"
-                                            class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">
+                                            class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#800000] transition-colors p-1 rounded-md">
                                             <svg x-show="!show" class="w-5 h-5" fill="none" stroke="currentColor"
                                                 viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -185,12 +208,12 @@
                                 </div>
                                 {{-- Confirmation --}}
                                 <div class="space-y-2" x-data="{ show: false }">
-                                    <label class="text-sm font-bold text-gray-700">Konfirmasi Sandi Baru</label>
+                                    <label class="text-sm font-bold text-gray-700">Konfirmasi Kata Sandi Baru</label>
                                     <div class="relative">
                                         <input :type="show ? 'text' : 'password'" name="new_password_confirmation" required
-                                            class="w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-xl pr-12 text-sm font-semibold">
+                                            class="w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#800000]/20 focus:border-[#800000] focus:bg-white outline-none transition-all text-sm text-gray-900 font-semibold shadow-sm pr-12">
                                         <button type="button" @click="show = !show"
-                                            class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">
+                                            class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#800000] transition-colors p-1 rounded-md">
                                             <svg x-show="!show" class="w-5 h-5" fill="none" stroke="currentColor"
                                                 viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -211,12 +234,58 @@
 
                         <div class="pt-4 flex justify-end">
                             <button type="submit"
-                                class="px-8 py-3.5 bg-[#800000] text-white text-sm font-bold rounded-xl hover:bg-red-900 shadow-md">Perbarui
-                                Sandi</button>
+                                class="px-8 py-3.5 bg-[#800000] text-white text-sm font-bold rounded-xl hover:bg-red-900 transition-colors shadow-md active:scale-95">
+                                Perbarui Sandi
+                            </button>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
+
+        {{-- MODAL SUCCESS & ERROR --}}
+        @if (session('success'))
+            <div class="fixed inset-0 z-[110] flex items-center justify-center bg-gray-900/60 backdrop-blur-sm px-4">
+                <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden text-center p-6">
+                    <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7">
+                            </path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Berhasil!</h3>
+                    <p class="text-gray-500 text-sm mb-6">{{ session('success') }}</p>
+                    <button onclick="this.parentElement.parentElement.remove()" type="button"
+                        class="w-full py-2.5 bg-gray-100 text-gray-800 font-medium rounded-lg hover:bg-gray-200 transition-colors">
+                        Tutup
+                    </button>
+                </div>
+            </div>
+        @endif
+
+        @if ($errors->any())
+            <div class="fixed inset-0 z-[110] flex items-center justify-center bg-gray-900/60 backdrop-blur-sm px-4">
+                <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden p-6">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center shrink-0">
+                            <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-900">Gagal Menyimpan</h3>
+                    </div>
+                    <ul class="text-sm text-gray-500 list-disc list-inside mb-6 space-y-1">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                    <button onclick="this.parentElement.parentElement.remove()" type="button"
+                        class="w-full py-2.5 bg-gray-100 text-gray-800 font-medium rounded-lg hover:bg-gray-200 transition-colors text-center">
+                        Tutup Peringatan
+                    </button>
+                </div>
+            </div>
+        @endif
     </div>
 @endsection

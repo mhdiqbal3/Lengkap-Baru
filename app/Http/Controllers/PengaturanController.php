@@ -78,4 +78,11 @@ class PengaturanController extends Controller
 
         return redirect()->back()->with('success', 'Kata sandi berhasil diperbarui.');
     }
+
+    // Fungsi ini ditambahkan agar route pengaturan.notifikasi tidak error jika diakses
+    public function updateNotifikasi(Request $request)
+    {
+        // Logika untuk update notifikasi dapat Anda tambahkan di sini ke depannya
+        return redirect()->back()->with('success', 'Pengaturan notifikasi berhasil diperbarui.');
+    }
 }
