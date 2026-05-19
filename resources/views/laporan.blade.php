@@ -244,7 +244,8 @@
 
                     <tbody class="divide-y divide-gray-50">
                         @foreach ($laporans as $index => $item)
-                            <tr class="bg-white hover:bg-gray-50/50 transition-colors group" x-data="{ showEdit: false, showBukti: false, showDetail: false }">
+                            {{-- PERBAIKAN: Menambahkan showDelete pada Alpine State --}}
+                            <tr class="bg-white hover:bg-gray-50/50 transition-colors group" x-data="{ showEdit: false, showBukti: false, showDetail: false, showDelete: false }">
                                 <td class="px-6 py-4 text-center font-medium text-gray-500">{{ $index + 1 }}</td>
                                 <td class="px-4 py-4 font-bold text-[#800000] whitespace-nowrap">{{ $item->kode_tiket }}
                                 </td>
@@ -332,6 +333,7 @@
                                             </svg>
                                         </button>
 
+                                        {{-- Tombol Verifikasi --}}
                                         <button @click="showEdit = true"
                                             class="p-2 text-yellow-600 bg-yellow-50 hover:bg-yellow-500 hover:text-white rounded-lg transition-colors border border-yellow-100 shadow-sm"
                                             title="Verifikasi Status">
@@ -342,6 +344,19 @@
                                             </svg>
                                         </button>
 
+                                        {{-- PERBAIKAN: Tombol Hapus (Diletakkan setelah Verifikasi) --}}
+                                        <button @click="showDelete = true"
+                                            class="p-2 text-red-600 bg-red-50 hover:bg-red-600 hover:text-white rounded-lg transition-colors border border-red-100 shadow-sm"
+                                            title="Hapus Laporan">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                                                </path>
+                                            </svg>
+                                        </button>
+
+                                        {{-- Tombol Cetak Laporan --}}
                                         <a href="{{ url('/laporan/cetak-pdf/' . $item->id) }}" target="_blank"
                                             class="p-2 text-[#800000] bg-red-50 hover:bg-[#800000] hover:text-white rounded-lg transition-colors border border-red-100 shadow-sm"
                                             title="Cetak Laporan">
@@ -650,7 +665,7 @@
                                                                 viewBox="0 0 24 24">
                                                                 <path stroke-linecap="round" stroke-linejoin="round"
                                                                     stroke-width="2"
-                                                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4">
+                                                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4-4m0 0l-4-4m4 4V4">
                                                                 </path>
                                                             </svg> Unduh Foto
                                                         </a>
@@ -750,6 +765,46 @@
                                             </div>
                                         </div>
                                     </template>
+
+                                    {{-- PERBAIKAN: MODAL KONFIRMASI HAPUS --}}
+                                    <template x-teleport="body">
+                                        <div x-show="showDelete" style="display: none;"
+                                            class="fixed inset-0 z-[9998] flex items-center justify-center bg-gray-900/80 backdrop-blur-sm px-4"
+                                            x-transition.opacity>
+                                            <div @click.away="showDelete = false"
+                                                class="bg-white rounded-3xl shadow-2xl max-w-sm w-full text-center p-8 transform transition-all"
+                                                x-transition.scale>
+                                                <div
+                                                    class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                                                    <svg class="w-10 h-10 text-red-600" fill="none"
+                                                        stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                                                        </path>
+                                                    </svg>
+                                                </div>
+                                                <h3 class="text-2xl font-black text-gray-900 mb-2">Hapus Laporan?</h3>
+                                                <p class="text-gray-500 text-sm mb-8 font-medium">Laporan dengan Kode
+                                                    <strong class="text-gray-800">{{ $item->kode_tiket }}</strong> akan
+                                                    dihapus secara permanen dan tidak dapat dipulihkan.</p>
+
+                                                <div class="flex justify-center gap-3">
+                                                    <button @click="showDelete = false"
+                                                        class="px-6 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-colors w-full">Batal</button>
+                                                    <form action="{{ route('laporan.destroy', $item->id) }}"
+                                                        method="POST" class="w-full m-0">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit"
+                                                            class="px-6 py-3 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition-colors shadow-md w-full">Ya,
+                                                            Hapus</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
+
                                 </td>
                             </tr>
                         @endforeach
