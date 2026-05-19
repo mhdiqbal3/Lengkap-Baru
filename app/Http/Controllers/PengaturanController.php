@@ -32,14 +32,16 @@ class PengaturanController extends Controller
             'name' => 'required|string|max:255',
             'username' => 'required|string|max:255|unique:users,username,' . $user->id,
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'no_hp' => 'required|string|max:20', // Validasi nomor HP
             'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
         $user->name = $request->name;
         $user->username = $request->username;
         $user->email = $request->email;
+        $user->no_hp = $request->no_hp; // Menyimpan data nomor HP ke database
 
-        // LOGIKA HAPUS FOTO: Cek apakah input remove_foto bernilai '1'
+        // LOGIKA HAPUS FOTO
         if ($request->input('remove_foto') == '1') {
             if ($user->foto && Storage::disk('public')->exists($user->foto)) {
                 Storage::disk('public')->delete($user->foto);
@@ -79,10 +81,8 @@ class PengaturanController extends Controller
         return redirect()->back()->with('success', 'Kata sandi berhasil diperbarui.');
     }
 
-    // Fungsi ini ditambahkan agar route pengaturan.notifikasi tidak error jika diakses
     public function updateNotifikasi(Request $request)
     {
-        // Logika untuk update notifikasi dapat Anda tambahkan di sini ke depannya
         return redirect()->back()->with('success', 'Pengaturan notifikasi berhasil diperbarui.');
     }
 }

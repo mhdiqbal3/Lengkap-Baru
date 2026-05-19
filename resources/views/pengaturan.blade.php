@@ -97,7 +97,6 @@
                                         Ganti avatar
                                     </button>
 
-                                    {{-- PERBAIKAN: Tombol Hapus Foto yang diperbaiki kondisinya --}}
                                     <button type="button"
                                         @click="removePhoto = true; photoPreview = null; $refs.fotoInput.value = ''"
                                         class="px-5 py-2.5 bg-red-50 border border-red-100 rounded-xl text-sm font-bold text-red-600 hover:bg-red-100 transition-colors shadow-sm"
@@ -122,11 +121,21 @@
                                 <input type="text" name="username" value="{{ Auth::user()->username }}" required
                                     class="w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#800000]/20 focus:border-[#800000] focus:bg-white outline-none transition-all text-sm text-gray-900 font-semibold shadow-sm">
                             </div>
-                            <div class="space-y-2 md:col-span-2">
+
+                            {{-- Kolom Alamat Email --}}
+                            <div class="space-y-2">
                                 <label class="text-sm font-bold text-gray-700">Alamat Email</label>
                                 <input type="email" name="email" value="{{ Auth::user()->email }}" required
                                     class="w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#800000]/20 focus:border-[#800000] focus:bg-white outline-none transition-all text-sm text-gray-900 font-semibold shadow-sm">
                             </div>
+                            {{-- Kolom Nomor HP (Mengambil data dinamis dari database) --}}
+                            <div class="space-y-2">
+                                <label class="text-sm font-bold text-gray-700">Nomor HP</label>
+                                <input type="text" name="no_hp" value="{{ Auth::user()->no_hp }}" required
+                                    class="w-full px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#800000]/20 focus:border-[#800000] focus:bg-white outline-none transition-all text-sm text-gray-900 font-semibold shadow-sm"
+                                    placeholder="Masukkan Nomor Handphone">
+                            </div>
+
                             <div class="space-y-2 md:col-span-2">
                                 <label class="text-sm font-bold text-gray-700">Role / Akses</label>
                                 <input type="text" value="{{ ucfirst(Auth::user()->role) }}" disabled
@@ -255,10 +264,12 @@
                     </div>
                     <h3 class="text-xl font-bold text-gray-900 mb-2">Berhasil!</h3>
                     <p class="text-gray-500 text-sm mb-6">{{ session('success') }}</p>
-                    <button onclick="this.parentElement.parentElement.remove()" type="button"
-                        class="w-full py-2.5 bg-gray-100 text-gray-800 font-medium rounded-lg hover:bg-gray-200 transition-colors">
-                        Tutup
-                    </button>
+                    <div class="pt-4 border-t border-gray-100">
+                        <button onclick="this.parentElement.parentElement.parentElement.remove()" type="button"
+                            class="w-full py-2.5 bg-gray-100 text-gray-800 font-medium rounded-lg hover:bg-gray-200 transition-colors">
+                            Tutup
+                        </button>
+                    </div>
                 </div>
             </div>
         @endif
