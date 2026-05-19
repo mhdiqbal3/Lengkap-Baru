@@ -27,15 +27,15 @@
 
         <div class="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
-                <h2 class="text-2xl font-extrabold text-gray-800 tracking-tight">Daftar Agenda & Berita</h2>
-                <p class="text-gray-500 text-sm mt-1.5 font-medium">Kelola informasi kegiatan Satgas PPKS di sini.</p>
+                <h2 class="text-2xl font-extrabold text-gray-800 tracking-tight">Daftar Berita Agenda</h2>
+                <p class="text-gray-500 text-sm mt-1.5 font-medium">Kelola informasi kegiatan Satgas PPKPT di sini.</p>
             </div>
             <button @click="showTambahModal = true"
                 class="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-[#800000] text-white text-sm font-bold rounded-xl hover:bg-red-900 transition-all shadow-md active:scale-95 whitespace-nowrap">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                 </svg>
-                Tambah Agenda Baru
+                Tambah Berita Agenda Baru
             </button>
         </div>
 
@@ -285,8 +285,9 @@
                             </path>
                         </svg>
                     </div>
-                    <h3 class="text-lg font-bold text-gray-800 mb-1">Belum Ada Agenda</h3>
-                    <p class="text-gray-500 text-sm font-medium">Klik tombol "Tambah Agenda Baru" untuk mulai menulis.</p>
+                    <h3 class="text-lg font-bold text-gray-800 mb-1">Belum Ada Berita Agenda</h3>
+                    <p class="text-gray-500 text-sm font-medium">Klik tombol "Tambah Berita Agenda Baru" untuk mulai
+                        menulis.</p>
                 </div>
             @endforelse
         </div>

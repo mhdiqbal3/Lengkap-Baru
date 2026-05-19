@@ -215,26 +215,61 @@
                                 </div>
                             </div>
                             <div class="hidden sm:block w-px h-6 bg-gray-200"></div>
+
+                            {{-- PERBAIKAN WAKTU DITERBITKAN (Sejajar ke Kanan) --}}
                             <div>
-                                <p class="text-[9px] text-gray-400 uppercase tracking-wide mb-0.5">Diterbitkan pada</p>
-                                <p class="font-bold text-gray-800 text-xs flex items-center gap-1">
-                                    <svg class="w-3.5 h-3.5 text-[#800000]" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
-                                        </path>
-                                    </svg>
-                                    {{ \Carbon\Carbon::parse($agenda->tanggal)->translatedFormat('d F Y') }}
-                                </p>
-                                <p class="text-[10px] text-gray-500 mt-0.5 flex items-center gap-1 ml-[1.125rem]">
-                                    <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                    </svg>
-                                    Pukul {{ \Carbon\Carbon::parse($agenda->created_at)->format('H:i') }} WITA
-                                </p>
+                                <p class="text-[9px] text-gray-400 uppercase tracking-wide mb-1.5">Diterbitkan pada</p>
+                                <div class="flex items-center gap-2.5">
+                                    <p class="font-bold text-gray-800 text-xs flex items-center gap-1">
+                                        <svg class="w-3.5 h-3.5 text-[#800000]" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
+                                            </path>
+                                        </svg>
+                                        {{ \Carbon\Carbon::parse($agenda->created_at)->translatedFormat('d F Y') }}
+                                    </p>
+                                    <div class="w-1 h-1 bg-gray-300 rounded-full"></div>
+                                    <p class="text-xs text-gray-500 font-medium flex items-center gap-1">
+                                        <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                        {{ \Carbon\Carbon::parse($agenda->created_at)->format('H:i') }} WITA
+                                    </p>
+                                </div>
                             </div>
+
+                            {{-- PERBAIKAN WAKTU DIEDIT (Sejajar ke Kanan) --}}
+                            @if ($agenda->updated_at && $agenda->updated_at->format('Y-m-d H:i') != $agenda->created_at->format('Y-m-d H:i'))
+                                <div class="hidden sm:block w-px h-6 bg-gray-200"></div>
+                                <div>
+                                    <p class="text-[9px] text-gray-400 uppercase tracking-wide mb-1.5">Terakhir
+                                        Diperbarui</p>
+                                    <div class="flex items-center gap-2.5">
+                                        <p class="font-bold text-gray-800 text-xs flex items-center gap-1">
+                                            <svg class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
+                                                </path>
+                                            </svg>
+                                            {{ \Carbon\Carbon::parse($agenda->updated_at)->translatedFormat('d F Y') }}
+                                        </p>
+                                        <div class="w-1 h-1 bg-gray-300 rounded-full"></div>
+                                        <p class="text-xs text-gray-500 font-medium flex items-center gap-1">
+                                            <svg class="w-3.5 h-3.5 text-gray-400" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                            {{ \Carbon\Carbon::parse($agenda->updated_at)->format('H:i') }} WITA
+                                        </p>
+                                    </div>
+                                </div>
+                            @endif
+
                         </div>
                     </div>
 

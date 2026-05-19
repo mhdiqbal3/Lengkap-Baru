@@ -428,7 +428,7 @@
                                                                     class="text-[12px] font-bold text-gray-400 uppercase tracking-wider mb-2">
                                                                     Deskripsi & Kronologi Singkat</p>
                                                                 <div class="p-4 bg-gray-50 border border-gray-100">
-                                                                    <p class="text-gray-700 whitespace-pre-wrap">
+                                                                    <p class="text-gray-700">
                                                                         {{ $item->deskripsi }}</p>
                                                                 </div>
                                                             </div>

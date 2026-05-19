@@ -412,7 +412,7 @@
                 </div>
                 <div class="p-6">
                     <h3 class="text-xl font-bold text-gray-800 mb-2">Laporan Terkirim!</h3>
-                    <p class="text-gray-600 text-sm mb-4">Laporan pengaduan Anda berhasil masuk ke sistem Satgas PPKS.
+                    <p class="text-gray-600 text-sm mb-4">Laporan pengaduan Anda berhasil masuk ke sistem Satgas PPKPT.
                         Berikut adalah Nomor Tiket Anda:</p>
                     <div class="bg-gray-100 py-3 rounded-xl mb-6">
                         <p class="text-[10px] text-gray-500 mb-1 uppercase tracking-widest font-bold">KODE TIKET</p>

@@ -8,7 +8,7 @@
         $showModal = isset($laporan) || isset($error) ? 'true' : 'false';
     @endphp
 
-    <div class="max-w-4xl mx-auto pb-10" x-data="{ showModal: {{ $showModal }} }">
+    <div class="max-w-4xl mx-auto pb-10" x-data="{ showModal: {{ $showModal }}, showBukti: false }">
         <div class="mb-8 text-center sm:text-left">
             <h2 class="text-3xl font-black text-gray-800 tracking-tight">Lacak Status Pengaduan</h2>
             <p class="text-gray-500 text-sm mt-2 font-medium leading-relaxed max-w-2xl">
@@ -271,17 +271,10 @@
                         <div
                             class="px-6 sm:px-10 pb-8 flex flex-col sm:flex-row justify-center gap-3 border-t border-white pt-6">
                             @if ($laporan->bukti)
-                                @if (request()->ajax())
-                                    <a href="{{ asset($laporan->bukti) }}" target="_blank"
-                                        class="px-8 py-3.5 bg-blue-50 text-blue-700 font-bold rounded-xl border border-blue-100 hover:bg-blue-100 transition-colors focus:outline-none text-center">
-                                        Buka Gambar Bukti Laporan
-                                    </a>
-                                @else
-                                    <button @click="showDetail = false; setTimeout(() => showBukti = true, 300)"
-                                        class="px-8 py-3.5 bg-blue-50 text-blue-700 font-bold rounded-xl border border-blue-100 hover:bg-blue-100 transition-colors focus:outline-none text-center">
-                                        Lihat Gambar Bukti Laporan
-                                    </button>
-                                @endif
+                                <button @click="showModal = false; setTimeout(() => showBukti = true, 300)"
+                                    class="px-8 py-3.5 bg-blue-50 text-blue-700 font-bold rounded-xl border border-blue-100 hover:bg-blue-100 transition-colors focus:outline-none text-center">
+                                    Lihat Bukti Laporan
+                                </button>
                             @endif
 
                             <button @click="showModal = false"
@@ -322,6 +315,93 @@
                 </div>
             @endif
         </div>
+
+        {{-- MODAL LIHAT BUKTI GAMBAR & VIDEO --}}
+        @if (isset($laporan) && ($laporan->bukti || $laporan->link_video))
+            <template x-teleport="body">
+                <div x-show="showBukti" style="display: none;"
+                    class="fixed inset-0 z-[10001] flex items-center justify-center bg-gray-900/80 backdrop-blur-sm px-4 py-6"
+                    x-transition.opacity>
+                    <div @click.away="showBukti = false; setTimeout(() => showModal = true, 300)"
+                        class="bg-white rounded-[2rem] shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden transform transition-all text-left"
+                        x-transition.scale>
+                        <div
+                            class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 shrink-0">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-10 h-10 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center shadow-sm">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
+                                        </path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-black text-gray-800 tracking-tight">
+                                        Lampiran Bukti</h3>
+                                    <p class="text-[11px] font-bold text-gray-500 uppercase tracking-wide">
+                                        {{ $laporan->kode_tiket }}</p>
+                                </div>
+                            </div>
+                            <button @click="showBukti = false; setTimeout(() => showModal = true, 300)"
+                                class="text-gray-400 hover:text-red-500 hover:bg-red-50 p-2 rounded-xl transition focus:outline-none">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div
+                            class="p-6 bg-gray-100/50 flex flex-col justify-start items-center gap-6 flex-1 overflow-y-auto custom-scroll min-h-[300px]">
+
+                            @if ($laporan->bukti)
+                                <img src="{{ asset($laporan->bukti) }}" alt="Bukti Laporan"
+                                    class="w-full h-auto object-contain rounded-xl shadow-sm border border-gray-200">
+                            @endif
+
+                            @if ($laporan->link_video)
+                                <div
+                                    class="w-full max-w-sm bg-white p-5 rounded-2xl border border-gray-200 shadow-sm text-center">
+                                    <div
+                                        class="w-12 h-12 bg-red-50 text-red-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z">
+                                            </path>
+                                        </svg>
+                                    </div>
+                                    <h4 class="text-base font-bold text-gray-800 mb-1">Bukti
+                                        Video</h4>
+                                    <p class="text-xs text-gray-500 mb-4">Terdapat lampiran
+                                        bukti tambahan berupa video.</p>
+                                    <a href="{{ $laporan->link_video }}" target="_blank"
+                                        class="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition-colors focus:outline-none w-full shadow-md">
+                                        Buka Video Laporan
+                                    </a>
+                                </div>
+                            @endif
+                        </div>
+
+                        <div class="px-6 py-4 border-t border-gray-100 bg-white flex justify-end gap-3 shrink-0">
+                            <button @click="showBukti = false; setTimeout(() => showModal = true, 300)"
+                                class="px-6 py-2.5 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition">Kembali</button>
+
+                            @if ($laporan->bukti)
+                                <a href="{{ asset($laporan->bukti) }}" download
+                                    class="px-6 py-2.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition shadow-md flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4-4m0 0l-4-4m4 4V4">
+                                        </path>
+                                    </svg> Unduh Foto
+                                </a>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </template>
+        @endif
     </div>
 
     @if (!request()->ajax())

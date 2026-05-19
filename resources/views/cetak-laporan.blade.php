@@ -146,11 +146,11 @@
             </td>
             <td width="65%">
                 <div class="header-text">
-                    KEMENTERIAN PENDIDIKAN, KEBUDAYAAN, RISET DAN TEKNOLOGI
-                    <br>
-                    <strong>PENCEGAHAN DAN PENANGANAN KEKERASAN SEKSUAL PERGURUAN TINGGI</strong>
+                    KEMENTERIAN PENDIDIKAN TINGGI, SAINS DAN TEKNOLOGI
                     <br>
                     <strong>UNIVERSITAS SEMBILANBELAS NOVEMBER KOLAKA</strong>
+                    <br>
+                    <strong>PENCEGAHAN DAN PENANGANAN KEKERASAN DI LINGKUNGAN PERGURUAN TINGGI</strong>
                 </div>
                 <div class="header-text-small">
                     Jl. Pemuda No. 339, Kabupaten Kolaka, Sulawesi Tenggara, 93517 <br>
@@ -186,7 +186,7 @@
             <tr>
                 <td>Kategori Kekerasan</td>
                 <td>:</td>
-                <td>{{ strtoupper($laporan->jenis_kasus) }}</td>
+                <td>{{ $laporan->jenis_kasus }}</td>
             </tr>
             <tr>
                 <td>Waktu Kejadian</td>
@@ -201,11 +201,11 @@
             <tr>
                 <td>Status Penanganan</td>
                 <td>:</td>
-                <td>{{ strtoupper($laporan->status) }}</td>
+                <td>{{ $laporan->status }}</td>
             </tr>
         </table>
 
-        <p style="margin-top: 5px; margin-bottom: 2px;"><strong>Kronologi / Deskripsi Singkat:</strong></p>
+        <p style="margin-top: 5px; margin-bottom: 2px;">Kronologi / Deskripsi Singkat:</p>
         <div class="box-kronologi">
             {{ $laporan->deskripsi }}
         </div>

@@ -114,14 +114,14 @@ class LaporanController extends Controller
                 $pathBukti = 'assets/bukti/' . $fileName;
             }
 
-            $lastLaporan = Laporan::where('kode_tiket', 'like', 'PPKS-%')->orderBy('id', 'desc')->first();
+            $lastLaporan = Laporan::where('kode_tiket', 'like', 'PPKPT_%')->orderBy('id', 'desc')->first();
 
             if (!$lastLaporan) {
-                $newKodeTiket = 'PPKS-001';
+                $newKodeTiket = 'PPKPT_001';
             } else {
                 $lastNumber = (int) substr($lastLaporan->kode_tiket, 5);
                 $newNumber = $lastNumber + 1;
-                $newKodeTiket = 'PPKS-' . str_pad($newNumber, 3, '0', STR_PAD_LEFT);
+                $newKodeTiket = 'PPPT-' . str_pad($newNumber, 3, '0', STR_PAD_LEFT);
             }
 
             $laporan = Laporan::create([
