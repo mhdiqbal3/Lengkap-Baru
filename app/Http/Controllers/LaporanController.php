@@ -201,8 +201,8 @@ class LaporanController extends Controller
         if ($laporan->user_id) {
             Notification::create([
                 'user_id' => $laporan->user_id,
-                'title' => '{$laporan->kode_tiket} Diperbarui',
-                'message' => "Laporan Anda dengan kode tiket {$laporan->kode_tiket} kini berstatus: {$laporan->status}.",
+                'title' => "{$laporan->kode_tiket} Diperbarui",
+                'message' => "Laporan Anda kini berstatus: {$laporan->status}.",
                 'url' => url('/cek-status'),
                 'is_read' => false
             ]);
