@@ -121,7 +121,7 @@ class LaporanController extends Controller
             } else {
                 $lastNumber = (int) substr($lastLaporan->kode_tiket, 5);
                 $newNumber = $lastNumber + 1;
-                $newKodeTiket = 'PPPT-' . str_pad($newNumber, 3, '0', STR_PAD_LEFT);
+                $newKodeTiket = 'PPPKPT_' . str_pad($newNumber, 3, '0', STR_PAD_LEFT);
             }
 
             $laporan = Laporan::create([
