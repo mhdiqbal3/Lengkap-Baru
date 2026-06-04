@@ -210,4 +210,17 @@ class InformasiController extends Controller
 
         return redirect()->route('laporkan')->with('success', 'Peraturan berhasil diperbarui!');
     }
+
+    public function uploadPanduan(\Illuminate\Http\Request $request)
+    {
+        $request->validate([
+            // Validasi: Wajib PDF dan maksimal 10MB
+            'panduan' => 'required|mimes:pdf|max:10240',
+        ]);
+
+        // Secara otomatis akan menyimpan/menimpa file dengan nama tetap "panduan.pdf"
+        $request->file('panduan')->move(public_path('assets/aturan'), 'panduan.pdf');
+
+        return redirect()->back()->with('success', 'File Panduan Penggunaan Sistem berhasil diperbarui.');
+    }
 }

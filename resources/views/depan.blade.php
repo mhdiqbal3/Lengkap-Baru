@@ -37,7 +37,6 @@
 
 <body class="bg-white text-gray-800 font-sans antialiased overflow-x-hidden" x-data="landingPageData()">
     @php
-        // Helper Pembongkar JSON dari Database
         $dec = function ($konten) {
             return $konten && !empty($konten->konten) ? json_decode($konten->konten, true) : [];
         };
@@ -50,20 +49,17 @@
         $t = function ($key, $default) use ($dTentang) {
             return $dTentang[$key] ?? $default;
         };
-
         $p = function ($key, $default) use ($dPencegahan) {
             return $dPencegahan[$key] ?? $default;
         };
-
         $n = function ($key, $default) use ($dPenanganan) {
             return $dPenanganan[$key] ?? $default;
         };
-
         $k = function ($key, $default) use ($dKontak) {
             return $dKontak[$key] ?? $default;
         };
 
-        // --- TAMBAHAN LOGIKA UNTUK BENTUK KEKERASAN (Menarik data dari Dashboard) ---
+        // Tarik data bentuk kekerasan dari Dashboard
         $kontenDashboard = \App\Models\KontenHalaman::where('halaman', 'dashboard')->first();
         $dataDashboard =
             $kontenDashboard && !empty($kontenDashboard->konten) ? json_decode($kontenDashboard->konten, true) : [];
@@ -84,14 +80,11 @@
                 'Ejekan, pengucilan, atau ancaman yang merusak kesehatan mental dan rasa percaya diri seseorang.',
             ),
         ];
-        // ----------------------------------------------------------------------------
 
-        // Ekstrak URL Gambar Carousel
         $carouselUrls = isset($carousels)
             ? array_column($carousels, 'url')
             : ['https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=1920&auto=format&fit=crop'];
 
-        // Logika Pengambilan Gambar Promo (Akan Datang)
         $promoPath = public_path('assets/image/promo');
         $promoImage = null;
         if (\File::exists($promoPath)) {
@@ -142,8 +135,6 @@
                 <div class="hidden md:flex items-center space-x-6">
                     <a href="#beranda" class="text-xs font-bold transition-colors"
                         :class="scrolled ? 'text-gray-600 hover:text-[#800000]' : 'text-gray-100 hover:text-white'">Beranda</a>
-                    <a href="#peraturan" class="text-xs font-bold transition-colors"
-                        :class="scrolled ? 'text-gray-600 hover:text-[#800000]' : 'text-gray-100 hover:text-white'">Peraturan</a>
 
                     <div x-data="{ dropdownOpen: false }" class="relative" @mouseenter="dropdownOpen = true"
                         @mouseleave="dropdownOpen = false">
@@ -155,7 +146,13 @@
                             </svg>
                         </button>
                         <div x-show="dropdownOpen" x-transition
-                            class="absolute top-full left-0 w-36 bg-white rounded-lg shadow-lg py-2 border border-gray-100 overflow-hidden text-gray-800">
+                            class="absolute top-full left-0 w-44 bg-white rounded-lg shadow-lg py-2 border border-gray-100 overflow-hidden text-gray-800">
+                            {{-- Dropdown Menu --}}
+                            <a href="#panduan"
+                                class="block px-4 py-2 text-[11px] font-bold hover:bg-red-50 hover:text-[#800000]">Panduan
+                                Penggunaan</a>
+                            <a href="#peraturan"
+                                class="block px-4 py-2 text-[11px] font-bold hover:bg-red-50 hover:text-[#800000]">Peraturan</a>
                             <a href="#pencegahan"
                                 class="block px-4 py-2 text-[11px] font-bold hover:bg-red-50 hover:text-[#800000]">Pencegahan</a>
                             <a href="#penanganan"
@@ -197,6 +194,8 @@
             <div class="px-4 pt-2 pb-4 space-y-1">
                 <a href="#beranda" @click="open = false"
                     class="block px-3 py-2 text-xs font-bold hover:text-[#800000]">Beranda</a>
+                <a href="#panduan" @click="open = false"
+                    class="block px-3 py-2 text-xs font-bold hover:text-[#800000]">Panduan Penggunaan</a>
                 <a href="#peraturan" @click="open = false"
                     class="block px-3 py-2 text-xs font-bold hover:text-[#800000]">Peraturan</a>
                 <a href="#pencegahan" @click="open = false"
@@ -211,13 +210,6 @@
                     class="block px-3 py-2 text-xs font-bold hover:text-[#800000]">Berita & Agenda</a>
                 <a href="#kontak" @click="open = false"
                     class="block px-3 py-2 text-xs font-bold hover:text-[#800000]">Kontak</a>
-
-                <div class="pt-4 mt-2 border-t border-gray-100">
-                    <a href="{{ route('login') }}"
-                        class="block w-full text-center bg-[#800000] text-white px-5 py-2.5 rounded-full font-bold text-xs hover:bg-red-900 transition shadow-sm">
-                        Login
-                    </a>
-                </div>
             </div>
         </div>
     </nav>
@@ -293,6 +285,48 @@
         </div>
     </section>
 
+    <!-- PANDUAN PENGGUNAAN SECTION -->
+    <section id="panduan" class="py-16 bg-gray-50 border-t border-gray-100 shadow-inner">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-10" data-aos="fade-up">
+                <span class="text-blue-600 font-bold tracking-widest uppercase text-[10px] mb-1 block">Bantuan
+                    Sistem</span>
+                <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight">Panduan Penggunaan</h2>
+                <div class="w-12 h-1.5 bg-blue-600 mx-auto mt-4 rounded-full"></div>
+            </div>
+
+            <div class="bg-white border border-gray-200 rounded-[2rem] p-6 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-6 hover:shadow-md transition-shadow"
+                data-aos="fade-up">
+                <div class="flex items-center gap-5">
+                    <div
+                        class="w-14 h-14 shrink-0 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center shadow-inner">
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
+                            </path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-black text-gray-900 mb-1">Buku Panduan Sistem PPKS</h3>
+                        <p class="text-gray-500 text-sm font-medium">Langkah-langkah lengkap cara menggunakan aplikasi,
+                            melaporkan kasus, dan melacak status laporan Anda.</p>
+                    </div>
+                </div>
+                <button @click="showPanduanModal = true"
+                    class="w-full sm:w-auto px-6 py-3.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors shadow-md whitespace-nowrap flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
+                        </path>
+                    </svg>
+                    Baca Panduan (PDF)
+                </button>
+            </div>
+        </div>
+    </section>
+
     <section id="peraturan" class="py-16 bg-white border-t border-gray-100">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-10" data-aos="fade-up">
@@ -336,6 +370,7 @@
         </div>
     </section>
 
+    <!-- KENALI BENTUK KEKERASAN SECTION -->
     <section id="bentuk-kekerasan" class="py-16 bg-white border-t border-gray-100">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-10" data-aos="fade-up">
@@ -378,7 +413,6 @@
                 @php
                     $l_titles = [];
                     $l_descs = [];
-
                     foreach ($dPencegahan as $key => $val) {
                         if (strpos($key, '_title') !== false && strpos($key, 'l_') !== false) {
                             $num = explode('_', $key)[1];
@@ -386,7 +420,6 @@
                             $l_descs[$num] = $dPencegahan['l_' . $num . '_desc'] ?? '';
                         }
                     }
-
                     if (empty($l_titles)) {
                         $l_titles = [1 => 'Sosialisasi', 2 => 'Pakta Integritas', 3 => 'Kampanye'];
                         $l_descs = [
@@ -519,52 +552,15 @@
                                     {{ $item->status_publikasi == 'poster' ? 'Poster Edukasi' : 'Sosialisasi' }}
                                 </span>
                             </div>
-
-                            <div
-                                class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                <div
-                                    class="w-10 h-10 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white border border-white/30">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7">
-                                        </path>
-                                    </svg>
-                                </div>
-                            </div>
                         </div>
-
                         <div class="p-5 flex flex-col flex-1">
-                            <div
-                                class="flex items-center gap-1.5 text-[10px] font-bold text-gray-400 mb-2 uppercase tracking-tight">
-                                <svg class="w-3.5 h-3.5 text-[#800000]" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
-                                    </path>
-                                </svg>
-                                {{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d F Y') }}
-                            </div>
                             <h3 class="text-sm font-bold text-gray-800 leading-snug mb-2 line-clamp-2 h-[2.5rem]">
                                 {{ $item->judul_kegiatan ?? $item->judul }}
                             </h3>
-                            <p class="text-[11px] text-gray-500 font-medium line-clamp-2 mb-4">{{ $item->deskripsi }}
-                            </p>
-
-                            <div class="mt-auto pt-3 border-t border-gray-100 flex items-center justify-between gap-2">
-                                <div class="flex items-center gap-1 text-[10px] font-bold text-gray-400 truncate">
-                                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z">
-                                        </path>
-                                    </svg>
-                                    <span class="truncate">{{ $item->lokasi }}</span>
-                                </div>
-                                <button @click="showModal = true"
-                                    class="shrink-0 px-3 py-1.5 bg-gray-50 hover:bg-[#800000] text-gray-600 hover:text-white text-[10px] font-bold uppercase tracking-wider rounded-lg transition-colors border border-gray-200 focus:outline-none">
-                                    Lihat
-                                </button>
-                            </div>
+                            <button @click="showModal = true"
+                                class="mt-auto shrink-0 px-3 py-1.5 bg-gray-50 hover:bg-[#800000] text-gray-600 hover:text-white text-[10px] font-bold uppercase tracking-wider rounded-lg transition-colors border border-gray-200 focus:outline-none w-max">
+                                Lihat
+                            </button>
                         </div>
 
                         <template x-teleport="body">
@@ -589,41 +585,13 @@
                                                     d="M6 18L18 6M6 6l12 12"></path>
                                             </svg>
                                         </button>
-
                                         <div class="mt-6 md:mt-2 mb-6">
                                             <h2 class="text-xl md:text-2xl font-black text-gray-800 leading-tight">
                                                 {{ $item->judul_kegiatan ?? $item->judul }}</h2>
                                         </div>
-
-                                        <div class="grid grid-cols-2 gap-4 mb-6">
-                                            <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
-                                                <p
-                                                    class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">
-                                                    Tanggal</p>
-                                                <p class="text-xs md:text-sm font-bold text-gray-800">
-                                                    {{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d F Y') }}
-                                                </p>
-                                            </div>
-                                            <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
-                                                <p
-                                                    class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">
-                                                    Lokasi</p>
-                                                <p class="text-xs md:text-sm font-bold text-gray-800">
-                                                    {{ $item->lokasi }}</p>
-                                            </div>
-                                        </div>
-
                                         <div class="mb-6 flex-1">
-                                            <p
-                                                class="text-[11px] font-bold text-[#800000] uppercase tracking-widest mb-2">
-                                                Deskripsi Kegiatan</p>
                                             <div class="text-gray-600 text-xs md:text-sm leading-relaxed space-y-2">
                                                 {!! nl2br(e($item->deskripsi)) !!}</div>
-                                        </div>
-
-                                        <div class="pt-4 border-t border-gray-100">
-                                            <button @click="showModal = false"
-                                                class="w-full py-3 bg-gray-100 text-gray-700 font-bold text-sm rounded-xl hover:bg-gray-200 transition">Tutup</button>
                                         </div>
                                     </div>
                                 </div>
@@ -672,11 +640,7 @@
                         <div class="p-6 flex flex-col flex-1">
                             <h3
                                 class="text-lg font-black text-gray-900 leading-tight mb-3 group-hover:text-[#800000] transition-colors line-clamp-2 h-[3.5rem]">
-                                {{ $agenda->judul }}
-                            </h3>
-                            <p class="text-sm text-gray-500 mb-6 line-clamp-3">
-                                {{ Str::limit(strip_tags($agenda->konten), 120) }}
-                            </p>
+                                {{ $agenda->judul }}</h3>
                             <div class="mt-auto">
                                 <a href="{{ route('agenda.show', $agenda->slug) }}"
                                     class="inline-flex items-center gap-1.5 text-xs font-bold text-[#800000] hover:text-red-900 group/link">
@@ -745,13 +709,14 @@
             </div>
             <div
                 class="border-t border-red-900 pt-6 text-center text-red-300 text-xs flex flex-col md:flex-row justify-between items-center">
-                <p>&copy; {{ date('Y') }} Satuan Tugas Pencegahan dan Penanganan Kekerasan di Lingkungan Perguruan
-                    Tinggi
-                    Universitas Sembilanbelas November Kolaka.</p>
+                <p>&copy; {{ date('Y') }} Satgas PPKS USN Kolaka. All rights reserved.</p>
+                <div class="mt-2 md:mt-0"><a href="{{ route('login') }}"
+                        class="hover:text-white transition font-bold">Sistem Admin</a></div>
             </div>
         </div>
     </footer>
 
+    <!-- MODAL PDF PERATURAN -->
     <template x-teleport="body">
         <div x-show="showPdfModal" style="display: none;"
             class="fixed inset-0 z-[9999] flex items-center justify-center bg-gray-900/80 backdrop-blur-sm p-4"
@@ -763,15 +728,52 @@
                     class="flex justify-between items-center px-6 py-4 border-b border-gray-100 bg-gray-50 rounded-t-2xl">
                     <h3 class="font-bold text-gray-800 text-sm md:text-base" x-text="pdfTitle"></h3>
                     <button @click="showPdfModal = false"
-                        class="text-gray-400 hover:text-red-500 bg-white p-2 rounded-lg border border-gray-200 focus:outline-none"><svg
-                            class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        class="text-gray-400 hover:text-red-500 bg-white p-2 rounded-lg border border-gray-200 focus:outline-none">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M6 18L18 6M6 6l12 12"></path>
-                        </svg></button>
+                        </svg>
+                    </button>
                 </div>
                 <div class="flex-1 bg-gray-200 rounded-b-2xl overflow-hidden relative">
                     <iframe :src="pdfUrl" class="w-full h-full relative z-10 border-none"
                         title="Dokumen Peraturan"></iframe>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- MODAL PDF PANDUAN -->
+    <template x-teleport="body">
+        <div x-show="showPanduanModal" style="display: none;"
+            class="fixed inset-0 z-[9999] flex items-center justify-center bg-gray-900/80 backdrop-blur-sm p-4"
+            x-transition.opacity>
+            <div class="absolute inset-0" @click="showPanduanModal = false"></div>
+            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-5xl h-[85vh] flex flex-col relative z-10 transform transition-all"
+                x-transition.scale>
+                <div
+                    class="flex justify-between items-center px-6 py-4 border-b border-gray-100 bg-gray-50 rounded-t-2xl">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
+                                </path>
+                            </svg>
+                        </div>
+                        <h3 class="font-bold text-gray-800 text-lg">Panduan Penggunaan Sistem</h3>
+                    </div>
+                    <button @click="showPanduanModal = false"
+                        class="text-gray-400 hover:text-red-500 bg-white p-1.5 rounded-md border border-gray-200 focus:outline-none">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div class="flex-1 bg-gray-200 rounded-b-2xl overflow-hidden relative">
+                    <iframe src="{{ asset('assets/aturan/panduan.pdf') }}"
+                        class="w-full h-full relative z-10 border-none" title="Panduan Penggunaan"></iframe>
                 </div>
             </div>
         </div>
@@ -782,7 +784,6 @@
             <div x-show="showPromoModal" style="display: none;"
                 class="fixed inset-0 z-[10000] flex items-center justify-center bg-gray-900/90 backdrop-blur-sm p-4 md:p-10"
                 x-transition.opacity>
-
                 <button @click="showPromoModal = false"
                     class="absolute top-4 right-4 md:top-8 md:right-8 text-white/70 hover:text-white bg-black/20 hover:bg-black/40 p-2 rounded-full backdrop-blur-md transition-colors focus:outline-none z-50">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -790,7 +791,6 @@
                             d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
                 </button>
-
                 <div @click.away="showPromoModal = false"
                     class="relative w-full max-w-md flex flex-col items-center transform transition-all"
                     x-transition.scale>
@@ -805,15 +805,12 @@
         <div x-show="showResultModal" style="display: none;"
             class="fixed inset-0 z-[10000] flex items-center justify-center bg-gray-900/90 backdrop-blur-md p-4 sm:p-6"
             x-transition.opacity>
-
             <div @click.away="showResultModal = false" class="w-full max-w-3xl relative transform transition-all"
                 x-transition.scale>
-
                 <div
                     class="w-full max-h-[85vh] overflow-y-auto custom-scroll bg-white rounded-[2rem] shadow-2xl overflow-hidden relative">
                     <div x-html="resultHtml" class="w-full"></div>
                 </div>
-
             </div>
         </div>
     </template>
@@ -830,6 +827,7 @@
             return {
                 showPromoModal: false,
                 showPdfModal: false,
+                showPanduanModal: false, // Ditambahkan State Panduan
                 showResultModal: false,
                 pdfUrl: '',
                 pdfTitle: '',
@@ -843,14 +841,12 @@
                             this.showPromoModal = true;
                         }, 1000);
                     @endif
-
                     if (this.slides.length > 1) {
                         setInterval(() => {
                             this.activeSlide = (this.activeSlide + 1) % this.slides.length
                         }, 4000);
                     }
                 },
-
                 async submitCekStatus(e) {
                     this.isChecking = true;
                     try {
@@ -861,13 +857,10 @@
                                 'X-Requested-With': 'XMLHttpRequest'
                             }
                         });
-
                         let html = await res.text();
                         let doc = new DOMParser().parseFromString(html, 'text/html');
-
                         let modalContent = doc.querySelector('#modal-content-laporan') || doc.querySelector(
                             '#modal-content-error');
-
                         if (modalContent) {
                             let finalHtml = modalContent.outerHTML;
                             finalHtml = finalHtml.replaceAll('showModal = false', 'showResultModal = false');

@@ -124,6 +124,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/informasi/peraturan/edit', [InformasiController::class, 'editPeraturan'])->name('informasi.peraturan.edit');
         Route::post('/informasi/peraturan/update', [InformasiController::class, 'updatePeraturan'])->name('informasi.peraturan.update');
 
+        Route::post('/informasi/panduan/upload', [\App\Http\Controllers\InformasiController::class, 'uploadPanduan'])->name('panduan.upload');
+
         Route::get('/petugas', [\App\Http\Controllers\PetugasController::class, 'index'])->name('petugas.index');
         Route::post('/petugas', [\App\Http\Controllers\PetugasController::class, 'store'])->name('petugas.store');
         Route::put('/petugas/{id}', [\App\Http\Controllers\PetugasController::class, 'update'])->name('petugas.update');
