@@ -82,78 +82,95 @@ class LaporanController extends Controller
 
     public function store(Request $request)
     {
+        // 1. Validasi input
         $request->validate([
-            'judul_lapor' => 'required|string|max:255',
-            'jenis_kasus' => 'required|string',
-            'nama_korban' => 'required|string',
-            'no_hp_korban' => 'required|string',
-            'status_korban' => 'required|string',
-            'status_terlapor' => 'required|string',
-            'jenis_kelamin' => 'required|in:L,P',
-            'disabilitas' => 'required|in:ya,tidak',
+            'judul_lapor'      => 'required|string|max:255',
+            'jenis_kasus'      => 'required|string',
+            'nama_korban'      => 'required|string|max:255',
+            'no_hp_korban'     => 'required|string|max:20',
+            'status_korban'    => 'required|string',
+            'status_terlapor'  => 'required|string',
+            'jenis_kelamin'    => 'required|in:L,P',
+            'disabilitas'      => 'required|in:ya,tidak',
             'tanggal_kejadian' => 'required|date',
-            'lokasi_kejadian' => 'required|string',
-            'deskripsi' => 'required|string',
-            'link_video' => 'nullable|url',
-            'bukti' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
+            'lokasi_kejadian'  => 'required|string|max:255',
+            'deskripsi'        => 'required|string',
+            'link_video'       => 'nullable|url',
+            'bukti'            => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
         ]);
 
         try {
-            $pathBukti = null;
+            // ---------------------------------------------------------
+            // PERBAIKAN: Logika Generate Kode Tiket Anti-Duplikat
+            // ---------------------------------------------------------
+            // Gunakan DB facade untuk memastikan membaca data paling akhir
+            $latestLaporan = \Illuminate\Support\Facades\DB::table('laporans')
+                ->orderBy('id', 'desc')
+                ->first();
 
-            if ($request->hasFile('bukti')) {
-                $file = $request->file('bukti');
-                $fileName = time() . '_' . $file->getClientOriginalName();
-                $destinationPath = public_path('assets/bukti');
-
-                if (!File::exists($destinationPath)) {
-                    File::makeDirectory($destinationPath, 0755, true);
-                }
-
-                $file->move($destinationPath, $fileName);
-                $pathBukti = 'assets/bukti/' . $fileName;
-            }
-
-            $lastLaporan = Laporan::where('kode_tiket', 'like', 'PPKPT_%')->orderBy('id', 'desc')->first();
-
-            if (!$lastLaporan) {
-                $newKodeTiket = 'PPKPT_001';
+            if (!$latestLaporan) {
+                $kodeTiket = 'PPKPT_001';
             } else {
-                $lastNumber = (int) substr($lastLaporan->kode_tiket, 5);
+                // Ambil kode terakhir (contoh: "PPKPT_005")
+                $lastCode = $latestLaporan->kode_tiket;
+
+                // Pisahkan string untuk mendapatkan angkanya saja
+                $parts = explode('_', $lastCode);
+                $lastNumber = isset($parts[1]) ? intval($parts[1]) : 0;
+
+                // Tambahkan 1 untuk laporan baru (005 + 1 = 6)
                 $newNumber = $lastNumber + 1;
-                $newKodeTiket = 'PPKPT_' . str_pad($newNumber, 3, '0', STR_PAD_LEFT);
+
+                // Format kembali menjadi PPKPT_XXX (hasil: PPKPT_006)
+                $kodeTiket = 'PPKPT_' . str_pad($newNumber, 3, '0', STR_PAD_LEFT);
+            }
+            // ---------------------------------------------------------
+
+            // Upload bukti jika ada
+            $buktiPath = null;
+            if ($request->hasFile('bukti')) {
+                $buktiPath = $request->file('bukti')->store('assets/bukti', 'public');
             }
 
-            $laporan = Laporan::create([
-                'user_id' => Auth::id(),
-                'kode_tiket' => $newKodeTiket,
-                'judul_lapor' => $request->judul_lapor,
-                'jenis_kasus' => $request->jenis_kasus,
-                'nama_korban' => $request->nama_korban,
-                'no_hp_korban' => $request->no_hp_korban,
-                'status_korban' => $request->status_korban,
-                'status_terlapor' => $request->status_terlapor,
-                'jenis_kelamin' => $request->jenis_kelamin,
-                'disabilitas' => $request->disabilitas,
+            // Simpan ke database
+            $laporan = \App\Models\Laporan::create([
+                'user_id'          => \Illuminate\Support\Facades\Auth::id(), // Akan otomatis terisi jika login, null jika anonim
+                'kode_tiket'       => $kodeTiket,
+                'judul_lapor'      => $request->judul_lapor,
+                'jenis_kasus'      => $request->jenis_kasus,
+                'nama_korban'      => $request->nama_korban,
+                'no_hp_korban'     => $request->no_hp_korban,
+                'status_korban'    => $request->status_korban,
+                'status_terlapor'  => $request->status_terlapor,
+                'jenis_kelamin'    => $request->jenis_kelamin,
+                'disabilitas'      => $request->disabilitas,
                 'tanggal_kejadian' => $request->tanggal_kejadian,
-                'lokasi_kejadian' => $request->lokasi_kejadian,
-                'deskripsi' => $request->deskripsi,
-                // PERBAIKAN: Jika request link_video null, masukkan string kosong ''
-                'link_video' => $request->link_video ?? '',
-                'bukti' => $pathBukti,
-                'status' => 'Menunggu Verifikasi',
+                'lokasi_kejadian'  => $request->lokasi_kejadian,
+                'deskripsi'        => $request->deskripsi,
+                'link_video'       => $request->link_video,
+                'bukti'            => $buktiPath,
+                'status'           => 'Menunggu Verifikasi',
             ]);
 
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Laporan berhasil dikirim dengan Kode Tiket: ' . $laporan->kode_tiket,
-                'kode_tiket' => $laporan->kode_tiket
-            ]);
+            // Jika dipanggil via AJAX (Dari Laporkan Blade)
+            if ($request->ajax()) {
+                return response()->json([
+                    'status' => 'success',
+                    'kode_tiket' => $kodeTiket,
+                    'message' => 'Laporan berhasil dikirim'
+                ]);
+            }
+
+            return redirect()->back()->with('success', 'Laporan berhasil dikirim! Kode Tiket: ' . $kodeTiket);
         } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
-            ], 500);
+            // Tangkap dan kembalikan error ke AJAX agar tampil di alert halaman
+            if ($request->ajax()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => $e->getMessage()
+                ], 500);
+            }
+            return redirect()->back()->with('error', 'Gagal mengirim laporan: ' . $e->getMessage());
         }
     }
 
