@@ -147,7 +147,6 @@
                         </button>
                         <div x-show="dropdownOpen" x-transition
                             class="absolute top-full left-0 w-44 bg-white rounded-lg shadow-lg py-2 border border-gray-100 overflow-hidden text-gray-800">
-                            {{-- Dropdown Menu --}}
                             <a href="#panduan"
                                 class="block px-4 py-2 text-[11px] font-bold hover:bg-red-50 hover:text-[#800000]">Panduan
                                 Penggunaan</a>
@@ -242,7 +241,7 @@
                         {{ $t('hero_desc', 'Satuan Tugas Pencegahan dan Penanganan Kekerasan Seksual (Satgas PPKS) Universitas Sembilanbelas November Kolaka hadir sebagai garda terdepan pelindung sivitas akademika.') }}
                     </p>
 
-                    <a href="{{ route('login') }}"
+                    <a href="{{ route('laporkan') }}"
                         class="inline-block bg-[#800000] text-white px-8 py-3 rounded-xl font-bold text-sm hover:bg-red-900 shadow-2xl transition transform hover:-translate-y-1 border border-red-900">
                         Laporkan ! </a>
                 </div>
@@ -285,7 +284,6 @@
         </div>
     </section>
 
-    <!-- PANDUAN PENGGUNAAN SECTION (Diperbarui dengan latar putih) -->
     <section id="panduan" class="py-16 bg-white border-t border-gray-100">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-10" data-aos="fade-up">
@@ -352,7 +350,7 @@
                             <div
                                 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1 flex items-center gap-1.5">
                                 {{ $item['tahun'] }}
-                                <svg class="w-3 h-3 text-blue-500" fill="none" stroke="currentColor"
+                                <svg class="w-3 h-3 text-[#800000]" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14">
@@ -370,7 +368,6 @@
         </div>
     </section>
 
-    <!-- KENALI BENTUK KEKERASAN SECTION -->
     <section id="bentuk-kekerasan" class="py-16 bg-white border-t border-gray-100">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-10" data-aos="fade-up">
@@ -549,7 +546,7 @@
 
                             <div class="absolute top-3 left-3">
                                 <span
-                                    class="px-3 py-1.5 text-[9px] font-black uppercase tracking-widest rounded-lg text-white shadow-md backdrop-blur-md {{ $item->status_publikasi == 'poster' ? 'bg-[#800000]/90' : 'bg-blue-600/90' }}">
+                                    class="px-3 py-1.5 text-[9px] font-black uppercase tracking-widest rounded-lg text-white shadow-md backdrop-blur-md {{ $item->status_publikasi == 'poster' ? 'bg-[#800000]/90' : 'bg-[#800000]/90' }}">
                                     {{ $item->status_publikasi == 'poster' ? 'Poster Edukasi' : 'Sosialisasi' }}
                                 </span>
                             </div>
@@ -804,7 +801,6 @@
         </div>
     </footer>
 
-    <!-- MODAL PDF PERATURAN -->
     <template x-teleport="body">
         <div x-show="showPdfModal" style="display: none;"
             class="fixed inset-0 z-[9999] flex items-center justify-center bg-gray-900/80 backdrop-blur-sm p-4"
@@ -831,7 +827,6 @@
         </div>
     </template>
 
-    <!-- PERBAIKAN WARNA: MODAL PDF PANDUAN PENGGUNAAN -->
     <template x-teleport="body">
         <div x-show="showPanduanModal" style="display: none;"
             class="fixed inset-0 z-[9999] flex items-center justify-center bg-gray-900/80 backdrop-blur-sm p-4"
@@ -889,6 +884,7 @@
         </template>
     @endif
 
+    {{-- MODAL HASIL LACAK STATUS --}}
     <template x-teleport="body">
         <div x-show="showResultModal" style="display: none;"
             class="fixed inset-0 z-[10000] flex items-center justify-center bg-gray-900/90 backdrop-blur-md p-4 sm:p-6"
@@ -917,6 +913,7 @@
                 showPdfModal: false,
                 showPanduanModal: false,
                 showResultModal: false,
+                showBukti: false,
                 pdfUrl: '',
                 pdfTitle: '',
                 resultHtml: '',
@@ -947,11 +944,23 @@
                         });
                         let html = await res.text();
                         let doc = new DOMParser().parseFromString(html, 'text/html');
+
                         let modalContent = doc.querySelector('#modal-content-laporan') || doc.querySelector(
                             '#modal-content-error');
+
+                        // Menarik Modal Gambar/Bukti dari halaman cek-status
+                        let templates = doc.querySelectorAll('template');
+                        let buktiTemplate = Array.from(templates).find(t => t.innerHTML.includes('showBukti'));
+
                         if (modalContent) {
                             let finalHtml = modalContent.outerHTML;
-                            finalHtml = finalHtml.replaceAll('showModal = false', 'showResultModal = false');
+                            if (buktiTemplate) {
+                                finalHtml += buktiTemplate.outerHTML;
+                            }
+
+                            // Sinkronkan fungsi close modal ke variabel milik landing page
+                            finalHtml = finalHtml.replaceAll('showModal', 'showResultModal');
+
                             this.resultHtml = finalHtml;
                             this.showResultModal = true;
                         } else {
