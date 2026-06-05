@@ -285,21 +285,21 @@
         </div>
     </section>
 
-    <!-- PANDUAN PENGGUNAAN SECTION -->
-    <section id="panduan" class="py-16 bg-gray-50 border-t border-gray-100 shadow-inner">
+    <!-- PANDUAN PENGGUNAAN SECTION (Diperbarui dengan latar putih) -->
+    <section id="panduan" class="py-16 bg-white border-t border-gray-100">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-10" data-aos="fade-up">
-                <span class="text-blue-600 font-bold tracking-widest uppercase text-[10px] mb-1 block">Bantuan
+                <span class="text-[#800000] font-bold tracking-widest uppercase text-[10px] mb-1 block">Bantuan
                     Sistem</span>
                 <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight">Panduan Penggunaan</h2>
-                <div class="w-12 h-1.5 bg-blue-600 mx-auto mt-4 rounded-full"></div>
+                <div class="w-12 h-1.5 bg-[#800000] mx-auto mt-4 rounded-full"></div>
             </div>
 
             <div class="bg-white border border-gray-200 rounded-[2rem] p-6 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-6 hover:shadow-md transition-shadow"
                 data-aos="fade-up">
                 <div class="flex items-center gap-5">
                     <div
-                        class="w-14 h-14 shrink-0 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center shadow-inner">
+                        class="w-14 h-14 shrink-0 bg-red-50 text-[#800000] rounded-2xl flex items-center justify-center shadow-inner">
                         <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
@@ -307,13 +307,13 @@
                         </svg>
                     </div>
                     <div>
-                        <h3 class="text-lg font-black text-gray-900 mb-1">Buku Panduan Sistem PPKS</h3>
+                        <h3 class="text-lg font-black text-gray-900 mb-1">Buku Panduan Sistem PPKPT USN KOLAKA</h3>
                         <p class="text-gray-500 text-sm font-medium">Langkah-langkah lengkap cara menggunakan aplikasi,
                             melaporkan kasus, dan melacak status laporan Anda.</p>
                     </div>
                 </div>
                 <button @click="showPanduanModal = true"
-                    class="w-full sm:w-auto px-6 py-3.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors shadow-md whitespace-nowrap flex items-center justify-center gap-2">
+                    class="w-full sm:w-auto px-6 py-3.5 bg-[#800000] text-white font-bold rounded-xl hover:bg-red-900 transition-colors shadow-md whitespace-nowrap flex items-center justify-center gap-2">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -537,6 +537,7 @@
                 @forelse ($galeris as $item)
                     <div x-data="{ showModal: false }" data-aos="zoom-in" data-aos-delay="{{ $loop->iteration * 50 }}"
                         class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full text-left">
+
                         <div @click="showModal = true"
                             class="relative aspect-[4/3] bg-gray-100 overflow-hidden shrink-0 cursor-pointer">
                             <img src="{{ asset($item->dokumentasi) }}"
@@ -552,17 +553,56 @@
                                     {{ $item->status_publikasi == 'poster' ? 'Poster Edukasi' : 'Sosialisasi' }}
                                 </span>
                             </div>
+
+                            <div
+                                class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                <div
+                                    class="w-10 h-10 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white border border-white/30">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7">
+                                        </path>
+                                    </svg>
+                                </div>
+                            </div>
                         </div>
+
+                        {{-- Kartu Info --}}
                         <div class="p-5 flex flex-col flex-1">
+                            <div
+                                class="flex items-center gap-1.5 text-[10px] font-bold text-gray-400 mb-2 uppercase tracking-tight">
+                                <svg class="w-3.5 h-3.5 text-[#800000]" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
+                                    </path>
+                                </svg>
+                                {{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d F Y') }}
+                            </div>
                             <h3 class="text-sm font-bold text-gray-800 leading-snug mb-2 line-clamp-2 h-[2.5rem]">
                                 {{ $item->judul_kegiatan ?? $item->judul }}
                             </h3>
-                            <button @click="showModal = true"
-                                class="mt-auto shrink-0 px-3 py-1.5 bg-gray-50 hover:bg-[#800000] text-gray-600 hover:text-white text-[10px] font-bold uppercase tracking-wider rounded-lg transition-colors border border-gray-200 focus:outline-none w-max">
-                                Lihat
-                            </button>
+                            <p class="text-[11px] text-gray-500 font-medium line-clamp-2 mb-4">{{ $item->deskripsi }}
+                            </p>
+
+                            <div class="mt-auto pt-3 border-t border-gray-100 flex items-center justify-between gap-2">
+                                <div class="flex items-center gap-1 text-[10px] font-bold text-gray-400 truncate">
+                                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z">
+                                        </path>
+                                    </svg>
+                                    <span class="truncate">{{ $item->lokasi }}</span>
+                                </div>
+                                <button @click="showModal = true"
+                                    class="shrink-0 px-3 py-1.5 bg-gray-50 hover:bg-[#800000] text-gray-600 hover:text-white text-[10px] font-bold uppercase tracking-wider rounded-lg transition-colors border border-gray-200 focus:outline-none">
+                                    Lihat
+                                </button>
+                            </div>
                         </div>
 
+                        {{-- MODAL GALERI DETAIL --}}
                         <template x-teleport="body">
                             <div x-show="showModal" style="display: none;"
                                 class="fixed inset-0 z-[9999] flex items-center justify-center bg-gray-900/80 backdrop-blur-sm p-4"
@@ -570,11 +610,15 @@
                                 <div @click.away="showModal = false"
                                     class="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col md:flex-row shadow-2xl text-left"
                                     x-transition.scale>
+
+                                    {{-- Gambar Kiri --}}
                                     <div
                                         class="w-full md:w-1/2 bg-gray-100 flex items-center justify-center relative min-h-[300px] md:min-h-full">
                                         <img src="{{ asset($item->dokumentasi) }}"
                                             class="w-full h-full object-contain max-h-[40vh] md:max-h-[85vh]">
                                     </div>
+
+                                    {{-- Detail Kanan --}}
                                     <div
                                         class="w-full md:w-1/2 p-6 md:p-8 flex flex-col overflow-y-auto custom-scroll bg-white relative">
                                         <button @click="showModal = false"
@@ -585,13 +629,57 @@
                                                     d="M6 18L18 6M6 6l12 12"></path>
                                             </svg>
                                         </button>
+
                                         <div class="mt-6 md:mt-2 mb-6">
                                             <h2 class="text-xl md:text-2xl font-black text-gray-800 leading-tight">
                                                 {{ $item->judul_kegiatan ?? $item->judul }}</h2>
                                         </div>
+
+                                        {{-- Informasi Tanggal & Lokasi --}}
+                                        <div class="grid grid-cols-2 gap-4 mb-6">
+                                            <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                                                <p
+                                                    class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">
+                                                    Tanggal</p>
+                                                <p class="text-xs md:text-sm font-bold text-gray-800">
+                                                    {{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d F Y') }}
+                                                </p>
+                                            </div>
+                                            <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                                                <p
+                                                    class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">
+                                                    Lokasi</p>
+                                                <p class="text-xs md:text-sm font-bold text-gray-800">
+                                                    {{ $item->lokasi }}</p>
+                                            </div>
+                                        </div>
+
                                         <div class="mb-6 flex-1">
+                                            <p
+                                                class="text-[11px] font-bold text-[#800000] uppercase tracking-widest mb-2">
+                                                Deskripsi Kegiatan</p>
                                             <div class="text-gray-600 text-xs md:text-sm leading-relaxed space-y-2">
                                                 {!! nl2br(e($item->deskripsi)) !!}</div>
+                                        </div>
+
+                                        {{-- Tombol Tutup & Unduh --}}
+                                        <div
+                                            class="pt-4 border-t border-gray-100 flex items-center justify-end gap-3 mt-auto">
+                                            <button @click="showModal = false"
+                                                class="px-6 py-2.5 bg-gray-100 text-gray-700 font-bold text-sm rounded-xl hover:bg-gray-200 transition">
+                                                Tutup
+                                            </button>
+                                            <a href="{{ asset($item->dokumentasi) }}" download
+                                                class="px-6 py-2.5 bg-[#800000] text-white font-bold text-sm rounded-xl hover:bg-red-900 transition flex items-center gap-2 shadow-md">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4-4m0 0l-4-4m4 4V4">
+                                                    </path>
+                                                </svg>
+                                                Unduh Foto
+                                            </a>
                                         </div>
                                     </div>
                                 </div>
@@ -743,7 +831,7 @@
         </div>
     </template>
 
-    <!-- MODAL PDF PANDUAN -->
+    <!-- PERBAIKAN WARNA: MODAL PDF PANDUAN PENGGUNAAN -->
     <template x-teleport="body">
         <div x-show="showPanduanModal" style="display: none;"
             class="fixed inset-0 z-[9999] flex items-center justify-center bg-gray-900/80 backdrop-blur-sm p-4"
@@ -754,7 +842,7 @@
                 <div
                     class="flex justify-between items-center px-6 py-4 border-b border-gray-100 bg-gray-50 rounded-t-2xl">
                     <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center">
+                        <div class="w-8 h-8 bg-red-100 text-[#800000] rounded-lg flex items-center justify-center">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
@@ -764,7 +852,7 @@
                         <h3 class="font-bold text-gray-800 text-lg">Panduan Penggunaan Sistem</h3>
                     </div>
                     <button @click="showPanduanModal = false"
-                        class="text-gray-400 hover:text-red-500 bg-white p-1.5 rounded-md border border-gray-200 focus:outline-none">
+                        class="text-gray-400 hover:text-red-500 bg-white p-1.5 rounded-md border border-gray-200 focus:outline-none hover:bg-red-50">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M6 18L18 6M6 6l12 12"></path>
@@ -827,7 +915,7 @@
             return {
                 showPromoModal: false,
                 showPdfModal: false,
-                showPanduanModal: false, // Ditambahkan State Panduan
+                showPanduanModal: false,
                 showResultModal: false,
                 pdfUrl: '',
                 pdfTitle: '',
