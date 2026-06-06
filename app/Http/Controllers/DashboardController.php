@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Laporan;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\File;
-use App\Models\KontenHalaman; // Tambahkan pemanggilan model
+use App\Models\KontenHalaman;
 
 class DashboardController extends Controller
 {
@@ -72,10 +72,8 @@ class DashboardController extends Controller
             }
         }
 
-        // Penambahan: Ambil konten dinamis dashboard
         $kontenDashboard = KontenHalaman::where('halaman', 'dashboard')->first();
 
-        // Penambahan: Sertakan kontenDashboard ke tampilan
         return view('index', compact('cards', 'filter', 'chartStatus', 'jenisKasusData', 'carousels', 'kontenDashboard'));
     }
 
@@ -87,16 +85,54 @@ class DashboardController extends Controller
 
         if ($request->hasFile('gambar')) {
             $file = $request->file('gambar');
-            $filename = time() . '_' . preg_replace('/[^a-zA-Z0-9_.]/', '', $file->getClientOriginalName());
+            
+            // Ambil nama asli tanpa ekstensi dan bersihkan dari karakter unik
+            $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+            $cleanName = preg_replace('/[^a-zA-Z0-9_]/', '', $originalName);
+            
+            // Paksa ekstensi menjadi .webp
+            $filename = time() . '_' . $cleanName . '.webp';
 
             $destinationPath = public_path('assets/image/kolosel');
             if (!File::exists($destinationPath)) {
                 File::makeDirectory($destinationPath, 0755, true, true);
             }
 
-            $file->move($destinationPath, $filename);
+            // ========================================================
+            // PROSES KONVERSI KE WEBP (MENGGUNAKAN NATIVE PHP GD)
+            // ========================================================
+            $mime = $file->getMimeType();
+            $image = null;
 
-            return redirect()->route('dashboard')->with('success', 'Gambar beranda berhasil ditambahkan!');
+            // Membaca file berdasarkan tipe MIME
+            if ($mime == 'image/jpeg') {
+                $image = @imagecreatefromjpeg($file->getRealPath());
+            } elseif ($mime == 'image/png') {
+                $image = @imagecreatefrompng($file->getRealPath());
+                // Mempertahankan transparansi untuk gambar PNG
+                if ($image) {
+                    imagepalettetotruecolor($image);
+                    imagealphablending($image, true);
+                    imagesavealpha($image, true);
+                }
+            } elseif ($mime == 'image/webp') {
+                $image = @imagecreatefromwebp($file->getRealPath());
+            }
+
+            // Jika gambar berhasil dibaca
+            if ($image) {
+                // Simpan sebagai WebP dengan kualitas 90 (Kualitas Jernih)
+                imagewebp($image, $destinationPath . '/' . $filename, 90);
+                imagedestroy($image); // Bebaskan memori
+            } else {
+                // Fallback aman: Jika sistem gagal membaca, simpan file seperti biasa tanpa konversi
+                $fallbackExtension = $file->getClientOriginalExtension();
+                $fallbackFilename = time() . '_' . $cleanName . '.' . $fallbackExtension;
+                $file->move($destinationPath, $fallbackFilename);
+            }
+            // ========================================================
+
+            return redirect()->route('dashboard')->with('success', 'Gambar beranda berhasil ditambahkan dan dikonversi ke format WebP resolusi tinggi!');
         }
 
         return redirect()->route('dashboard')->with('error', 'Gagal mengunggah gambar.');
@@ -116,14 +152,12 @@ class DashboardController extends Controller
         return redirect()->route('dashboard')->with('error', 'Gambar tidak ditemukan.');
     }
 
-    // Penambahan: Metode untuk menampilkan halaman edit
     public function editDashboard()
     {
         $kontenDashboard = KontenHalaman::where('halaman', 'dashboard')->first();
         return view('edit-dashboard', compact('kontenDashboard'));
     }
 
-    // Penambahan: Metode untuk menyimpan pembaruan konten dinamis
     public function updateDashboard(Request $request)
     {
         $dataKonten = $request->except(['_token']);
