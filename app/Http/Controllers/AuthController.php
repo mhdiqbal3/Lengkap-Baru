@@ -110,7 +110,7 @@ class AuthController extends Controller
             // PERBAIKAN DI SINI: 'emails.otp' diubah menjadi 'otp'
             Mail::send('otp', ['otp' => $otp], function ($message) use ($request) {
                 $message->to($request->email);
-                $message->subject('Kode OTP Reset Password - Satgas PPKS USN Kolaka');
+                $message->subject('Kode OTP Reset Password - Satgas PPKPT USN Kolaka');
             });
         } catch (\Exception $e) {
             // Jika Anda ingin melihat pesan error aslinya untuk debugging, Anda bisa mengaktifkan baris di bawah ini:

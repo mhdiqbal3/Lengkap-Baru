@@ -21,8 +21,7 @@
             meminta kode ini, mohon abaikan email ini.</p>
 
         <hr style="border: none; border-top: 1px solid #eeeeee; margin: 30px 0;">
-        <p style="color: #aaaaaa; font-size: 11px;">&copy; {{ date('Y') }} Satgas PPKS USN Kolaka. All rights
-            reserved.</p>
+        <p style="color: #aaaaaa; font-size: 11px;">&copy; {{ date('Y') }} Satgas PPKPT USN Kolaka.</p>
     </div>
 </body>
 
