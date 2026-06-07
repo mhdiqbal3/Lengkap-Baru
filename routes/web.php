@@ -53,9 +53,13 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
 Route::post('/register', [AuthController::class, 'register']);
 
-// --- RUTE LUPA PASSWORD TANPA EMAIL ---
+// --- RUTE LUPA PASSWORD (VIA OTP EMAIL) ---
 Route::get('/lupa-password', [AuthController::class, 'showLupaPasswordForm'])->name('password.request');
-Route::post('/lupa-password', [AuthController::class, 'prosesLupaPassword'])->name('password.update');
+Route::post('/lupa-password/kirim-otp', [AuthController::class, 'kirimOtp'])->name('password.email');
+Route::get('/lupa-password/verifikasi-otp', [AuthController::class, 'showVerifikasiOtpForm'])->name('password.verify');
+Route::post('/lupa-password/verifikasi-otp', [AuthController::class, 'prosesVerifikasiOtp'])->name('password.verify.post');
+Route::get('/reset-password', [AuthController::class, 'showResetPasswordForm'])->name('password.reset');
+Route::post('/reset-password', [AuthController::class, 'prosesResetPassword'])->name('password.update');
 
 // Rute Cek Status Tiket
 Route::post('/cek-status', [LaporanController::class, 'cariStatus'])->name('cek-status.cari');

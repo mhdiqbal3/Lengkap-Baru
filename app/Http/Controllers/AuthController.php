@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use App\Models\User;
 
 class AuthController extends Controller
@@ -79,40 +80,106 @@ class AuthController extends Controller
     }
 
     // ==========================================
-    // BAGIAN LUPA PASSWORD (VIA USERNAME & NO HP)
+    // BAGIAN LUPA PASSWORD (VIA OTP EMAIL)
     // ==========================================
+
+    // 1. Tampilkan form input email
     public function showLupaPasswordForm()
     {
-        // Menampilkan view baru kita
         return view('auth-lupa-password');
     }
 
-    public function prosesLupaPassword(Request $request)
+    // 2. Proses kirim OTP ke email
+    public function kirimOtp(Request $request)
     {
-        // Validasi input
-        $request->validate([
-            'username' => 'required',
-            'no_hp'    => 'required',
-            'password' => 'required|min:8|confirmed', // Pastikan password baru diisi dan dikonfirmasi
+        $request->validate(['email' => 'required|email|exists:users,email'], [
+            'email.exists' => 'Alamat email tidak terdaftar di sistem kami.'
         ]);
 
-        // Cari user yang username DAN no_hp nya cocok
-        $user = User::where('username', $request->username)
-            ->where('no_hp', $request->no_hp)
-            ->first();
+        // Generate 6 digit OTP acak
+        $otp = rand(100000, 999999);
 
-        // Jika tidak ketemu (salah ketik atau coba retas)
-        if (!$user) {
-            return back()->withErrors([
-                'username' => 'Maaf, Username atau Nomor HP tidak cocok dengan data kami.'
-            ]);
+        // Simpan OTP dan email ke session, berlaku 10 menit
+        session([
+            'otp' => $otp,
+            'otp_email' => $request->email,
+            'otp_expires' => now()->addMinutes(10)
+        ]);
+
+        try {
+            // PERBAIKAN DI SINI: 'emails.otp' diubah menjadi 'otp'
+            Mail::send('otp', ['otp' => $otp], function ($message) use ($request) {
+                $message->to($request->email);
+                $message->subject('Kode OTP Reset Password - Satgas PPKS USN Kolaka');
+            });
+        } catch (\Exception $e) {
+            // Jika Anda ingin melihat pesan error aslinya untuk debugging, Anda bisa mengaktifkan baris di bawah ini:
+            // return back()->withErrors(['email' => 'Error: ' . $e->getMessage()]);
+            return back()->withErrors(['email' => 'Gagal mengirim email. Pastikan konfigurasi SMTP (.env) sudah benar.']);
         }
 
-        // Jika cocok, ubah passwordnya langsung
-        $user->password = Hash::make($request->password);
-        $user->save();
+        return redirect()->route('password.verify')->with('success', 'Kode OTP telah dikirim. Silakan periksa kotak masuk (inbox) atau folder spam email Anda.');
+    }
 
-        // Kembali ke login dan beri tahu berhasil
-        return redirect('/login')->with('success', 'Password berhasil diatur ulang! Silakan masuk dengan password baru Anda.');
+    // 3. Tampilkan form verifikasi OTP
+    public function showVerifikasiOtpForm()
+    {
+        if (!session('otp_email')) {
+            return redirect()->route('password.request');
+        }
+        return view('auth-verifikasi-otp');
+    }
+
+    // 4. Proses pencocokan OTP
+    public function prosesVerifikasiOtp(Request $request)
+    {
+        $request->validate(['otp' => 'required|numeric']);
+
+        // Cek apakah waktu kedaluwarsa
+        if (now()->greaterThan(session('otp_expires'))) {
+            return back()->withErrors(['otp' => 'Kode OTP sudah kedaluwarsa. Silakan minta kode baru.']);
+        }
+
+        // Cek apakah OTP cocok
+        if ($request->otp != session('otp')) {
+            return back()->withErrors(['otp' => 'Kode OTP tidak valid atau salah.']);
+        }
+
+        // Jika benar, tandai session sebagai terverifikasi
+        session(['otp_verified' => true]);
+
+        return redirect()->route('password.reset')->with('success', 'OTP divalidasi! Silakan buat password baru Anda.');
+    }
+
+    // 5. Tampilkan form buat sandi baru
+    public function showResetPasswordForm()
+    {
+        // Pastikan pengguna sudah melewati verifikasi OTP
+        if (!session('otp_verified')) {
+            return redirect()->route('password.request');
+        }
+        return view('auth-reset-password');
+    }
+
+    // 6. Proses simpan sandi baru ke database
+    public function prosesResetPassword(Request $request)
+    {
+        $request->validate([
+            'password' => 'required|min:8|confirmed'
+        ]);
+
+        // Ambil email dari session
+        $email = session('otp_email');
+        $user = User::where('email', $email)->first();
+
+        if ($user) {
+            $user->password = Hash::make($request->password);
+            $user->save();
+        }
+
+        // Hapus seluruh session OTP demi keamanan
+        session()->forget(['otp', 'otp_email', 'otp_expires', 'otp_verified']);
+
+        return redirect('/login')->with('success', 'Password berhasil diubah! Silakan masuk dengan password baru Anda.');
     }
 }
