@@ -325,4 +325,52 @@ class LaporanController extends Controller
         $pdf->setPaper('letter', 'portrait');
         return $pdf->stream('Bukti_Laporan_' . $laporan->kode_tiket . '.pdf');
     }
+
+    public function uploadTtd(Request $request)
+    {
+        // Validasi diubah: file_ttd sekarang opsional (nullable) agar bisa edit nama saja
+        $request->validate([
+            'file_ttd' => 'nullable|image|mimes:png,jpg,jpeg|max:2048',
+            'nama_ketua' => 'nullable|string|max:255',
+            'nip_ketua' => 'nullable|string|max:255',
+        ]);
+
+        $konten = \App\Models\KontenHalaman::where('halaman', 'pengaturan_surat')->first();
+        $dataKonten = $konten ? json_decode($konten->konten, true) : [];
+
+        // 1. Proses Upload Gambar (Jika ada gambar baru yang dipilih)
+        if ($request->hasFile('file_ttd')) {
+            $path = public_path('assets/image/surat');
+            if (!\Illuminate\Support\Facades\File::exists($path)) {
+                \Illuminate\Support\Facades\File::makeDirectory($path, 0755, true);
+            }
+
+            $file = $request->file('file_ttd');
+            $filename = 'ttd_admin_' . time() . '.' . $file->getClientOriginalExtension();
+            $file->move($path, $filename);
+
+            // Hapus gambar lama agar tidak menumpuk
+            if (isset($dataKonten['ttd_url']) && \Illuminate\Support\Facades\File::exists(public_path($dataKonten['ttd_url']))) {
+                \Illuminate\Support\Facades\File::delete(public_path($dataKonten['ttd_url']));
+            }
+
+            $dataKonten['ttd_url'] = 'assets/image/surat/' . $filename;
+        }
+
+        // 2. Simpan Data Nama dan NIP
+        if ($request->filled('nama_ketua')) {
+            $dataKonten['nama_ketua'] = $request->nama_ketua;
+        }
+        if ($request->filled('nip_ketua')) {
+            $dataKonten['nip_ketua'] = $request->nip_ketua;
+        }
+
+        // Simpan ke database
+        \App\Models\KontenHalaman::updateOrCreate(
+            ['halaman' => 'pengaturan_surat'],
+            ['konten' => json_encode($dataKonten)]
+        );
+
+        return redirect()->back()->with('success', 'Pengaturan Surat (Tanda Tangan & Pejabat) berhasil disimpan!');
+    }
 }

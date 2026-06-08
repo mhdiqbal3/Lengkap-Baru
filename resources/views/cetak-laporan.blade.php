@@ -1,3 +1,14 @@
+@php
+    // SCRIPT BARU UNTUK MENGAMBIL DATA TTD DARI DATABASE
+    $pengaturanSurat = \App\Models\KontenHalaman::where('halaman', 'pengaturan_surat')->first();
+    $ttdPath = null;
+    if ($pengaturanSurat) {
+        $dataSurat = json_decode($pengaturanSurat->konten, true);
+        if (isset($dataSurat['ttd_url'])) {
+            $ttdPath = public_path($dataSurat['ttd_url']);
+        }
+    }
+@endphp
 <!DOCTYPE html>
 <html lang="id">
 
@@ -129,8 +140,7 @@
         }
 
         .nama-ttd {
-            margin-top: 50px;
-            /* Ruang tanda tangan disesuaikan */
+            margin-top: 5px;
             font-weight: bold;
             text-decoration: underline;
         }
@@ -223,10 +233,20 @@
                     <p style="margin-bottom: 2px;">Kolaka, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</p>
                     <p style="margin-top: 0;"><strong>Ketua PPKPT USN Kolaka,</strong></p>
 
-                    <div class="nama-ttd">
-                        Muhamad Aksan Akbar, S.H., M.H.
+                    <div style="margin: 10px 0; min-height: 60px;">
+                        @if ($ttdPath && file_exists($ttdPath))
+                            <img src="data:image/png;base64,{{ base64_encode(file_get_contents($ttdPath)) }}"
+                                alt="TTD" style="max-height: 80px; max-width: 150px;">
+                        @else
+                            <br><br><br>
+                        @endif
                     </div>
-                    <p style="margin-top: 2px;">NIP. ........................................</p>
+
+                    <div class="nama-ttd">
+                        {{ $dataSurat['nama_ketua'] ?? '(Nama Ketua Belum Diatur)' }}
+                    </div>
+                    <p style="margin-top: 2px;">NIP.
+                        {{ $dataSurat['nip_ketua'] ?? '........................................' }}</p>
                 </td>
             </tr>
         </table>

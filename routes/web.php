@@ -134,5 +134,8 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/petugas', [\App\Http\Controllers\PetugasController::class, 'store'])->name('petugas.store');
         Route::put('/petugas/{id}', [\App\Http\Controllers\PetugasController::class, 'update'])->name('petugas.update');
         Route::delete('/petugas/{id}', [\App\Http\Controllers\PetugasController::class, 'destroy'])->name('petugas.destroy');
+
+        // Route Upload Tanda Tangan Surat Laporan
+        Route::post('/laporan/upload-ttd', [\App\Http\Controllers\LaporanController::class, 'uploadTtd'])->name('laporan.upload-ttd');
     });
 });

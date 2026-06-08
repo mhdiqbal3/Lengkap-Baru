@@ -209,6 +209,13 @@
                     class="block px-3 py-2 text-xs font-bold hover:text-[#800000]">Berita & Agenda</a>
                 <a href="#kontak" @click="open = false"
                     class="block px-3 py-2 text-xs font-bold hover:text-[#800000]">Kontak</a>
+
+                <div class="pt-2 mt-2 border-t border-gray-100">
+                    <a href="{{ route('login') }}"
+                        class="block w-full text-center px-3 py-2 text-xs font-bold text-white bg-[#800000] rounded-lg hover:bg-red-900 transition shadow-sm">
+                        Login
+                    </a>
+                </div>
             </div>
         </div>
     </nav>
@@ -819,8 +826,9 @@
                         </svg>
                     </button>
                 </div>
-                <div class="flex-1 bg-gray-200 rounded-b-2xl overflow-hidden relative">
-                    <iframe :src="pdfUrl" class="w-full h-full relative z-10 border-none"
+                <div class="flex-1 bg-gray-200 rounded-b-2xl overflow-y-auto custom-scroll relative"
+                    style="-webkit-overflow-scrolling: touch;">
+                    <iframe :src="pdfUrl" class="w-full min-h-[85vh] relative z-10 border-none"
                         title="Dokumen Peraturan"></iframe>
                 </div>
             </div>
@@ -854,9 +862,10 @@
                         </svg>
                     </button>
                 </div>
-                <div class="flex-1 bg-gray-200 rounded-b-2xl overflow-hidden relative">
+                <div class="flex-1 bg-gray-200 rounded-b-2xl overflow-y-auto custom-scroll relative"
+                    style="-webkit-overflow-scrolling: touch;">
                     <iframe src="{{ asset('assets/aturan/panduan.pdf') }}"
-                        class="w-full h-full relative z-10 border-none" title="Panduan Penggunaan"></iframe>
+                        class="w-full min-h-[85vh] relative z-10 border-none" title="Panduan Penggunaan"></iframe>
                 </div>
             </div>
         </div>

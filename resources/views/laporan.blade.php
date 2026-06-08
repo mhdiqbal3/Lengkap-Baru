@@ -244,7 +244,6 @@
 
                     <tbody class="divide-y divide-gray-50">
                         @foreach ($laporans as $index => $item)
-                            {{-- PERBAIKAN: Menambahkan showDelete pada Alpine State --}}
                             <tr class="bg-white hover:bg-gray-50/50 transition-colors group" x-data="{ showEdit: false, showBukti: false, showDetail: false, showDelete: false }">
                                 <td class="px-6 py-4 text-center font-medium text-gray-500">{{ $index + 1 }}</td>
                                 <td class="px-4 py-4 font-bold text-[#800000] whitespace-nowrap">{{ $item->kode_tiket }}
@@ -256,7 +255,6 @@
                                     <span
                                         class="px-2.5 py-1 bg-purple-50 text-purple-700 text-xs font-semibold rounded-lg border border-purple-100">{{ ucfirst($item->jenis_kasus) }}</span>
                                 </td>
-                                {{-- Menghapus Anonim (selalu memunculkan nama asli di sisi admin) --}}
                                 <td class="px-4 py-4 font-medium text-gray-700 whitespace-nowrap">{{ $item->nama_korban }}
                                 </td>
 
@@ -344,7 +342,7 @@
                                             </svg>
                                         </button>
 
-                                        {{-- PERBAIKAN: Tombol Hapus (Diletakkan setelah Verifikasi) --}}
+                                        {{-- Tombol Hapus --}}
                                         <button @click="showDelete = true"
                                             class="p-2 text-red-600 bg-red-50 hover:bg-red-600 hover:text-white rounded-lg transition-colors border border-red-100 shadow-sm"
                                             title="Hapus Laporan">
@@ -766,7 +764,7 @@
                                         </div>
                                     </template>
 
-                                    {{-- PERBAIKAN: MODAL KONFIRMASI HAPUS --}}
+                                    {{-- MODAL KONFIRMASI HAPUS --}}
                                     <template x-teleport="body">
                                         <div x-show="showDelete" style="display: none;"
                                             class="fixed inset-0 z-[9998] flex items-center justify-center bg-gray-900/80 backdrop-blur-sm px-4"
@@ -787,7 +785,8 @@
                                                 <h3 class="text-2xl font-black text-gray-900 mb-2">Hapus Laporan?</h3>
                                                 <p class="text-gray-500 text-sm mb-8 font-medium">Laporan dengan Kode
                                                     <strong class="text-gray-800">{{ $item->kode_tiket }}</strong> akan
-                                                    dihapus secara permanen dan tidak dapat dipulihkan.</p>
+                                                    dihapus secara permanen dan tidak dapat dipulihkan.
+                                                </p>
 
                                                 <div class="flex justify-center gap-3">
                                                     <button @click="showDelete = false"
@@ -810,6 +809,74 @@
                         @endforeach
                     </tbody>
                 </table>
+            </div>
+        </div>
+    </div>
+
+    {{-- MODAL PENGATURAN TANDA TANGAN --}}
+    <div id="modalTtd" class="fixed inset-0 z-[10000] bg-gray-900/80 backdrop-blur-sm hidden">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="relative w-full max-w-md bg-white rounded-2xl shadow-xl p-6">
+
+                {{-- Header Modal --}}
+                <div class="flex justify-between items-center mb-5">
+                    <h3 class="text-lg font-extrabold text-gray-900">Pengaturan Tanda Tangan</h3>
+                    <button type="button" onclick="document.getElementById('modalTtd').classList.add('hidden')"
+                        class="text-gray-400 hover:text-red-500 bg-gray-50 hover:bg-red-50 p-1.5 rounded-lg transition focus:outline-none">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                {{-- Mengambil data lama jika sudah pernah diisi --}}
+                @php
+                    $kontenSurat = \App\Models\KontenHalaman::where('halaman', 'pengaturan_surat')->first();
+                    $dataSurat = $kontenSurat ? json_decode($kontenSurat->konten, true) : [];
+                @endphp
+
+                <form action="{{ route('laporan.upload-ttd') }}" method="POST" enctype="multipart/form-data"
+                    class="space-y-4">
+                    @csrf
+
+                    {{-- Input File Tanda Tangan --}}
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">File Tanda Tangan (Opsional)</label>
+                        <input type="file" name="file_ttd" accept="image/png, image/jpeg, image/jpg"
+                            class="w-full border border-gray-300 rounded-xl p-2 text-sm focus:ring-[#800000] focus:border-[#800000] file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-[#800000] file:text-white hover:file:bg-red-900 cursor-pointer transition outline-none">
+                        <p class="text-[10px] text-gray-500 mt-1.5">Abaikan jika tidak ingin mengubah gambar. Disarankan
+                            format PNG transparan.</p>
+                    </div>
+
+                    {{-- Input Nama Ketua --}}
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Nama Lengkap & Gelar Pejabat</label>
+                        <input type="text" name="nama_ketua" placeholder="Contoh: Muhamad Aksan Akbar, S.H., M.H"
+                            value="{{ $dataSurat['nama_ketua'] ?? '' }}"
+                            class="w-full border border-gray-300 rounded-xl p-3 text-sm focus:ring-1 focus:ring-[#800000] focus:border-[#800000] outline-none transition shadow-sm">
+                    </div>
+
+                    {{-- Input NIP Ketua --}}
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Nomor Induk Pegawai (NIP)</label>
+                        <input type="text" name="nip_ketua" placeholder="Contoh: 19800101 200501 1 001"
+                            value="{{ $dataSurat['nip_ketua'] ?? '' }}"
+                            class="w-full border border-gray-300 rounded-xl p-3 text-sm focus:ring-1 focus:ring-[#800000] focus:border-[#800000] outline-none transition shadow-sm">
+                    </div>
+
+                    {{-- Tombol Aksi --}}
+                    <div class="flex justify-end gap-3 border-t border-gray-100 pt-5 mt-4">
+                        <button type="button" onclick="document.getElementById('modalTtd').classList.add('hidden')"
+                            class="px-5 py-2.5 bg-gray-100 text-gray-700 rounded-xl text-sm font-bold hover:bg-gray-200 transition focus:outline-none">
+                            Batal
+                        </button>
+                        <button type="submit"
+                            class="px-5 py-2.5 bg-[#800000] text-white rounded-xl text-sm font-bold hover:bg-red-900 transition shadow-md focus:outline-none">
+                            Simpan Pengaturan
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -876,7 +943,6 @@
                 },
                 "pagingType": "simple_numbers",
 
-                // Susunan DOM diperbarui: 'B' (Button) ada di atas 'f' (Filter/Pencarian) di sisi kanan
                 "dom": '<"flex flex-col md:flex-row justify-between items-start gap-4 mb-6"<"left-side flex flex-col gap-3"l><"right-side flex flex-col items-end gap-2"Bf>>rt<"flex flex-col md:flex-row justify-between items-center gap-4 mt-6"ip>',
 
                 "buttons": [{
@@ -884,7 +950,6 @@
                     text: '<svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg> Export Excel',
                     title: 'Data Laporan Pengaduan PPKS',
                     exportOptions: {
-                        // Telah diperbarui untuk mengambil kolom ke-8 (Status Terlapor)
                         columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12]
                     }
                 }],
@@ -899,13 +964,20 @@
                     },
                     {
                         "orderable": false,
-                        "targets": -3 // Kolom Bukti
+                        "targets": -3
                     }
                 ],
                 "initComplete": function() {
                     var tableTitle =
                         '<span class="text-base text-gray-700 font-bold mt-1">Tabel Laporan</span>';
                     $('.left-side').prepend(tableTitle);
+
+                    // SCRIPT BARU UNTUK TOMBOL UPLOAD TTD DI SAMPING TOMBOL EXCEL
+                    var btnUploadTTD = `<button type="button" onclick="document.getElementById('modalTtd').classList.remove('hidden')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg inline-flex items-center text-sm shadow-sm transition gap-2 ml-2 h-[38px]">
+                        <svg class="w-4 h-4 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                        Tanda Tangan
+                    </button>`;
+                    $('.dt-buttons').append(btnUploadTTD);
                 }
             });
         });
