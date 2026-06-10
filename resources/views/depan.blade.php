@@ -815,22 +815,44 @@
             <div class="absolute inset-0" @click="showPdfModal = false"></div>
             <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl h-[85vh] flex flex-col relative z-10 transform transition-all"
                 x-transition.scale>
+
+                {{-- Bagian Header Modal --}}
                 <div
-                    class="flex justify-between items-center px-6 py-4 border-b border-gray-100 bg-gray-50 rounded-t-2xl">
-                    <h3 class="font-bold text-gray-800 text-sm md:text-base" x-text="pdfTitle"></h3>
-                    <button @click="showPdfModal = false"
-                        class="text-gray-400 hover:text-red-500 bg-white p-2 rounded-lg border border-gray-200 focus:outline-none">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
+                    class="flex justify-between items-center px-5 py-4 border-b border-gray-100 bg-gray-50 rounded-t-2xl">
+                    <h3 class="font-bold text-gray-800 text-sm md:text-base truncate pr-4" x-text="pdfTitle"></h3>
+                    <div class="flex items-center gap-2 shrink-0">
+                        {{-- Tombol Buka Penuh Khusus Perangkat Mobile/iOS --}}
+                        <a :href="pdfUrl" target="_blank"
+                            class="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-xs rounded-lg transition-colors border border-blue-200 shadow-sm focus:outline-none">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14">
+                                </path>
+                            </svg>
+                            <span class="hidden sm:inline">Buka Penuh</span>
+                        </a>
+                        {{-- Tombol Tutup --}}
+                        <button @click="showPdfModal = false"
+                            class="text-gray-400 hover:text-red-500 bg-white p-2 rounded-lg border border-gray-200 focus:outline-none shadow-sm">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
-                <div class="flex-1 bg-gray-200 rounded-b-2xl overflow-y-auto custom-scroll relative"
+
+                {{-- Kontainer PDF --}}
+                <div class="flex-1 bg-gray-200 rounded-b-2xl relative w-full h-full overflow-y-auto custom-scroll"
                     style="-webkit-overflow-scrolling: touch;">
-                    <iframe :src="pdfUrl" class="w-full min-h-[85vh] relative z-10 border-none"
-                        title="Dokumen Peraturan"></iframe>
+                    <object :data="pdfUrl" type="application/pdf"
+                        class="absolute inset-0 w-full h-full min-h-[80vh] md:min-h-full z-10 border-none">
+                        <iframe :src="pdfUrl"
+                            class="absolute inset-0 w-full h-full min-h-[80vh] md:min-h-full z-10 border-none"
+                            title="Dokumen Peraturan"></iframe>
+                    </object>
                 </div>
+
             </div>
         </div>
     </template>
@@ -842,31 +864,55 @@
             <div class="absolute inset-0" @click="showPanduanModal = false"></div>
             <div class="bg-white rounded-2xl shadow-2xl w-full max-w-5xl h-[85vh] flex flex-col relative z-10 transform transition-all"
                 x-transition.scale>
+
+                {{-- Bagian Header Modal --}}
                 <div
-                    class="flex justify-between items-center px-6 py-4 border-b border-gray-100 bg-gray-50 rounded-t-2xl">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 bg-red-100 text-[#800000] rounded-lg flex items-center justify-center">
+                    class="flex justify-between items-center px-5 py-4 border-b border-gray-100 bg-gray-50 rounded-t-2xl">
+                    <div class="flex items-center gap-3 overflow-hidden">
+                        <div
+                            class="w-8 h-8 bg-red-100 text-[#800000] rounded-lg flex items-center justify-center shrink-0">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
                                 </path>
                             </svg>
                         </div>
-                        <h3 class="font-bold text-gray-800 text-lg">Panduan Penggunaan Sistem</h3>
+                        <h3 class="font-bold text-gray-800 text-sm md:text-lg truncate pr-2">Panduan Penggunaan Sistem
+                        </h3>
                     </div>
-                    <button @click="showPanduanModal = false"
-                        class="text-gray-400 hover:text-red-500 bg-white p-1.5 rounded-md border border-gray-200 focus:outline-none hover:bg-red-50">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
+                    <div class="flex items-center gap-2 shrink-0">
+                        {{-- Tombol Buka Penuh Khusus Perangkat Mobile/iOS --}}
+                        <a href="{{ asset('assets/aturan/panduan.pdf') }}" target="_blank"
+                            class="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-xs rounded-lg transition-colors border border-blue-200 shadow-sm focus:outline-none">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14">
+                                </path>
+                            </svg>
+                            <span class="hidden sm:inline">Buka Penuh</span>
+                        </a>
+                        {{-- Tombol Tutup --}}
+                        <button @click="showPanduanModal = false"
+                            class="text-gray-400 hover:text-red-500 bg-white p-2 rounded-lg border border-gray-200 focus:outline-none hover:bg-red-50 shadow-sm">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
-                <div class="flex-1 bg-gray-200 rounded-b-2xl overflow-y-auto custom-scroll relative"
+
+                {{-- Kontainer PDF --}}
+                <div class="flex-1 bg-gray-200 rounded-b-2xl relative w-full h-full overflow-y-auto custom-scroll"
                     style="-webkit-overflow-scrolling: touch;">
-                    <iframe src="{{ asset('assets/aturan/panduan.pdf') }}"
-                        class="w-full min-h-[85vh] relative z-10 border-none" title="Panduan Penggunaan"></iframe>
+                    <object data="{{ asset('assets/aturan/panduan.pdf') }}" type="application/pdf"
+                        class="absolute inset-0 w-full h-full min-h-[80vh] md:min-h-full z-10 border-none">
+                        <iframe src="{{ asset('assets/aturan/panduan.pdf') }}"
+                            class="absolute inset-0 w-full h-full min-h-[80vh] md:min-h-full z-10 border-none"
+                            title="Panduan Penggunaan"></iframe>
+                    </object>
                 </div>
+
             </div>
         </div>
     </template>

@@ -4,13 +4,13 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Arsip;
-use Illuminate\Support\Facades\File; // Tambahkan ini
+use Illuminate\Support\Facades\File;
 
 class ArsipController extends Controller
 {
     public function index()
     {
-        $arsips = Arsip::orderBy('tanggal', 'desc')->get();
+        $arsips = Arsip::orderBy('tanggal', 'desc')->limit(50)->get();
         return view('arsip', compact('arsips'));
     }
 
@@ -48,6 +48,7 @@ class ArsipController extends Controller
         }
 
         Arsip::create([
+            'user_id'          => auth()->id(),
             'judul_kegiatan'   => $request->judul_kegiatan,
             'jenis_kegiatan'   => $request->jenis_kegiatan,
             'tanggal'          => $request->tanggal,
@@ -60,7 +61,6 @@ class ArsipController extends Controller
         return redirect()->route('arsip.index')->with('success', 'Data kegiatan berhasil disimpan!');
     }
 
-    // Tambahkan fungsi destroy ini di bawah fungsi store()
     public function destroy($id)
     {
         $arsip = Arsip::findOrFail($id);
@@ -76,7 +76,6 @@ class ArsipController extends Controller
         return redirect()->route('arsip.index')->with('success', 'Data arsip berhasil dihapus permanen!');
     }
 
-    // Tambahkan fungsi update ini
     public function update(Request $request, $id)
     {
         $arsip = Arsip::findOrFail($id);
@@ -88,7 +87,7 @@ class ArsipController extends Controller
             'lokasi'           => 'required|string|max:255',
             'status_publikasi' => 'required|string',
             'deskripsi'        => 'required|string',
-            'dokumentasi'      => 'nullable|image|mimes:jpeg,png,jpg|max:5120', // nullable agar gambar tidak wajib diisi jika tidak ingin diganti
+            'dokumentasi'      => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
         ]);
 
         $dokumentasiPath = $arsip->dokumentasi; // Gunakan gambar lama sebagai default
@@ -113,10 +112,10 @@ class ArsipController extends Controller
             $dokumentasiPath = 'assets/kegiatan/' . $fileName;
         }
 
-        // Update data ke database
+        // Update data ke database (Typo jenis_kegiatab sudah diperbaiki)
         $arsip->update([
             'judul_kegiatan'   => $request->judul_kegiatan,
-            'jenis_kegiatab'   => $request->jenis_kegiatan,
+            'jenis_kegiatan'   => $request->jenis_kegiatan,
             'tanggal'          => $request->tanggal,
             'lokasi'           => $request->lokasi,
             'status_publikasi' => $request->status_publikasi,
