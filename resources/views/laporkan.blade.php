@@ -4,27 +4,15 @@
 
 @section('content')
     @php
-        // Mengambil data peraturan dari database
-        $dataPeraturan =
-            isset($kontenPeraturan) && !empty($kontenPeraturan->konten)
-                ? json_decode($kontenPeraturan->konten, true)
-                : [];
-        $peraturan_items = $dataPeraturan['peraturan_items'] ?? [
+        // Kita paksa (hardcode) hanya menampilkan peraturan No 55 dan mengabaikan database
+        $peraturan_items = [
             [
-                'nomor' => '30',
-                'tahun' => 'Permendikbudristek 2021',
-                'judul' => 'Pencegahan dan Penanganan Kekerasan Seksual (PPKS)',
+                'nomor' => '55',
+                'tahun' => 'Permendikbudristek 2024',
+                'judul' => 'Pencegahan dan Penanganan Kekerasan di Lingkungan Perguruan Tinggi',
                 'deskripsi' =>
-                    'Menjamin hak warga kampus atas pendidikan yang aman, penanganan kasus berperspektif korban dan mengutamakan kerahasiaan.',
-                'file_url' => 'assets/aturan/TAHUN 2021.pdf',
-            ],
-            [
-                'nomor' => '17',
-                'tahun' => 'Permendikbudristek Tahun 2022',
-                'judul' => 'Pedoman Lingkungan Inklusif dan Aman',
-                'deskripsi' =>
-                    'Mengatur komitmen institusi dalam menyelenggarakan pendidikan yang bebas kekerasan, mendorong tindakan proaktif.',
-                'file_url' => 'assets/aturan/TAHUN 2022.pdf',
+                    'Menjamin penyelenggaraan tridharma yang ramah, aman, inklusif, setara, dan bebas dari kekerasan dengan memperluas bentuk pencegahan dan penanganan kekerasan.',
+                'file_url' => 'assets/aturan/TAHUN 2024.pdf',
             ],
         ];
     @endphp
