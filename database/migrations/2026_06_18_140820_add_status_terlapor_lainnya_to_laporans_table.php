@@ -9,12 +9,10 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up()
+    public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            if (!Schema::hasColumn('users', 'password_plain')) {
-                $table->string('password_plain')->nullable()->after('password');
-            }
+        Schema::table('laporans', function (Blueprint $table) {
+            $table->string('status_terlapor_lainnya')->nullable()->after('status_terlapor');
         });
     }
 
@@ -23,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            //
+        Schema::table('laporans', function (Blueprint $table) {
+            $table->dropColumn('status_terlapor_lainnya');
         });
     }
 };

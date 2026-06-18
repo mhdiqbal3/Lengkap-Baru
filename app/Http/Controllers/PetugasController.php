@@ -17,7 +17,7 @@ class PetugasController extends Controller
 
         // Mengambil user dengan role satgas
         $petugas = User::where('role', 'satgas')->orderBy('created_at', 'desc')->get();
-        return view('petugas', compact('petugas'));
+        return view('admin.petugas', compact('petugas'));
     }
 
     public function store(Request $request)

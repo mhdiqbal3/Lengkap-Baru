@@ -56,29 +56,18 @@
                             <th scope="col" class="px-6 py-5 font-bold tracking-wider text-center w-16">No</th>
                             <th scope="col" class="px-4 py-5 font-bold tracking-wider whitespace-nowrap">Kode Tiket</th>
                             <th scope="col" class="px-4 py-5 font-bold tracking-wider whitespace-nowrap">Tgl. Lapor</th>
-                            <th scope="col" class="px-4 py-5 font-bold tracking-wider whitespace-nowrap">Judul Laporan
-                            </th>
+                            <th scope="col" class="px-4 py-5 font-bold tracking-wider whitespace-nowrap">Judul Laporan</th>
                             <th scope="col" class="px-4 py-5 font-bold tracking-wider whitespace-nowrap">Jenis Kasus</th>
-                            <th scope="col" class="px-4 py-5 font-bold tracking-wider whitespace-nowrap">Nama Korban</th>
-                            <th scope="col" class="px-4 py-5 font-bold tracking-wider whitespace-nowrap text-center">
-                                Status Korban</th>
-                            <th scope="col"
-                                class="px-4 py-5 font-bold tracking-wider whitespace-nowrap text-center text-red-500">Status
-                                Terlapor</th>
-                            <th scope="col" class="px-4 py-5 font-bold tracking-wider whitespace-nowrap text-center">L/P
-                            </th>
-                            <th scope="col" class="px-4 py-5 font-bold tracking-wider whitespace-nowrap text-center">
-                                Disabilitas</th>
-                            <th scope="col" class="px-4 py-5 font-bold tracking-wider whitespace-nowrap">No. HP</th>
-                            <th scope="col" class="px-4 py-5 font-bold tracking-wider whitespace-nowrap">Lokasi Kejadian
-                            </th>
-                            <th scope="col" class="px-4 py-5 font-bold tracking-wider whitespace-nowrap text-center">
-                                Bukti</th>
-                            <th scope="col" class="px-4 py-5 font-bold tracking-wider text-center whitespace-nowrap">
-                                Status Penanganan</th>
-                            <th scope="col"
-                                class="px-6 py-5 font-bold tracking-wider text-center whitespace-nowrap sticky right-0 bg-gray-50 z-30 border-l border-gray-200 shadow-[-10px_0_15px_-3px_rgba(0,0,0,0.05)]">
-                                Aksi</th>
+                            <th scope="col" class="px-4 py-5 font-bold tracking-wider whitespace-nowrap">Pelapor</th>
+                            <th scope="col" class="px-4 py-5 font-bold tracking-wider whitespace-nowrap">No. WhatsApp</th>
+                            <th scope="col" class="px-4 py-5 font-bold tracking-wider whitespace-nowrap text-center">Status Korban</th>
+                            <th scope="col" class="px-4 py-5 font-bold tracking-wider whitespace-nowrap text-center text-red-500">Status Terlapor</th>
+                            <th scope="col" class="px-4 py-5 font-bold tracking-wider whitespace-nowrap text-center">L/P</th>
+                            <th scope="col" class="px-4 py-5 font-bold tracking-wider whitespace-nowrap text-center">Disabilitas</th>
+                            <th scope="col" class="px-4 py-5 font-bold tracking-wider whitespace-nowrap text-center">Saksi</th>
+                            <th scope="col" class="px-4 py-5 font-bold tracking-wider whitespace-nowrap text-center">Bukti</th>
+                            <th scope="col" class="px-4 py-5 font-bold tracking-wider text-center whitespace-nowrap">Status Penanganan</th>
+                            <th scope="col" class="px-6 py-5 font-bold tracking-wider text-center whitespace-nowrap sticky right-0 bg-gray-50 z-30 border-l border-gray-200 shadow-[-10px_0_15px_-3px_rgba(0,0,0,0.05)]">Aksi</th>
                         </tr>
                     </thead>
 
@@ -87,27 +76,46 @@
                             @foreach ($laporans as $index => $item)
                                 <tr class="bg-white hover:bg-gray-50/50 transition-colors group" x-data="{ showView: false, showEdit: false, showDelete: false, showBukti: false }">
                                     <td class="px-6 py-4 text-center font-medium text-gray-500">{{ $index + 1 }}</td>
-                                    <td class="px-4 py-4 font-bold text-[#800000] whitespace-nowrap">{{ $item->kode_tiket }}
-                                    </td>
+                                    <td class="px-4 py-4 font-bold text-[#800000] whitespace-nowrap">{{ $item->kode_tiket }}</td>
                                     <td class="px-4 py-4 whitespace-nowrap text-gray-500">
                                         {{ \Carbon\Carbon::parse($item->tanggal_kejadian)->format('d M Y') }}</td>
-                                    <td class="px-4 py-4 font-bold text-gray-800 min-w-[200px]">{{ $item->judul_lapor }}
-                                    </td>
+                                    <td class="px-4 py-4 font-bold text-gray-800 min-w-[200px]">{{ $item->judul_lapor }}</td>
                                     <td class="px-4 py-4 whitespace-nowrap">
-                                        <span
-                                            class="px-2.5 py-1 bg-purple-50 text-purple-700 text-xs font-semibold rounded-lg border border-purple-100">{{ ucfirst($item->jenis_kasus) }}</span>
+                                        <span class="px-2.5 py-1 bg-purple-50 text-purple-700 text-xs font-semibold rounded-lg border border-purple-100">{{ ucfirst($item->jenis_kasus) }}</span>
                                     </td>
-                                    <td class="px-4 py-4 font-medium text-gray-700 whitespace-nowrap">
-                                        {{ $item->nama_korban }}</td>
+                                    <td class="px-4 py-4 font-medium text-gray-700 whitespace-nowrap">{{ $item->user ? $item->user->name : 'Anonim' }}</td>
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        @if ($item->no_hp_korban)
+                                            <a href="https://wa.me/{{ '62' . ltrim($item->no_hp_korban, '0') }}" target="_blank"
+                                                class="inline-flex items-center gap-1.5 text-green-600 hover:text-green-700 bg-green-50 px-3 py-1.5 rounded-lg font-bold transition-colors">
+                                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path d="M12.031 0C5.383 0 0 5.383 0 12.031c0 2.124.553 4.195 1.604 6.012L.19 24l6.14-1.583c1.76.963 3.754 1.472 5.801 1.472 6.648 0 12.031-5.383 12.031-12.031S18.679 0 12.031 0zm0 21.86c-1.802 0-3.568-.484-5.116-1.402l-.367-.217-3.8.98.998-3.705-.238-.379C2.476 15.541 1.95 13.81 1.95 12.031c0-5.562 4.519-10.081 10.081-10.081 5.563 0 10.082 4.519 10.082 10.081s-4.519 10.081-10.082 10.081zm5.534-7.551c-.303-.152-1.795-.886-2.073-.987-.278-.101-.481-.152-.684.152-.202.303-.784.987-.96 1.189-.177.202-.354.227-.657.076-1.353-.679-2.457-1.442-3.411-3.084-.177-.303-.019-.467.133-.618.136-.136.303-.354.455-.53.152-.177.202-.303.303-.505.101-.202.051-.379-.025-.531-.076-.152-.684-1.645-.936-2.251-.246-.593-.497-.512-.684-.521-.177-.008-.379-.01-.582-.01-.202 0-.531.076-.809.379-.278.303-1.062 1.037-1.062 2.53 0 1.493 1.088 2.934 1.239 3.136.152.202 2.138 3.265 5.178 4.577 1.303.561 2.054.675 2.825.642.85-.036 2.655-1.085 3.033-2.133.379-1.048.379-1.946.265-2.133-.114-.187-.417-.288-.72-.44z"></path>
+                                                </svg>
+                                                {{ $item->no_hp_korban }}
+                                            </a>
+                                        @else
+                                            <span class="text-xs text-gray-400">-</span>
+                                        @endif
+                                    </td>
                                     <td class="px-4 py-4 text-center whitespace-nowrap">
-                                        {{ ucwords(str_replace('_', ' ', $item->status_korban)) }}</td>
-                                    <td class="px-4 py-4 text-center whitespace-nowrap font-medium text-red-600">
-                                        {{ ucwords(str_replace('_', ' ', $item->status_terlapor)) }}</td>
+                                        {{ ucfirst($item->status_korban) }}
+                                        @if ($item->status_korban === 'lainnya' && $item->status_korban_lainnya)
+                                            <span class="block text-xs text-gray-500 mt-1">({{ $item->status_korban_lainnya }})</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-4 py-4 text-center whitespace-nowrap font-medium text-red-600">{{ ucwords(str_replace('_', ' ', $item->status_terlapor)) }}</td>
                                     <td class="px-4 py-4 text-center">{{ $item->jenis_kelamin }}</td>
                                     <td class="px-4 py-4 text-center text-gray-400">{{ ucfirst($item->disabilitas) }}</td>
-                                    <td class="px-4 py-4 whitespace-nowrap">{{ $item->no_hp_korban }}</td>
-                                    <td class="px-4 py-4 whitespace-nowrap">
-                                        {{ \Illuminate\Support\Str::limit($item->lokasi_kejadian, 20) }}</td>
+                                    <td class="px-4 py-4 text-center whitespace-nowrap">
+                                        @php
+                                            $saksi = $item->saksi ? json_decode($item->saksi, true) : null;
+                                        @endphp
+                                        @if($saksi && !empty($saksi['nama']))
+                                            <span class="text-xs font-bold text-gray-700 bg-gray-100 px-2 py-1 rounded-md">{{ $saksi['nama'] }}</span>
+                                        @else
+                                            <span class="text-xs text-gray-400">-</span>
+                                        @endif
+                                    </td>
 
                                     {{-- Tombol Lihat Bukti Gambar & Video --}}
                                     <td class="px-4 py-4 text-center">
@@ -293,18 +301,25 @@
                                                     class="bg-white rounded-[2rem] shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col text-left overflow-hidden transform transition-all"
                                                     x-transition.scale>
 
-                                                    {{-- Header Modal --}}
+                                                    {{-- Header Gradient Merah --}}
                                                     <div
-                                                        class="bg-[#800000] p-6 sm:px-8 text-white flex justify-between items-center relative shrink-0">
-                                                        <div>
-                                                            <span
-                                                                class="text-red-200 text-xs font-bold uppercase tracking-widest block mb-1">Detail
-                                                                Tiket Pengaduan</span>
-                                                            <h3 class="text-2xl sm:text-3xl font-black">
-                                                                {{ $item->kode_tiket }}</h3>
+                                                        class="bg-gradient-to-r from-[#800000] to-red-900 p-6 sm:px-8 text-white flex justify-between items-center relative shrink-0 border-b-4 border-red-950/20 shadow-inner">
+                                                        <div class="flex items-center gap-4">
+                                                            <div class="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-sm border border-white/20 shadow-lg">
+                                                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path>
+                                                                </svg>
+                                                            </div>
+                                                            <div>
+                                                                <span
+                                                                    class="text-red-200 text-[10px] font-bold uppercase tracking-widest block mb-0.5">Detail
+                                                                    Tiket Pengaduan</span>
+                                                                <h3 class="text-2xl sm:text-3xl font-black drop-shadow-md tracking-tight">
+                                                                    {{ $item->kode_tiket }}</h3>
+                                                            </div>
                                                         </div>
                                                         <button @click="showView = false"
-                                                            class="p-2 bg-white/20 hover:bg-white/40 rounded-full transition-colors focus:outline-none">
+                                                            class="p-2 bg-white/10 hover:bg-white/20 rounded-xl transition-all focus:outline-none backdrop-blur-sm border border-white/10 hover:scale-105 active:scale-95 shadow-sm">
                                                             <svg class="w-6 h-6" fill="none" stroke="currentColor"
                                                                 viewBox="0 0 24 24">
                                                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -316,104 +331,111 @@
                                                     {{-- Isi Modal --}}
                                                     <div
                                                         class="overflow-y-auto p-6 sm:p-8 custom-scroll bg-gray-50 flex-1">
-                                                        {{-- Bagian Judul --}}
+                                                        {{-- Judul & Status --}}
                                                         <div
-                                                            class="bg-white border border-gray-100 shadow-sm rounded-2xl p-6 mb-6">
-                                                            <p
-                                                                class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">
-                                                                Judul Pengaduan</p>
-                                                            <p class="font-black text-gray-800 text-xl lg:text-2xl">
-                                                                {{ $item->judul_lapor }}</p>
+                                                            class="bg-gradient-to-br from-white to-gray-50 border border-gray-100 shadow-md shadow-gray-200/40 rounded-2xl p-6 mb-6 relative overflow-hidden">
+                                                            <div class="absolute top-0 right-0 w-32 h-32 bg-gray-100 rounded-full mix-blend-multiply filter blur-3xl opacity-50 translate-x-10 -translate-y-10"></div>
+                                                            <div
+                                                                class="flex flex-col md:flex-row md:items-start justify-between gap-5 relative z-10">
+                                                                <div>
+                                                                    <p
+                                                                        class="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
+                                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                                                        Judul Pengaduan</p>
+                                                                    <p class="font-black text-gray-800 text-xl lg:text-2xl leading-tight">
+                                                                        {{ $item->judul_lapor }}</p>
+                                                                </div>
+                                                            </div>
                                                         </div>
 
                                                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                                                             {{-- Kotak 1: Informasi Kejadian --}}
                                                             <div
-                                                                class="bg-white border border-gray-100 shadow-sm rounded-2xl p-6">
+                                                                class="bg-white border border-gray-100 shadow-sm shadow-gray-200/50 rounded-2xl p-6 hover:shadow-md transition-shadow">
                                                                 <h4
-                                                                    class="font-bold text-[#800000] border-b border-gray-50 pb-3 mb-4 flex items-center gap-2">
-                                                                    <svg class="w-5 h-5" fill="none"
-                                                                        stroke="currentColor" viewBox="0 0 24 24">
-                                                                        <path stroke-linecap="round"
-                                                                            stroke-linejoin="round" stroke-width="2"
-                                                                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
-                                                                        </path>
-                                                                    </svg>
+                                                                    class="font-black text-[#800000] border-b-2 border-gray-100 pb-3 mb-5 flex items-center gap-2.5 text-sm uppercase tracking-wide">
+                                                                    <div class="p-1.5 bg-red-50 rounded-lg text-[#800000]">
+                                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                                                                            viewBox="0 0 24 24">
+                                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                                stroke-width="2"
+                                                                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
+                                                                            </path>
+                                                                        </svg>
+                                                                    </div>
                                                                     Informasi Kejadian
                                                                 </h4>
-                                                                <div class="space-y-4">
-                                                                    <div>
-                                                                        <p
-                                                                            class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">
-                                                                            Kategori Kasus</p>
-                                                                        <p class="font-bold text-gray-800">
-                                                                            {{ strtoupper($item->jenis_kasus) }}</p>
+                                                                <div class="space-y-3">
+                                                                    <div class="flex flex-col gap-1 p-3.5 bg-gray-50 hover:bg-gray-100/50 transition-colors rounded-xl border border-gray-100">
+                                                                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Kategori Kasus</p>
+                                                                        <p class="font-black text-gray-800 text-sm">{{ strtoupper($item->jenis_kasus) }}</p>
                                                                     </div>
-                                                                    <div>
-                                                                        <p
-                                                                            class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">
-                                                                            Tanggal Kejadian</p>
-                                                                        <p class="font-bold text-gray-800">
-                                                                            {{ \Carbon\Carbon::parse($item->tanggal_kejadian)->translatedFormat('d F Y') }}
+                                                                    <div class="flex flex-col gap-1 p-3.5 bg-gray-50 hover:bg-gray-100/50 transition-colors rounded-xl border border-gray-100">
+                                                                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Tanggal Kejadian</p>
+                                                                        <p class="font-black text-gray-800 text-sm">{{ \Carbon\Carbon::parse($item->tanggal_kejadian)->translatedFormat('d F Y') }}</p>
+                                                                    </div>
+                                                                    <div class="flex flex-col gap-1 p-3.5 bg-gray-50 hover:bg-gray-100/50 transition-colors rounded-xl border border-gray-100">
+                                                                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Lokasi Kejadian</p>
+                                                                        <p class="font-black text-gray-800 text-sm">{{ $item->lokasi_kejadian }}</p>
+                                                                    </div>
+                                                                    <div class="flex flex-col gap-1 p-3.5 bg-red-50 hover:bg-red-100/50 transition-colors rounded-xl border border-red-100">
+                                                                        <p class="text-[10px] font-bold text-red-500 uppercase tracking-widest">Status Terlapor (Pelaku)</p>
+                                                                        <p class="font-black text-red-700 text-sm">{{ ucwords(str_replace('_', ' ', $item->status_terlapor)) }}</p>
+                                                                    </div>
+                                                                    @php
+                                                                        $saksi = $item->saksi ? json_decode($item->saksi, true) : null;
+                                                                    @endphp
+                                                                    @if($saksi && !empty($saksi['nama']))
+                                                                    <div class="flex flex-col gap-1 p-3.5 bg-gray-50 hover:bg-gray-100/50 transition-colors rounded-xl border border-gray-100">
+                                                                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Saksi Kejadian</p>
+                                                                        <p class="font-black text-gray-800 text-sm">
+                                                                            {{ $saksi['nama'] }} 
+                                                                            @if(!empty($saksi['pekerjaan'])) <span class="text-xs text-gray-500 font-medium">({{ $saksi['pekerjaan'] }})</span> @endif
                                                                         </p>
+                                                                        @if(!empty($saksi['telepon']) || !empty($saksi['alamat']))
+                                                                            <div class="mt-1.5 pt-1.5 border-t border-gray-200">
+                                                                                @if(!empty($saksi['telepon'])) <p class="text-[11px] text-gray-600 font-medium flex gap-1.5 items-center"><svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg> {{ $saksi['telepon'] }}</p> @endif
+                                                                                @if(!empty($saksi['alamat'])) <p class="text-[11px] text-gray-600 font-medium flex gap-1.5 items-start mt-1"><svg class="w-3.5 h-3.5 text-gray-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg> <span class="line-clamp-2">{{ $saksi['alamat'] }}</span></p> @endif
+                                                                            </div>
+                                                                        @endif
                                                                     </div>
-                                                                    <div>
-                                                                        <p
-                                                                            class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">
-                                                                            Lokasi Kejadian</p>
-                                                                        <p class="font-bold text-gray-800">
-                                                                            {{ $item->lokasi_kejadian }}</p>
-                                                                    </div>
-                                                                    <div>
-                                                                        <p
-                                                                            class="text-[10px] font-bold text-red-400 uppercase tracking-wider mb-0.5">
-                                                                            Status Terlapor (Pelaku)</p>
-                                                                        <p class="font-bold text-red-600">
-                                                                            {{ ucwords(str_replace('_', ' ', $item->status_terlapor)) }}
-                                                                        </p>
-                                                                    </div>
+                                                                    @endif
                                                                 </div>
                                                             </div>
 
                                                             {{-- Kotak 2: Profil Pelapor / Korban --}}
                                                             <div
-                                                                class="bg-white border border-gray-100 shadow-sm rounded-2xl p-6">
+                                                                class="bg-white border border-gray-100 shadow-sm shadow-gray-200/50 rounded-2xl p-6 hover:shadow-md transition-shadow">
                                                                 <h4
-                                                                    class="font-bold text-[#800000] border-b border-gray-50 pb-3 mb-4 flex items-center gap-2">
-                                                                    <svg class="w-5 h-5" fill="none"
-                                                                        stroke="currentColor" viewBox="0 0 24 24">
-                                                                        <path stroke-linecap="round"
-                                                                            stroke-linejoin="round" stroke-width="2"
-                                                                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z">
-                                                                        </path>
-                                                                    </svg>
+                                                                    class="font-black text-[#800000] border-b-2 border-gray-100 pb-3 mb-5 flex items-center gap-2.5 text-sm uppercase tracking-wide">
+                                                                    <div class="p-1.5 bg-red-50 rounded-lg text-[#800000]">
+                                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                                                                            viewBox="0 0 24 24">
+                                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                                stroke-width="2"
+                                                                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z">
+                                                                            </path>
+                                                                        </svg>
+                                                                    </div>
                                                                     Profil Pelapor / Korban
                                                                 </h4>
-                                                                <div class="space-y-4">
-                                                                    <div>
-                                                                        <p
-                                                                            class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">
-                                                                            Nama Lengkap</p>
-                                                                        <p class="font-bold text-gray-800">
-                                                                            {{ $item->nama_korban }}</p>
+                                                                <div class="space-y-3">
+                                                                    <div class="flex flex-col gap-1 p-3.5 bg-gray-50 hover:bg-gray-100/50 transition-colors rounded-xl border border-gray-100">
+                                                                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Nama Lengkap</p>
+                                                                        <p class="font-black text-gray-800 text-sm">{{ $item->nama_korban }}</p>
                                                                     </div>
-                                                                    <div>
-                                                                        <p
-                                                                            class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">
-                                                                            Nomor Kontak (HP/WA)</p>
-                                                                        <p class="font-bold text-gray-800">
-                                                                            {{ $item->no_hp_korban }}</p>
+                                                                    <div class="flex flex-col gap-1 p-3.5 bg-gray-50 hover:bg-gray-100/50 transition-colors rounded-xl border border-gray-100">
+                                                                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Nomor Kontak (HP/WA)</p>
+                                                                        <p class="font-black text-gray-800 text-sm">{{ $item->no_hp_korban }}</p>
                                                                     </div>
-                                                                    <div>
-                                                                        <p
-                                                                            class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">
-                                                                            Identitas Lainnya</p>
-                                                                        <p class="font-bold text-gray-800">
-                                                                            {{ ucwords(str_replace('_', ' ', $item->status_korban)) }}
-                                                                            •
-                                                                            {{ $item->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan' }}
-                                                                            •
-                                                                            {{ $item->disabilitas == 'ya' ? 'Disabilitas' : 'Non-Disabilitas' }}
+                                                                    <div class="flex flex-col gap-1 p-3.5 bg-gray-50 hover:bg-gray-100/50 transition-colors rounded-xl border border-gray-100">
+                                                                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Identitas Lainnya</p>
+                                                                        <p class="font-black text-gray-800 text-sm flex flex-wrap gap-1 items-center">
+                                                                            <span class="bg-white border border-gray-200 px-2.5 py-1 rounded-md shadow-sm">{{ ucfirst($item->status_korban) }} @if ($item->status_korban === 'lainnya' && $item->status_korban_lainnya) ({{ $item->status_korban_lainnya }}) @endif</span>
+                                                                            <span class="text-gray-300">•</span>
+                                                                            <span class="bg-white border border-gray-200 px-2.5 py-1 rounded-md shadow-sm">{{ $item->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan' }}</span>
+                                                                            <span class="text-gray-300">•</span>
+                                                                            <span class="bg-white border border-gray-200 px-2.5 py-1 rounded-md shadow-sm {{ $item->disabilitas == 'ya' ? 'text-red-600' : '' }}">{{ $item->disabilitas == 'ya' ? 'Disabilitas' : 'Non-Disabilitas' }}</span>
                                                                         </p>
                                                                     </div>
                                                                 </div>
@@ -422,13 +444,14 @@
 
                                                         {{-- Kotak 3: Deskripsi & Bukti --}}
                                                         <div
-                                                            class="bg-white border border-gray-100 shadow-sm rounded-2xl p-6">
+                                                            class="bg-white border border-gray-100 shadow-sm shadow-gray-200/50 rounded-2xl p-6 hover:shadow-md transition-shadow">
                                                             <div class="mb-6">
                                                                 <p
-                                                                    class="text-[12px] font-bold text-gray-400 uppercase tracking-wider mb-2">
+                                                                    class="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2.5 flex items-center gap-2">
+                                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path></svg>
                                                                     Deskripsi & Kronologi Singkat</p>
-                                                                <div class="p-4 bg-gray-50 border border-gray-100">
-                                                                    <p class="text-gray-700">
+                                                                <div class="p-5 bg-gray-50/80 border border-gray-100 rounded-xl">
+                                                                    <p class="text-gray-700 leading-relaxed whitespace-pre-wrap text-sm">
                                                                         {{ $item->deskripsi }}</p>
                                                                 </div>
                                                             </div>

@@ -11,7 +11,7 @@ class ArsipController extends Controller
     public function index()
     {
         $arsips = Arsip::orderBy('tanggal', 'desc')->limit(50)->get();
-        return view('arsip', compact('arsips'));
+        return view('admin.arsip', compact('arsips'));
     }
 
     public function store(Request $request)
@@ -21,10 +21,11 @@ class ArsipController extends Controller
             'jenis_kegiatan'   => 'required|string',
             'tanggal'          => 'required|date',
             'lokasi'           => 'required|string|max:255',
-            'status_publikasi' => 'required|string',
             'deskripsi'        => 'required|string',
-            'dokumentasi'      => 'required|image|mimes:jpeg,png,jpg|max:5120',
+            'dokumentasi'      => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
         ]);
+
+        $jenisKegiatan = $request->jenis_kegiatan === 'Lainnya' ? $request->jenis_kegiatan_lainnya : $request->jenis_kegiatan;
 
         $dokumentasiPath = null;
         if ($request->hasFile('dokumentasi')) {
@@ -50,10 +51,10 @@ class ArsipController extends Controller
         Arsip::create([
             'user_id'          => auth()->id(),
             'judul_kegiatan'   => $request->judul_kegiatan,
-            'jenis_kegiatan'   => $request->jenis_kegiatan,
+            'jenis_kegiatan'   => $jenisKegiatan,
             'tanggal'          => $request->tanggal,
             'lokasi'           => $request->lokasi,
-            'status_publikasi' => $request->status_publikasi,
+            'status_publikasi' => 'internal', // Default internal; tidak lagi dari form
             'deskripsi'        => $request->deskripsi,
             'dokumentasi'      => $dokumentasiPath,
         ]);
@@ -85,10 +86,11 @@ class ArsipController extends Controller
             'jenis_kegiatan'   => 'required|string',
             'tanggal'          => 'required|date',
             'lokasi'           => 'required|string|max:255',
-            'status_publikasi' => 'required|string',
             'deskripsi'        => 'required|string',
             'dokumentasi'      => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
         ]);
+
+        $jenisKegiatan = $request->jenis_kegiatan === 'Lainnya' ? $request->jenis_kegiatan_lainnya : $request->jenis_kegiatan;
 
         $dokumentasiPath = $arsip->dokumentasi; // Gunakan gambar lama sebagai default
 
@@ -115,10 +117,10 @@ class ArsipController extends Controller
         // Update data ke database (Typo jenis_kegiatab sudah diperbaiki)
         $arsip->update([
             'judul_kegiatan'   => $request->judul_kegiatan,
-            'jenis_kegiatan'   => $request->jenis_kegiatan,
+            'jenis_kegiatan'   => $jenisKegiatan,
             'tanggal'          => $request->tanggal,
             'lokasi'           => $request->lokasi,
-            'status_publikasi' => $request->status_publikasi,
+            'status_publikasi' => $arsip->status_publikasi, // Tidak diubah dari form
             'deskripsi'        => $request->deskripsi,
             'dokumentasi'      => $dokumentasiPath,
         ]);

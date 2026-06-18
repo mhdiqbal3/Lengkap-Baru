@@ -15,7 +15,7 @@ class AgendaController extends Controller
     {
         // Semua user yang login (Admin, Satgas, Masyarakat) bisa melihat daftar agenda
         $agendas = Agenda::orderBy('created_at', 'desc')->get();
-        return view('agenda', compact('agendas'));
+        return view('agenda.agenda', compact('agendas'));
     }
 
     /**
@@ -32,7 +32,7 @@ class AgendaController extends Controller
             ->take(3)
             ->get();
 
-        return view('agenda-detail', compact('agenda', 'agendas_lain'));
+        return view('agenda.agenda-detail', compact('agenda', 'agendas_lain'));
     }
 
     public function store(Request $request)

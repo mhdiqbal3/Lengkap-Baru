@@ -74,7 +74,7 @@ class DashboardController extends Controller
 
         $kontenDashboard = KontenHalaman::where('halaman', 'dashboard')->first();
 
-        return view('index', compact('cards', 'filter', 'chartStatus', 'jenisKasusData', 'carousels', 'kontenDashboard'));
+        return view('dashboard.index', compact('cards', 'filter', 'chartStatus', 'jenisKasusData', 'carousels', 'kontenDashboard'));
     }
 
     public function uploadCarousel(Request $request)
@@ -155,7 +155,7 @@ class DashboardController extends Controller
     public function editDashboard()
     {
         $kontenDashboard = KontenHalaman::where('halaman', 'dashboard')->first();
-        return view('edit-dashboard', compact('kontenDashboard'));
+        return view('dashboard.edit-dashboard', compact('kontenDashboard'));
     }
 
     public function updateDashboard(Request $request)

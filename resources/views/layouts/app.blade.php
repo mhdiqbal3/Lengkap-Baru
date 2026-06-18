@@ -74,8 +74,8 @@
             }
         }
 
-        // Mengecek jumlah laporan dengan status 'Menunggu Verifikasi' khusus untuk Admin
-        if ($isAdmin && class_exists('\App\Models\Laporan')) {
+        // Mengecek jumlah laporan dengan status 'Menunggu Verifikasi' untuk Admin & Satgas
+        if (($isAdmin || $isSatgas) && class_exists('\App\Models\Laporan')) {
             try {
                 $laporanBaruCount = \App\Models\Laporan::where('status', 'Menunggu Verifikasi')->count();
             } catch (\Exception $e) {
@@ -84,7 +84,7 @@
     }
 @endphp
 
-<body class="bg-gray-50 flex h-screen overflow-hidden font-sans" x-data="{
+<body class="bg-gray-50 flex h-[100dvh] overflow-hidden font-sans" x-data="{
     sidebarOpen: true,
     showPengaduan: false,
     isAnonim: false,
@@ -99,7 +99,7 @@
 
     {{-- SIDEBAR --}}
     <aside :class="sidebarOpen ? 'ml-0' : '-ml-64'"
-        class="w-64 {{ $themeSidebar }} text-white flex flex-col h-full shadow-xl z-20 shrink-0 transition-all duration-300 ease-in-out relative">
+        class="w-64 {{ $themeSidebar }} text-white flex flex-col h-[100dvh] shadow-xl z-20 shrink-0 transition-all duration-300 ease-in-out relative">
         <div class="flex items-center justify-center h-20 border-b border-white/20 shrink-0 px-4">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-white p-1 rounded-lg shadow flex-shrink-0 flex items-center justify-center">
@@ -113,7 +113,7 @@
             </div>
         </div>
 
-        <nav class="flex-1 px-4 py-6 overflow-y-auto custom-scroll sidebar-scroll w-64">
+        <nav class="flex-1 px-4 pt-6 pb-32 overflow-y-auto custom-scroll sidebar-scroll w-64">
             <div>
                 <a href="{{ url('/index') }}"
                     class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 {{ request()->is('/') || request()->is('dashboard') || request()->is('index') ? 'bg-white ' . $themeTextActive . ' shadow-sm font-bold' : 'text-gray-100 hover:bg-white/10 hover:text-white font-medium' }}">
@@ -243,8 +243,30 @@
                         </li>
                     @endif
 
-                    @if ($isAdmin || $isSatgas)
-                        {{-- BERITA AGENDA BISA DIAKSES ADMIN & SATGAS --}}
+                    @if ($isSatgas)
+                        {{-- MENU DATA LAPORAN KHUSUS SATGAS (Hanya lihat & cetak) --}}
+                        <li>
+                            <a href="{{ url('/laporan') }}"
+                                class="flex items-center gap-3 px-4 py-2.5 text-sm rounded-xl transition-all duration-200 {{ request()->is('laporan') ? 'bg-white ' . $themeTextActive . ' shadow-sm font-bold' : 'text-gray-100 hover:bg-white/10 hover:text-white font-medium' }}">
+                                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                                    </path>
+                                </svg>
+                                <span class="whitespace-nowrap flex-1">Data Laporan</span>
+                                @if ($laporanBaruCount > 0)
+                                    <span class="relative flex h-2.5 w-2.5 shrink-0">
+                                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full {{ request()->is('laporan') ? 'bg-red-400' : 'bg-white' }} opacity-75"></span>
+                                        <span class="relative inline-flex rounded-full h-2.5 w-2.5 {{ request()->is('laporan') ? 'bg-red-600' : 'bg-white' }}"></span>
+                                    </span>
+                                @endif
+                            </a>
+                        </li>
+                    @endif
+
+                    @if ($isAdmin)
+                        {{-- BERITA AGENDA HANYA UNTUK ADMIN --}}
                         <li>
                             <a href="{{ route('agenda.index') }}"
                                 class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10 transition-colors {{ request()->routeIs('agenda.*') ? 'bg-white ' . $themeTextActive . ' shadow-sm font-bold' : 'text-gray-100 hover:bg-white/10 hover:text-white font-medium' }}">
@@ -314,7 +336,7 @@
         </nav>
     </aside>
 
-    <main class="flex-1 flex flex-col h-screen overflow-hidden bg-[#F4F7FE] relative">
+    <main class="flex-1 flex flex-col h-[100dvh] overflow-hidden bg-[#F4F7FE] relative">
         <header
             class="h-20 bg-white shadow-sm flex items-center justify-between px-8 z-10 shrink-0 border-b border-gray-100">
             <div class="flex items-center gap-8 w-full max-w-2xl">

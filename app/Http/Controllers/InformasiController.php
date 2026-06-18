@@ -11,13 +11,13 @@ class InformasiController extends Controller
     public function pencegahan()
     {
         $kontenPencegahan = KontenHalaman::where('halaman', 'pencegahan')->first();
-        return view('pencegahan', compact('kontenPencegahan'));
+        return view('informasi.pencegahan', compact('kontenPencegahan'));
     }
 
     public function editPencegahan()
     {
         $kontenPencegahan = KontenHalaman::where('halaman', 'pencegahan')->first();
-        return view('edit-pencegahan', compact('kontenPencegahan'));
+        return view('dashboard.edit-pencegahan', compact('kontenPencegahan'));
     }
 
     public function updatePencegahan(Request $request)
@@ -34,13 +34,13 @@ class InformasiController extends Controller
     public function penanganan()
     {
         $kontenPenanganan = KontenHalaman::where('halaman', 'penanganan')->first();
-        return view('penanganan', compact('kontenPenanganan'));
+        return view('informasi.penanganan', compact('kontenPenanganan'));
     }
 
     public function editPenanganan()
     {
         $kontenPenanganan = KontenHalaman::where('halaman', 'penanganan')->first();
-        return view('edit-penanganan', compact('kontenPenanganan'));
+        return view('dashboard.edit-penanganan', compact('kontenPenanganan'));
     }
 
     public function updatePenanganan(Request $request)
@@ -56,22 +56,20 @@ class InformasiController extends Controller
 
     public function galeri()
     {
-        $galeris = Arsip::whereIn('status_publikasi', ['sosialisasi', 'poster'])
-            ->orderBy('tanggal', 'desc')
-            ->get();
-        return view('galeri', compact('galeris'));
+        $galeris = Arsip::orderBy('tanggal', 'desc')->get();
+        return view('informasi.galeri', compact('galeris'));
     }
 
     public function kontak()
     {
         $kontenKontak = KontenHalaman::where('halaman', 'kontak')->first();
-        return view('kontak', compact('kontenKontak'));
+        return view('informasi.kontak', compact('kontenKontak'));
     }
 
     public function editKontak()
     {
         $kontenKontak = KontenHalaman::where('halaman', 'kontak')->first();
-        return view('edit-kontak', compact('kontenKontak'));
+        return view('dashboard.edit-kontak', compact('kontenKontak'));
     }
 
     public function updateKontak(Request $request)
@@ -88,13 +86,13 @@ class InformasiController extends Controller
     public function tentang()
     {
         $kontenTentang = KontenHalaman::where('halaman', 'tentang')->first();
-        return view('tentang', compact('kontenTentang'));
+        return view('informasi.tentang', compact('kontenTentang'));
     }
 
     public function editTentang()
     {
         $kontenTentang = KontenHalaman::where('halaman', 'tentang')->first();
-        return view('edit-tentang', compact('kontenTentang'));
+        return view('dashboard.edit-tentang', compact('kontenTentang'));
     }
 
     public function updateTentang(Request $request)
@@ -165,7 +163,7 @@ class InformasiController extends Controller
     public function editPeraturan()
     {
         $kontenPeraturan = KontenHalaman::where('halaman', 'peraturan')->first();
-        return view('edit-peraturan', compact('kontenPeraturan'));
+        return view('dashboard.edit-peraturan', compact('kontenPeraturan'));
     }
 
     public function updatePeraturan(Request $request)

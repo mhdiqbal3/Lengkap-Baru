@@ -44,8 +44,8 @@
                     data-tanggal="{{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d F Y') }}"
                     data-lokasi="{{ $item->lokasi }}"
                     data-deskripsi="{{ $item->deskripsi }}"
-                    data-badgetext="{{ $item->status_publikasi == 'poster' ? 'Poster Edukasi' : 'Sosialisasi' }}"
-                    data-badgeclass="{{ $item->status_publikasi == 'poster' ? 'bg-[#800000]' : 'bg-blue-600' }}">
+                    data-badgetext="{{ $item->jenis_kegiatan }}"
+                    data-badgeclass="bg-[#800000]">
 
                     {{-- Bagian Gambar (Klik untuk trigger Modal Global) --}}
                     <div @click="openModal($el.closest('.gallery-card'))"
@@ -58,9 +58,9 @@
                         </div>
 
                         {{-- Badge Status --}}
-                        <div class="absolute top-4 left-4">
-                            <span class="px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl text-white shadow-xl backdrop-blur-md {{ $item->status_publikasi == 'poster' ? 'bg-[#800000]/90' : 'bg-blue-600/90' }}">
-                                {{ $item->status_publikasi == 'poster' ? 'Poster Edukasi' : 'Sosialisasi' }}
+                        <div class="absolute top-4 left-4 max-w-[80%]">
+                            <span class="px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl text-white shadow-xl backdrop-blur-md bg-[#800000]/90 truncate block">
+                                {{ $item->jenis_kegiatan }}
                             </span>
                         </div>
 

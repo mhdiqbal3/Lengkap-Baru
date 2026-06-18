@@ -17,7 +17,7 @@ class PengaturanController extends Controller
         }
 
         $user = Auth::user();
-        return view('pengaturan', compact('user'));
+        return view('admin.pengaturan', compact('user'));
     }
 
     public function updateProfil(Request $request)

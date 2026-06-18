@@ -9,12 +9,12 @@ return new class extends Migration
     public function up()
     {
         Schema::table('laporans', function (Blueprint $table) {
-            // Menambahkan kolom baru
-            $table->string('status_terlapor')->nullable()->after('status_korban');
-            $table->string('link_video')->nullable()->after('deskripsi');
-
-            // Opsional: Jika kamu ingin benar-benar menghapus is_anonim dari database
-            // $table->dropColumn('is_anonim'); 
+            if (!Schema::hasColumn('laporans', 'status_terlapor')) {
+                $table->string('status_terlapor')->nullable()->after('status_korban');
+            }
+            if (!Schema::hasColumn('laporans', 'link_video')) {
+                $table->string('link_video')->nullable()->after('deskripsi');
+            }
         });
     }
 

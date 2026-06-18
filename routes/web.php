@@ -36,7 +36,7 @@ Route::get('/', function () {
         $carousels[] = ['url' => 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=1920&auto=format&fit=crop', 'nama' => 'default1'];
     }
 
-    return view('depan', compact('kontenPencegahan', 'kontenPenanganan', 'kontenTentang', 'kontenKontak', 'galeris', 'carousels', 'kontenPeraturan', 'agendas'));
+    return view('public.depan', compact('kontenPencegahan', 'kontenPenanganan', 'kontenTentang', 'kontenKontak', 'galeris', 'carousels', 'kontenPeraturan', 'agendas'));
 });
 
 // Rute Detail Berita (Public)
@@ -81,9 +81,8 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/cek-status', [LaporanController::class, 'cekStatus'])->name('cek-status');
 
-    Route::put('/laporan/{id}', [LaporanController::class, 'update'])->name('laporan.update');
-    Route::delete('/laporan/{id}', [LaporanController::class, 'destroy'])->name('laporan.destroy');
-
+    // Rute Laporan - Bisa diakses Admin & Satgas (hanya GET)
+    Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
     Route::get('/laporan/{id}', [LaporanController::class, 'show'])->name('laporan.show');
     Route::get('/laporan/{id}/cetak', [LaporanController::class, 'cetak'])->name('laporan.cetak');
     Route::get('/laporan/cetak-pdf/{id}', [LaporanController::class, 'cetakPdf']);
@@ -94,9 +93,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/tentang', [InformasiController::class, 'tentang'])->name('tentang');
     Route::get('/galeri', [InformasiController::class, 'galeri'])->name('galeri');
 
-    Route::get('/agenda', [AgendaController::class, 'index'])->name('agenda.index');
-    Route::resource('agenda', AgendaController::class)->except(['index', 'show']);
-
     // Rute Pengaturan
     Route::get('/pengaturan', [PengaturanController::class, 'index'])->name('pengaturan');
     Route::post('/pengaturan/profil', [PengaturanController::class, 'updateProfil'])->name('pengaturan.profil');
@@ -105,8 +101,13 @@ Route::middleware(['auth'])->group(function () {
 
     // --- KHUSUS ADMIN ---
     Route::middleware(['admin'])->group(function () {
-        Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
         Route::post('/laporan/{id}/status', [LaporanController::class, 'updateStatus'])->name('laporan.update-status');
+        Route::put('/laporan/{id}', [LaporanController::class, 'update'])->name('laporan.update');
+        Route::delete('/laporan/{id}', [LaporanController::class, 'destroy'])->name('laporan.destroy');
+        Route::post('/laporan/upload-ttd', [\App\Http\Controllers\LaporanController::class, 'uploadTtd'])->name('laporan.upload-ttd');
+
+        Route::get('/agenda', [AgendaController::class, 'index'])->name('agenda.index');
+        Route::resource('agenda', AgendaController::class)->except(['index', 'show']);
 
         Route::get('/arsip', [ArsipController::class, 'index'])->name('arsip.index');
         Route::post('/arsip/simpan', [ArsipController::class, 'store'])->name('arsip.store');
@@ -134,8 +135,5 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/petugas', [\App\Http\Controllers\PetugasController::class, 'store'])->name('petugas.store');
         Route::put('/petugas/{id}', [\App\Http\Controllers\PetugasController::class, 'update'])->name('petugas.update');
         Route::delete('/petugas/{id}', [\App\Http\Controllers\PetugasController::class, 'destroy'])->name('petugas.destroy');
-
-        // Route Upload Tanda Tangan Surat Laporan
-        Route::post('/laporan/upload-ttd', [\App\Http\Controllers\LaporanController::class, 'uploadTtd'])->name('laporan.upload-ttd');
     });
 });

@@ -15,7 +15,7 @@ class AuthController extends Controller
     // ==========================================
     public function showLoginForm()
     {
-        return view('login');
+        return view('auth.login');
     }
 
     public function login(Request $request)
@@ -49,7 +49,7 @@ class AuthController extends Controller
     // ==========================================
     public function showRegisterForm()
     {
-        return view('register');
+        return view('auth.register');
     }
 
     public function register(Request $request)
@@ -86,7 +86,7 @@ class AuthController extends Controller
     // 1. Tampilkan form input email
     public function showLupaPasswordForm()
     {
-        return view('auth-lupa-password');
+        return view('auth.auth-lupa-password');
     }
 
     // 2. Proses kirim OTP ke email
@@ -108,7 +108,7 @@ class AuthController extends Controller
 
         try {
             // PERBAIKAN DI SINI: 'emails.otp' diubah menjadi 'otp'
-            Mail::send('otp', ['otp' => $otp], function ($message) use ($request) {
+            Mail::send('auth.otp', ['otp' => $otp], function ($message) use ($request) {
                 $message->to($request->email);
                 $message->subject('Kode OTP Reset Password - Satgas PPKPT USN Kolaka');
             });
@@ -127,7 +127,7 @@ class AuthController extends Controller
         if (!session('otp_email')) {
             return redirect()->route('password.request');
         }
-        return view('auth-verifikasi-otp');
+        return view('auth.auth-verifikasi-otp');
     }
 
     // 4. Proses pencocokan OTP
@@ -158,7 +158,7 @@ class AuthController extends Controller
         if (!session('otp_verified')) {
             return redirect()->route('password.request');
         }
-        return view('auth-reset-password');
+        return view('auth.auth-reset-password');
     }
 
     // 6. Proses simpan sandi baru ke database

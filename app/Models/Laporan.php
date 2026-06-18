@@ -15,16 +15,19 @@ class Laporan extends Model
         'kode_tiket',
         'judul_lapor',
         'jenis_kasus',
-        'nama_korban', // is_anonim dihapus
+        'nama_korban',
         'no_hp_korban',
         'status_korban',
-        'status_terlapor', // Kolom baru
+        'status_korban_lainnya', // Keterangan jika pilih Lainnya
+        'status_terlapor',
+        'status_terlapor_lainnya',
         'jenis_kelamin',
         'disabilitas',
         'tanggal_kejadian',
         'lokasi_kejadian',
+        'saksi',               // Data saksi (JSON)
         'deskripsi',
-        'link_video', // Kolom baru
+        'link_video',
         'bukti',
         'status'
     ];

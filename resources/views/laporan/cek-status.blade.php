@@ -1,9 +1,6 @@
-@if (!request()->ajax())
-    @extends('layouts.app')
-    @section('header_title', 'Cek Status Laporan')
-    @section('content')
-    @endif
-
+@extends(request()->ajax() ? 'layouts.ajax' : 'layouts.app')
+@section('header_title', 'Cek Status Laporan')
+@section('content')
     @php
         $showModal = isset($laporan) || isset($error) ? 'true' : 'false';
     @endphp
@@ -176,109 +173,12 @@
                             <div class="h-10"></div>
                         </div>
 
-                        <div class="px-6 sm:px-10 py-8">
-                            <h4 class="font-extrabold text-gray-800 text-lg mb-6 flex items-center gap-2">
-                                <svg class="w-5 h-5 text-[#800000]" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
-                                    </path>
-                                </svg>
-                                Rincian Data Formulir
-                            </h4>
-                            <div class="border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
-                                <table class="w-full text-sm text-left text-gray-600">
-                                    <tbody class="divide-y divide-gray-200">
-                                        <tr class="hover:bg-gray-50 transition-colors">
-                                            <th class="w-1/3 px-6 py-4 bg-gray-50/50 font-bold text-gray-700">Waktu
-                                                Pelaporan</th>
-                                            <td class="px-6 py-4 font-medium text-gray-900">
-                                                {{ \Carbon\Carbon::parse($laporan->created_at)->format('d F Y - H:i') }}
-                                                WIB</td>
-                                        </tr>
-                                        <tr class="hover:bg-gray-50 transition-colors">
-                                            <th class="px-6 py-4 bg-gray-50/50 font-bold text-gray-700">Judul Pengaduan
-                                            </th>
-                                            <td class="px-6 py-4 font-black text-gray-900 text-base">
-                                                {{ $laporan->judul_lapor }}</td>
-                                        </tr>
-                                        <tr class="hover:bg-gray-50 transition-colors">
-                                            <th class="px-6 py-4 bg-gray-50/50 font-bold text-gray-700">Jenis Kekerasan
-                                            </th>
-                                            <td class="px-6 py-4">
-                                                <span
-                                                    class="px-2.5 py-1 bg-purple-100 text-purple-800 font-bold rounded-md text-xs border border-purple-200">{{ strtoupper($laporan->jenis_kasus) }}</span>
-                                            </td>
-                                        </tr>
-                                        <tr class="hover:bg-gray-50 transition-colors">
-                                            <th class="px-6 py-4 bg-gray-50/50 font-bold text-gray-700">Nama Pelapor/Korban
-                                            </th>
-                                            <td class="px-6 py-4 font-medium text-gray-900">
-                                                @if ($laporan->is_anonim)
-                                                    <span class="italic text-gray-500">Anonim (Dirahasiakan)</span>
-                                                @else
-                                                    {{ $laporan->nama_korban }}
-                                                @endif
-                                            </td>
-                                        </tr>
-                                        <tr class="hover:bg-gray-50 transition-colors">
-                                            <th class="px-6 py-4 bg-gray-50/50 font-bold text-gray-700">Status di Kampus
-                                            </th>
-                                            <td class="px-6 py-4 font-medium text-gray-900">
-                                                {{ ucfirst($laporan->status_korban) }}</td>
-                                        </tr>
-                                        <tr class="hover:bg-gray-50 transition-colors">
-                                            <th class="px-6 py-4 bg-gray-50/50 font-bold text-gray-700">Nomor Handphone
-                                            </th>
-                                            <td class="px-6 py-4 font-medium text-gray-900">{{ $laporan->no_hp_korban }}
-                                            </td>
-                                        </tr>
-                                        <tr class="hover:bg-gray-50 transition-colors">
-                                            <th class="px-6 py-4 bg-gray-50/50 font-bold text-gray-700">Jenis Kelamin</th>
-                                            <td class="px-6 py-4 font-medium text-gray-900">
-                                                {{ $laporan->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan' }}</td>
-                                        </tr>
-                                        <tr class="hover:bg-gray-50 transition-colors">
-                                            <th class="px-6 py-4 bg-gray-50/50 font-bold text-gray-700">Disabilitas</th>
-                                            <td class="px-6 py-4 font-medium text-gray-900">
-                                                {{ ucfirst($laporan->disabilitas) }}</td>
-                                        </tr>
-                                        <tr class="hover:bg-gray-50 transition-colors">
-                                            <th class="px-6 py-4 bg-gray-50/50 font-bold text-gray-700">Tanggal Kejadian
-                                            </th>
-                                            <td class="px-6 py-4 font-medium text-gray-900">
-                                                {{ \Carbon\Carbon::parse($laporan->tanggal_kejadian)->format('d F Y') }}
-                                            </td>
-                                        </tr>
-                                        <tr class="hover:bg-gray-50 transition-colors">
-                                            <th class="px-6 py-4 bg-gray-50/50 font-bold text-gray-700">Lokasi Kejadian
-                                            </th>
-                                            <td class="px-6 py-4 font-medium text-gray-900">
-                                                {{ $laporan->lokasi_kejadian }}</td>
-                                        </tr>
-                                        <tr>
-                                            <th
-                                                class="px-6 py-4 bg-gray-50/50 font-bold text-gray-700 border-b-0 align-top">
-                                                Deskripsi & Kronologi</th>
-                                            <td class="px-6 py-4 font-medium text-gray-700">
-                                                {{ $laporan->deskripsi }}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+
 
                         <div
                             class="px-6 sm:px-10 pb-8 flex flex-col sm:flex-row justify-center gap-3 border-t border-white pt-6">
-                            @if ($laporan->bukti)
-                                <button @click="showModal = false; setTimeout(() => showBukti = true, 300)"
-                                    class="px-8 py-3.5 bg-blue-50 text-blue-700 font-bold rounded-xl border border-blue-100 hover:bg-blue-100 transition-colors focus:outline-none text-center">
-                                    Lihat Bukti Laporan
-                                </button>
-                            @endif
-
                             <button @click="showModal = false"
-                                class="px-8 py-3.5 bg-[#800000] text-white hover:bg-red-200 font-bold rounded-xl transition-colors text-center">
+                                class="px-8 py-3.5 bg-[#800000] text-white hover:bg-red-900 font-bold rounded-xl transition-colors text-center">
                                 Tutup Kartu Laporan
                             </button>
                         </div>
@@ -404,6 +304,4 @@
         @endif
     </div>
 
-    @if (!request()->ajax())
-    @endsection
-@endif
+@endsection

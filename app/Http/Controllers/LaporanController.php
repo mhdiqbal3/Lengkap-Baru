@@ -34,7 +34,7 @@ class LaporanController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate($perPage);
 
-        return view('riwayat', compact('laporans'));
+        return view('laporan.riwayat', compact('laporans'));
     }
 
     public function index(Request $request)
@@ -65,19 +65,19 @@ class LaporanController extends Controller
             'ditolak' => Laporan::where('status', 'Ditolak')->count(),
         ];
 
-        return view('laporan', compact('laporans', 'rekapan'));
+        return view('laporan.laporan', compact('laporans', 'rekapan'));
     }
 
     public function cetak($id)
     {
         $laporan = Laporan::with('user')->findOrFail($id);
-        return view('laporan-cetak', compact('laporan'));
+        return view('laporan.laporan-cetak', compact('laporan'));
     }
 
     public function show($id)
     {
         $laporan = Laporan::with('user')->findOrFail($id);
-        return view('laporan-detail', compact('laporan'));
+        return view('laporan.laporan-detail', compact('laporan'));
     }
 
     public function store(Request $request)
@@ -89,9 +89,14 @@ class LaporanController extends Controller
             'nama_korban'      => 'required|string|max:255',
             'no_hp_korban'     => 'required|string|max:20',
             'status_korban'    => 'required|string',
+            'status_korban_lainnya' => 'nullable|string|max:255',
             'status_terlapor'  => 'required|string',
             'jenis_kelamin'    => 'required|in:L,P',
             'disabilitas'      => 'required|in:ya,tidak',
+            'saksi_nama'       => 'nullable|string|max:255',
+            'saksi_pekerjaan'  => 'nullable|string|max:255',
+            'saksi_telepon'    => 'nullable|string|max:20',
+            'saksi_alamat'     => 'nullable|string',
             'tanggal_kejadian' => 'required|date',
             'lokasi_kejadian'  => 'required|string|max:255',
             'deskripsi'        => 'required|string',
@@ -101,35 +106,28 @@ class LaporanController extends Controller
 
         try {
             // ---------------------------------------------------------
-            // PERBAIKAN: Logika Generate Kode Tiket Anti-Duplikat
+            // PERBAIKAN: Logika Generate Kode Tiket Anti-Duplikat (Acak 8 Digit)
             // ---------------------------------------------------------
-            // Gunakan DB facade untuk memastikan membaca data paling akhir
-            $latestLaporan = \Illuminate\Support\Facades\DB::table('laporans')
-                ->orderBy('id', 'desc')
-                ->first();
-
-            if (!$latestLaporan) {
-                $kodeTiket = 'PPKPT_001';
-            } else {
-                // Ambil kode terakhir (contoh: "PPKPT_005")
-                $lastCode = $latestLaporan->kode_tiket;
-
-                // Pisahkan string untuk mendapatkan angkanya saja
-                $parts = explode('_', $lastCode);
-                $lastNumber = isset($parts[1]) ? intval($parts[1]) : 0;
-
-                // Tambahkan 1 untuk laporan baru (005 + 1 = 6)
-                $newNumber = $lastNumber + 1;
-
-                // Format kembali menjadi PPKPT_XXX (hasil: PPKPT_006)
-                $kodeTiket = 'PPKPT_' . str_pad($newNumber, 3, '0', STR_PAD_LEFT);
-            }
+            do {
+                $kodeTiket = strtoupper(\Illuminate\Support\Str::random(8));
+            } while (\Illuminate\Support\Facades\DB::table('laporans')->where('kode_tiket', $kodeTiket)->exists());
             // ---------------------------------------------------------
 
             // Upload bukti jika ada
             $buktiPath = null;
             if ($request->hasFile('bukti')) {
                 $buktiPath = $request->file('bukti')->store('assets/bukti', 'public');
+            }
+
+            // Siapkan data saksi jika diisi
+            $saksiData = null;
+            if ($request->filled('saksi_nama') || $request->filled('saksi_pekerjaan') || $request->filled('saksi_telepon') || $request->filled('saksi_alamat')) {
+                $saksiData = json_encode([
+                    'nama' => $request->saksi_nama,
+                    'pekerjaan' => $request->saksi_pekerjaan,
+                    'telepon' => $request->saksi_telepon,
+                    'alamat' => $request->saksi_alamat,
+                ]);
             }
 
             // Simpan ke database
@@ -141,13 +139,16 @@ class LaporanController extends Controller
                 'nama_korban'      => $request->nama_korban,
                 'no_hp_korban'     => $request->no_hp_korban,
                 'status_korban'    => $request->status_korban,
+                'status_korban_lainnya' => $request->status_korban === 'lainnya' ? $request->status_korban_lainnya : null,
                 'status_terlapor'  => $request->status_terlapor,
+                'status_terlapor_lainnya' => $request->status_terlapor === 'lainnya' ? $request->status_terlapor_lainnya : null,
                 'jenis_kelamin'    => $request->jenis_kelamin,
                 'disabilitas'      => $request->disabilitas,
                 'tanggal_kejadian' => $request->tanggal_kejadian,
                 'lokasi_kejadian'  => $request->lokasi_kejadian,
+                'saksi'            => $saksiData,
                 'deskripsi'        => $request->deskripsi,
-                'link_video'       => $request->link_video,
+                'link_video'       => $request->link_video ?? '',
                 'bukti'            => $buktiPath,
                 'status'           => 'Menunggu Verifikasi',
             ]);
@@ -176,7 +177,7 @@ class LaporanController extends Controller
 
     public function cekStatus()
     {
-        return view('cek-status');
+        return view('laporan.cek-status');
     }
 
     public function cariStatus(Request $request)
@@ -193,16 +194,16 @@ class LaporanController extends Controller
         $request->flash();
 
         if (!$laporan) {
-            return view('cek-status', ['error' => 'Kode tiket tidak ditemukan.']);
+            return view('laporan.cek-status', ['error' => 'Kode tiket tidak ditemukan.']);
         }
 
-        return view('cek-status', compact('laporan'));
+        return view('laporan.cek-status', compact('laporan'));
     }
 
     public function create()
     {
         $kontenPeraturan = KontenHalaman::where('halaman', 'peraturan')->first();
-        return view('laporkan', compact('kontenPeraturan'));
+        return view('laporan.laporkan', compact('kontenPeraturan'));
     }
 
     public function updateStatus(Request $request, $id)
@@ -321,7 +322,7 @@ class LaporanController extends Controller
     public function cetakPdf($id)
     {
         $laporan = \App\Models\Laporan::findOrFail($id);
-        $pdf = Pdf::loadView('cetak-laporan', compact('laporan'));
+        $pdf = Pdf::loadView('laporan.cetak-laporan', compact('laporan'));
         $pdf->setPaper('letter', 'portrait');
         return $pdf->stream('Bukti_Laporan_' . $laporan->kode_tiket . '.pdf');
     }

@@ -100,22 +100,19 @@
                 : [];
         $peraturan_items = $dataPeraturan['peraturan_items'] ?? [
             [
-                'nomor' => '30',
-                'tahun' => 'Permendikbudristek 2021',
-                'judul' => 'Pencegahan dan Penanganan Kekerasan Seksual (PPKS)',
+                'nomor' => '55',
+                'tahun' => 'Permendikbudristek 2024',
+                'judul' => 'Pencegahan dan Penanganan Kekerasan di Lingkungan Perguruan Tinggi',
                 'deskripsi' =>
-                    'Menjamin hak warga kampus atas pendidikan yang aman, penanganan kasus berperspektif korban dan mengutamakan kerahasiaan.',
-                'file_url' => 'assets/aturan/TAHUN 2021.pdf',
-            ],
-            [
-                'nomor' => '17',
-                'tahun' => 'Permendikbudristek Tahun 2022',
-                'judul' => 'Pedoman Lingkungan Inklusif dan Aman',
-                'deskripsi' =>
-                    'Mengatur komitmen institusi dalam menyelenggarakan pendidikan yang bebas kekerasan, mendorong tindakan proaktif.',
-                'file_url' => 'assets/aturan/TAHUN 2022.pdf',
+                    'Menjamin penyelenggaraan tridharma yang ramah, aman, inklusif, setara, dan bebas dari kekerasan dengan memperluas bentuk pencegahan dan penanganan kekerasan.',
+                'file_url' => 'assets/aturan/TAHUN 2024.pdf',
             ],
         ];
+
+        // Hapus peraturan nomor 30 dan 17 sesuai permintaan
+        $peraturan_items = array_filter($peraturan_items, function($item) {
+            return !in_array($item['nomor'], ['30', '17']);
+        });
     @endphp
 
     <nav x-data="{ open: false, scrolled: false }" @scroll.window="scrolled = (window.pageYOffset > 10) ? true : false"
@@ -968,7 +965,6 @@
                 showPdfModal: false,
                 showPanduanModal: false,
                 showResultModal: false,
-                showBukti: false,
                 pdfUrl: '',
                 pdfTitle: '',
                 resultHtml: '',
@@ -1003,15 +999,8 @@
                         let modalContent = doc.querySelector('#modal-content-laporan') || doc.querySelector(
                             '#modal-content-error');
 
-                        // Menarik Modal Gambar/Bukti dari halaman cek-status
-                        let templates = doc.querySelectorAll('template');
-                        let buktiTemplate = Array.from(templates).find(t => t.innerHTML.includes('showBukti'));
-
                         if (modalContent) {
                             let finalHtml = modalContent.outerHTML;
-                            if (buktiTemplate) {
-                                finalHtml += buktiTemplate.outerHTML;
-                            }
 
                             // Sinkronkan fungsi close modal ke variabel milik landing page
                             finalHtml = finalHtml.replaceAll('showModal', 'showResultModal');

@@ -156,7 +156,7 @@
             </td>
             <td width="65%">
                 <div class="header-text">
-                    KEMENTERIAN PENDIDIKAN TINGGI, SAINS DAN TEKNOLOGI
+                    KEMENTERIAN PENDIDIKAN TINGGI,<br>SAINS, DAN RISET TEKNOLOGI
                     <br>
                     <strong>UNIVERSITAS SEMBILANBELAS NOVEMBER KOLAKA</strong>
                     <br>
@@ -194,9 +194,24 @@
                 <td><strong>{{ $laporan->is_anonim ? 'Anonim (Dirahasiakan)' : $laporan->nama_korban }}</strong></td>
             </tr>
             <tr>
+                <td>Status Korban</td>
+                <td>:</td>
+                <td>
+                    {{ ucfirst($laporan->status_korban) }}
+                    @if ($laporan->status_korban === 'lainnya' && $laporan->status_korban_lainnya)
+                        ({{ $laporan->status_korban_lainnya }})
+                    @endif
+                </td>
+            </tr>
+            <tr>
                 <td>Kategori Kekerasan</td>
                 <td>:</td>
                 <td>{{ $laporan->jenis_kasus }}</td>
+            </tr>
+            <tr>
+                <td>Status Terlapor</td>
+                <td>:</td>
+                <td>{{ ucwords(str_replace('_', ' ', $laporan->status_terlapor)) }}</td>
             </tr>
             <tr>
                 <td>Waktu Kejadian</td>
@@ -208,6 +223,20 @@
                 <td>:</td>
                 <td>{{ $laporan->lokasi_kejadian }}</td>
             </tr>
+            @php
+                $saksi = $laporan->saksi ? json_decode($laporan->saksi, true) : null;
+            @endphp
+            @if($saksi && !empty($saksi['nama']))
+            <tr>
+                <td>Saksi Kejadian</td>
+                <td>:</td>
+                <td>
+                    {{ $saksi['nama'] }} 
+                    @if(!empty($saksi['pekerjaan'])) ({{ $saksi['pekerjaan'] }}) @endif
+                    @if(!empty($saksi['telepon'])) - {{ $saksi['telepon'] }} @endif
+                </td>
+            </tr>
+            @endif
             <tr>
                 <td>Status Penanganan</td>
                 <td>:</td>

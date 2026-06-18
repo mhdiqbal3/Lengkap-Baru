@@ -3,6 +3,24 @@
 @section('header_title', 'Arsip Kegiatan')
 
 @section('content')
+    <style>
+        /* Modifikasi tombol excel datatables */
+        .dt-buttons .dt-button {
+            background-color: #16a34a !important;
+            color: white !important;
+            border: none !important;
+            padding: 0.5rem 1rem !important;
+            border-radius: 0.5rem !important;
+            font-weight: bold !important;
+            font-size: 0.875rem !important;
+            transition: all 0.3s !important;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+        }
+
+        .dt-buttons .dt-button:hover {
+            background-color: #15803d !important;
+        }
+    </style>
     @php
         $promoPath = public_path('assets/image/promo');
         $promos = [];
@@ -53,7 +71,6 @@
                             <th scope="col" class="px-6 py-5 font-bold tracking-wider whitespace-nowrap">Lokasi</th>
                             <th scope="col" class="px-6 py-5 font-bold tracking-wider whitespace-nowrap">Deskripsi Singkat</th>
                             <th scope="col" class="px-6 py-5 font-bold tracking-wider text-center whitespace-nowrap">Dokumentasi</th>
-                            <th scope="col" class="px-6 py-5 font-bold tracking-wider text-center whitespace-nowrap">Status Publikasi</th>
                             <th scope="col" class="px-6 py-5 font-bold tracking-wider text-center whitespace-nowrap sticky right-0 bg-gray-50 z-30 border-l border-gray-200">Aksi</th>
                         </tr>
                     </thead>
@@ -83,15 +100,6 @@
                                         @endif
                                     </td>
 
-                                    <td class="px-6 py-4 text-center whitespace-nowrap">
-                                        <span class="px-3 py-1.5 text-[11px] uppercase tracking-wider font-extrabold rounded-xl border shadow-sm
-                                            {{ $item->status_publikasi == 'sosialisasi' ? 'bg-blue-50 text-blue-700 border-blue-200' : '' }}
-                                            {{ $item->status_publikasi == 'poster' ? 'bg-purple-50 text-purple-700 border-purple-200' : '' }}
-                                            {{ $item->status_publikasi == 'tidak_dipublikasi' || $item->status_publikasi == 'internal' ? 'bg-gray-50 text-gray-700 border-gray-200' : '' }}">
-                                            @if ($item->status_publikasi == 'sosialisasi') Sosialisasi @elseif($item->status_publikasi == 'poster') Poster @else Internal @endif
-                                        </span>
-                                    </td>
-
                                     <td class="px-6 py-4 transition-colors text-center sticky right-0 bg-white group-hover:bg-gray-50 z-20 border-l border-gray-100">
                                         <div class="flex items-center justify-center gap-2">
                                             <button type="button" 
@@ -101,7 +109,7 @@
                                                 data-jenis="{{ $item->jenis_kegiatan ?? $item->jenis }}"
                                                 data-tanggal="{{ \Carbon\Carbon::parse($item->tanggal)->format('Y-m-d') }}"
                                                 data-lokasi="{{ $item->lokasi }}"
-                                                data-status="{{ $item->status_publikasi }}"
+                                                data-lokasi="{{ $item->lokasi }}"
                                                 data-deskripsi="{{ $item->deskripsi }}"
                                                 data-dokumentasi="{{ $item->dokumentasi ? asset($item->dokumentasi) : '' }}"
                                                 data-update="{{ route('arsip.update', $item->id) }}"
@@ -142,31 +150,38 @@
                     <div class="space-y-6">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div><label class="block mb-2 text-sm font-bold text-gray-700">Judul <span class="text-red-500">*</span></label><input type="text" name="judul_kegiatan" required class="border border-gray-200 text-sm rounded-xl w-full p-3 outline-none"></div>
-                            <div><label class="block mb-2 text-sm font-bold text-gray-700">Jenis <span class="text-red-500">*</span></label>
-                                <select required name="jenis_kegiatan" class="border border-gray-200 text-sm rounded-xl w-full p-3 outline-none">
-                                    <option value="seminar">Seminar / Workshop</option>
-                                    <option value="kampanye">Kampanye Offline / Online</option>
-                                    <option value="rilis_poster">Rilis Poster Edukasi</option>
-                                    <option value="rapat">Rapat Koordinasi</option>
-                                    <option value="lainnya">Lainnya</option>
+                            <div>
+                                <label class="block mb-2 text-sm font-bold text-gray-700">Jenis <span class="text-red-500">*</span></label>
+                                <select required name="jenis_kegiatan" onchange="
+                                    let l = document.getElementById('tambahLainnya'); 
+                                    let i = document.getElementById('tambahJenisLainnya');
+                                    if(this.value === 'Lainnya') { l.style.display = 'block'; i.setAttribute('required', 'required'); } 
+                                    else { l.style.display = 'none'; i.removeAttribute('required'); }
+                                " class="border border-gray-200 text-sm rounded-xl w-full p-3 outline-none">
+                                    <option value="Seminar">Seminar</option>
+                                    <option value="Kampanye">Kampanye</option>
+                                    <option value="Poster">Poster</option>
+                                    <option value="Rapat Koordinasi">Rapat Koordinasi</option>
+                                    <option value="MOU">MOU</option>
+                                    <option value="Lainnya">Lainnya</option>
                                 </select>
+                                <div id="tambahLainnya" style="display: none;" class="mt-2">
+                                    <input type="text" id="tambahJenisLainnya" name="jenis_kegiatan_lainnya" placeholder="Sebutkan jenis kegiatan..." class="border border-gray-200 text-sm rounded-xl w-full p-3 outline-none">
+                                </div>
                             </div>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div><label class="block mb-2 text-sm font-bold text-gray-700">Tanggal <span class="text-red-500">*</span></label><input type="date" required name="tanggal" class="border border-gray-200 text-sm rounded-xl w-full p-3 outline-none"></div>
                             <div><label class="block mb-2 text-sm font-bold text-gray-700">Lokasi <span class="text-red-500">*</span></label><input type="text" required name="lokasi" class="border border-gray-200 text-sm rounded-xl w-full p-3 outline-none"></div>
                         </div>
-                        <div><label class="block mb-2 text-sm font-bold text-[#800000]">Status Publikasi <span class="text-red-500">*</span></label>
-                            <select required name="status_publikasi" class="border border-red-200 bg-red-50/30 text-sm rounded-xl w-full p-3 outline-none">
-                                <option value="sosialisasi">Publikasikan sebagai "Sosialisasi Pencegahan"</option>
-                                <option value="poster">Publikasikan sebagai "Poster Edukasi"</option>
-                                <option value="internal">Internal (Tidak Dipublikasikan)</option>
-                            </select>
                         </div>
-                        <div><label class="block mb-2 text-sm font-bold text-gray-700">Deskripsi <span class="text-red-500">*</span></label><textarea rows="3" required name="deskripsi" class="border border-gray-200 text-sm rounded-xl w-full p-3 outline-none"></textarea></div>
                         <div>
-                            <label class="block mb-2 text-sm font-bold text-gray-700">Unggah Gambar <span class="text-red-500">*</span></label>
-                            <input name="dokumentasi" type="file" accept="image/*" required class="border border-gray-200 w-full p-2 rounded-xl text-sm bg-gray-50">
+                            <label class="block mb-2 text-sm font-bold text-gray-700">Deskripsi <span class="text-red-500">*</span> <span class="text-xs font-normal text-gray-400">(Maks. 800 kata)</span></label>
+                            <textarea rows="3" required name="deskripsi" maxlength="5000" class="border border-gray-200 text-sm rounded-xl w-full p-3 outline-none"></textarea>
+                        </div>
+                        <div>
+                            <label class="block mb-2 text-sm font-bold text-gray-700">Unggah Gambar (Opsional)</label>
+                            <input name="dokumentasi" type="file" accept="image/*" class="border border-gray-200 w-full p-2 rounded-xl text-sm bg-gray-50">
                         </div>
                         <div class="flex justify-end gap-4 pt-4 border-t border-gray-100">
                             <button type="button" onclick="tutupModal('modalTambah')" class="px-6 py-3 bg-gray-100 font-bold rounded-xl">Batal</button>
@@ -192,28 +207,35 @@
                     <div class="space-y-6">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div><label class="block mb-2 text-sm font-bold text-gray-700">Judul <span class="text-red-500">*</span></label><input type="text" id="editJudul" name="judul_kegiatan" required class="border border-gray-200 text-sm rounded-xl w-full p-3 outline-none"></div>
-                            <div><label class="block mb-2 text-sm font-bold text-gray-700">Jenis <span class="text-red-500">*</span></label>
-                                <select required id="editJenis" name="jenis_kegiatan" class="border border-gray-200 text-sm rounded-xl w-full p-3 outline-none">
-                                    <option value="seminar">Seminar / Workshop</option>
-                                    <option value="kampanye">Kampanye Offline / Online</option>
-                                    <option value="rilis_poster">Rilis Poster Edukasi</option>
-                                    <option value="rapat">Rapat Koordinasi</option>
-                                    <option value="lainnya">Lainnya</option>
+                            <div>
+                                <label class="block mb-2 text-sm font-bold text-gray-700">Jenis <span class="text-red-500">*</span></label>
+                                <select required id="editJenis" name="jenis_kegiatan" onchange="
+                                    let l = document.getElementById('editLainnya'); 
+                                    let i = document.getElementById('editJenisLainnya');
+                                    if(this.value === 'Lainnya') { l.style.display = 'block'; i.setAttribute('required', 'required'); } 
+                                    else { l.style.display = 'none'; i.removeAttribute('required'); }
+                                " class="border border-gray-200 text-sm rounded-xl w-full p-3 outline-none">
+                                    <option value="Seminar">Seminar</option>
+                                    <option value="Kampanye">Kampanye</option>
+                                    <option value="Poster">Poster</option>
+                                    <option value="Rapat Koordinasi">Rapat Koordinasi</option>
+                                    <option value="MOU">MOU</option>
+                                    <option value="Lainnya">Lainnya</option>
                                 </select>
+                                <div id="editLainnya" style="display: none;" class="mt-2">
+                                    <input type="text" id="editJenisLainnya" name="jenis_kegiatan_lainnya" placeholder="Sebutkan jenis kegiatan..." class="border border-gray-200 text-sm rounded-xl w-full p-3 outline-none">
+                                </div>
                             </div>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div><label class="block mb-2 text-sm font-bold text-gray-700">Tanggal <span class="text-red-500">*</span></label><input type="date" id="editTanggal" required name="tanggal" class="border border-gray-200 text-sm rounded-xl w-full p-3 outline-none"></div>
                             <div><label class="block mb-2 text-sm font-bold text-gray-700">Lokasi <span class="text-red-500">*</span></label><input type="text" id="editLokasi" required name="lokasi" class="border border-gray-200 text-sm rounded-xl w-full p-3 outline-none"></div>
                         </div>
-                        <div><label class="block mb-2 text-sm font-bold text-[#800000]">Status Publikasi <span class="text-red-500">*</span></label>
-                            <select required id="editStatus" name="status_publikasi" class="border border-red-200 bg-red-50/30 text-sm rounded-xl w-full p-3 outline-none">
-                                <option value="sosialisasi">Publikasikan sebagai "Sosialisasi Pencegahan"</option>
-                                <option value="poster">Publikasikan sebagai "Poster Edukasi"</option>
-                                <option value="internal">Internal (Tidak Dipublikasikan)</option>
-                            </select>
                         </div>
-                        <div><label class="block mb-2 text-sm font-bold text-gray-700">Deskripsi <span class="text-red-500">*</span></label><textarea rows="3" id="editDeskripsi" required name="deskripsi" class="border border-gray-200 text-sm rounded-xl w-full p-3 outline-none"></textarea></div>
+                        <div>
+                            <label class="block mb-2 text-sm font-bold text-gray-700">Deskripsi <span class="text-red-500">*</span> <span class="text-xs font-normal text-gray-400">(Maks. 800 kata)</span></label>
+                            <textarea rows="3" id="editDeskripsi" required name="deskripsi" maxlength="5000" class="border border-gray-200 text-sm rounded-xl w-full p-3 outline-none"></textarea>
+                        </div>
                         <div>
                             <label class="block mb-2 text-sm font-bold text-gray-700">Ganti Gambar (Opsional)</label>
                             <input name="dokumentasi" type="file" accept="image/*" class="border border-gray-200 w-full p-2 rounded-xl text-sm bg-gray-50">
@@ -301,6 +323,11 @@
 @endsection
 
 @push('scripts')
+    {{-- SCRIPT UNTUK EXPORT EXCEL DATATABLES --}}
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+
     <script>
         // Fungsi Native Buka/Tutup Modal
         function bukaModal(id) {
@@ -329,10 +356,24 @@
             let el = document.getElementById('data-edit-' + id);
             document.getElementById('formEdit').action = el.getAttribute('data-update');
             document.getElementById('editJudul').value = el.getAttribute('data-judul');
-            document.getElementById('editJenis').value = el.getAttribute('data-jenis');
+            
+            let jenis = el.getAttribute('data-jenis');
+            let editJenis = document.getElementById('editJenis');
+            let std = ['Seminar', 'Kampanye', 'Poster', 'Rapat Koordinasi', 'MOU'];
+            if(std.includes(jenis)) {
+                editJenis.value = jenis;
+                document.getElementById('editLainnya').style.display = 'none';
+                document.getElementById('editJenisLainnya').value = '';
+                document.getElementById('editJenisLainnya').removeAttribute('required');
+            } else {
+                editJenis.value = 'Lainnya';
+                document.getElementById('editLainnya').style.display = 'block';
+                document.getElementById('editJenisLainnya').value = jenis;
+                document.getElementById('editJenisLainnya').setAttribute('required', 'required');
+            }
+            
             document.getElementById('editTanggal').value = el.getAttribute('data-tanggal');
             document.getElementById('editLokasi').value = el.getAttribute('data-lokasi');
-            document.getElementById('editStatus').value = el.getAttribute('data-status');
             document.getElementById('editDeskripsi').value = el.getAttribute('data-deskripsi');
             bukaModal('modalEdit');
         }
@@ -347,7 +388,15 @@
                     "paginate": { "previous": "Sebelumnya", "next": "Selanjutnya" }
                 },
                 "pagingType": "simple_numbers",
-                "dom": '<"flex flex-col md:flex-row justify-between items-start gap-4 mb-6"<"left-side flex flex-col gap-3"l><"right-side flex flex-col items-end gap-3"f>>rt<"flex flex-col md:flex-row justify-between items-center gap-4 mt-6"ip>',
+                "dom": '<"flex flex-col md:flex-row justify-between items-start gap-4 mb-6"<"left-side flex flex-col gap-3"l><"right-side flex flex-col items-end gap-2"Bf>>rt<"flex flex-col md:flex-row justify-between items-center gap-4 mt-6"ip>',
+                "buttons": [{
+                    extend: 'excelHtml5',
+                    text: '<svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg> Export Excel',
+                    title: 'Data Arsip Kegiatan',
+                    exportOptions: {
+                        columns: [0, 1, 2, 3, 4, 5]
+                    }
+                }],
                 "pageLength": 10,
                 "scrollX": true,
                 "order": [[3, "desc"]],
@@ -357,25 +406,8 @@
                     $('.left-side').prepend(tableTitle);
 
                     var btnTambahElem = $('#btnTambahContainer').children().detach();
-                    $('.right-side').prepend(btnTambahElem);
-
-                    var filterSelect = `
-                    <select id="statusFilter" class="bg-white border border-gray-200 text-gray-900 text-sm rounded-xl px-4 py-2.5 outline-none cursor-pointer shadow-sm w-full md:w-auto font-medium">
-                        <option value="">Semua Status Publikasi</option>
-                        <option value="Sosialisasi">Sosialisasi Pencegahan</option>
-                        <option value="Poster">Poster Edukasi</option>
-                        <option value="Internal">Internal / Tidak Dipublikasi</option>
-                    </select>
-                `;
-                    $('.dataTables_filter').before(filterSelect);
-                    $('.right-side select#statusFilter, .right-side .dataTables_filter').wrapAll(
-                        '<div class="flex flex-col sm:flex-row gap-3 items-center w-full sm:w-auto mt-2"></div>'
-                    );
+                    $('.dt-buttons').append(btnTambahElem).addClass('flex items-center gap-2');
                 }
-            });
-
-            $('#statusFilter').on('change', function() {
-                table.column(7).search(this.value).draw();
             });
 
             // Buka modal tambah otomatis jika ada error validasi
