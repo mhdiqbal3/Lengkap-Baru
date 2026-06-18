@@ -237,7 +237,7 @@ class LaporanController extends Controller
             $notif->update(['is_read' => true]);
         }
 
-        return redirect('/cek-status');
+        return back();
     }
 
     public function update(Request $request, $id)

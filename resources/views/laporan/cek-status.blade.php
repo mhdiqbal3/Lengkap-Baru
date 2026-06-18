@@ -25,7 +25,7 @@
                     </div>
                     <input type="text" name="kode_tiket" value="{{ old('kode_tiket', request('kode_tiket')) }}" required
                         class="w-full pl-14 pr-4 py-4 sm:py-5 bg-gray-50 border border-gray-200 text-gray-900 text-lg font-bold rounded-2xl focus:ring-4 focus:ring-[#800000]/20 focus:border-[#800000] focus:bg-white outline-none transition-all uppercase placeholder-normal-case placeholder:font-medium placeholder:text-gray-400 shadow-inner"
-                        placeholder="Contoh: PPKPT_001">
+                        placeholder="Kode Tiket Pengaduan">
                 </div>
                 <button type="submit"
                     class="w-full md:w-auto px-10 py-4 sm:py-5 bg-[#800000] text-white font-extrabold text-lg rounded-2xl hover:bg-red-900 transition-all shadow-xl shadow-red-900/20 active:scale-95 whitespace-nowrap flex items-center justify-center gap-2">
@@ -191,8 +191,8 @@
                     <button @click="showModal = false"
                         class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 focus:outline-none">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M6 18L18 6M6 6l12 12"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                            </path>
                         </svg>
                     </button>
                     <div

@@ -372,12 +372,25 @@
                         </div>
                         <div class="max-h-64 overflow-y-auto custom-scroll">
                             @forelse($unreadNotifs as $notif)
-                                <button type="button"
-                                    @click="activeNotifId = '{{ $notif->id }}'; activeNotifTitle = '{{ addslashes($notif->title) }}'; activeNotifMessage = '{{ addslashes($notif->message) }}'; showModalNotif = true; showNotif = false;"
-                                    class="w-full text-left block px-4 py-3 hover:bg-gray-50 transition border-b border-gray-50">
-                                    <p class="text-xs font-bold {{ $themeTextActive }}">{{ $notif->title }}</p>
-                                    <p class="text-[11px] text-gray-600 truncate">{{ $notif->message }}</p>
-                                </button>
+                                <div class="flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition border-b border-gray-50 group">
+                                    <div class="flex-1 cursor-pointer pr-2" @click="activeNotifId = '{{ $notif->id }}'; activeNotifTitle = '{{ addslashes($notif->title) }}'; activeNotifMessage = '{{ addslashes($notif->message) }}'; showModalNotif = true; showNotif = false;">
+                                        <p class="text-xs font-bold {{ $themeTextActive }}">{{ $notif->title }}</p>
+                                        <p class="text-[11px] text-gray-600 truncate max-w-[200px]">{{ $notif->message }}</p>
+                                    </div>
+                                    <div class="flex items-center gap-1 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                                        {{-- Tombol Tandai Dibaca --}}
+                                        <form action="{{ url('/notifikasi/' . $notif->id . '/baca') }}" method="POST" class="m-0" title="Tandai Dibaca">
+                                            @csrf
+                                            <button type="submit" class="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition focus:outline-none">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                            </button>
+                                        </form>
+                                        {{-- Tombol Cek Status --}}
+                                        <a href="{{ url('/cek-status') }}" class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition focus:outline-none" title="Cek Status">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                        </a>
+                                    </div>
+                                </div>
                             @empty
                                 <div class="px-4 py-6 text-center">
                                     <p class="text-xs text-gray-500">Tidak ada notifikasi baru.</p>
@@ -456,12 +469,8 @@
                 <div class="p-8">
                     <p class="text-gray-600 mb-8 leading-relaxed font-medium" x-text="activeNotifMessage"></p>
                     <div class="flex flex-col gap-3">
-                        <form :action="'{{ url('/notifikasi') }}/' + activeNotifId + '/baca'" method="POST">
-                            @csrf
-                            <button type="submit"
-                                class="w-full py-3 {{ $themeModalBtn }} text-white font-bold rounded-xl transition shadow-lg">Tandai
-                                Dibaca & Cek Status</button>
-                        </form>
+                        <a href="{{ url('/cek-status') }}"
+                                class="w-full block text-center py-3 {{ $themeModalBtn }} text-white font-bold rounded-xl transition shadow-lg">Cek Status</a>
                         <button @click="showModalNotif = false" type="button"
                             class="w-full py-3 bg-gray-100 text-gray-500 font-bold rounded-xl hover:bg-gray-200 transition">Tutup</button>
                     </div>

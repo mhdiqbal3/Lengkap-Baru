@@ -182,7 +182,8 @@
     <div class="content-laporan">
         <p style="text-indent: 30px; margin-bottom: 10px;">Pada tanggal
             <strong>{{ \Carbon\Carbon::parse($laporan->created_at)->translatedFormat('d F Y') }}</strong>, Satuan Tugas
-            Pencegahan dan Penanganan Kekerasan Seksual Perguruan Tinggi Universitas Sembilanbelas November Kolaka telah
+            Pencegahan dan Penanganan Kekerasan Di Lingkungan Perguruan Tinggi Universitas Sembilanbelas November Kolaka
+            telah
             menerima
             laporan pengaduan dengan rincian sebagai berikut:
         </p>
@@ -226,16 +227,20 @@
             @php
                 $saksi = $laporan->saksi ? json_decode($laporan->saksi, true) : null;
             @endphp
-            @if($saksi && !empty($saksi['nama']))
-            <tr>
-                <td>Saksi Kejadian</td>
-                <td>:</td>
-                <td>
-                    {{ $saksi['nama'] }} 
-                    @if(!empty($saksi['pekerjaan'])) ({{ $saksi['pekerjaan'] }}) @endif
-                    @if(!empty($saksi['telepon'])) - {{ $saksi['telepon'] }} @endif
-                </td>
-            </tr>
+            @if ($saksi && !empty($saksi['nama']))
+                <tr>
+                    <td>Saksi Kejadian</td>
+                    <td>:</td>
+                    <td>
+                        {{ $saksi['nama'] }}
+                        @if (!empty($saksi['pekerjaan']))
+                            ({{ $saksi['pekerjaan'] }})
+                        @endif
+                        @if (!empty($saksi['telepon']))
+                            - {{ $saksi['telepon'] }}
+                        @endif
+                    </td>
+                </tr>
             @endif
             <tr>
                 <td>Status Penanganan</td>
