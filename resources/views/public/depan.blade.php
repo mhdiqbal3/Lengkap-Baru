@@ -965,6 +965,8 @@
                 showPdfModal: false,
                 showPanduanModal: false,
                 showResultModal: false,
+                showErrorModal: false,
+                errorModalMsg: '',
                 pdfUrl: '',
                 pdfTitle: '',
                 resultHtml: '',
@@ -996,8 +998,14 @@
                         let html = await res.text();
                         let doc = new DOMParser().parseFromString(html, 'text/html');
 
-                        let modalContent = doc.querySelector('#modal-content-laporan') || doc.querySelector(
-                            '#modal-content-error');
+                        let modalContent = doc.querySelector('#modal-content-laporan') || doc.querySelector('#modal-content-error');
+                        
+                        if (!modalContent) {
+                            doc.querySelectorAll('template').forEach(t => {
+                                let found = t.content.querySelector('#modal-content-laporan') || t.content.querySelector('#modal-content-error');
+                                if (found) modalContent = found;
+                            });
+                        }
 
                         if (modalContent) {
                             let finalHtml = modalContent.outerHTML;
@@ -1007,17 +1015,91 @@
 
                             this.resultHtml = finalHtml;
                             this.showResultModal = true;
+                        } else if (res.ok) {
+                            // Tiket tidak ditemukan - tampilkan modal error kustom
+                            this.errorModalMsg = 'Kode tiket tidak ditemukan. Pastikan kode diketik dengan benar.';
+                            this.showErrorModal = true;
                         } else {
-                            alert('Sistem gagal memuat data. Mohon pastikan format tiket Anda benar.');
+                            this.errorModalMsg = 'Terjadi kesalahan sistem. Silakan coba beberapa saat lagi.';
+                            this.showErrorModal = true;
                         }
                     } catch (err) {
-                        alert('Terjadi kesalahan jaringan atau sistem sedang sibuk.');
+                        this.errorModalMsg = 'Terjadi kesalahan jaringan. Periksa koneksi internet Anda dan coba lagi.';
+                        this.showErrorModal = true;
                     }
                     this.isChecking = false;
                 }
             }
         }
     </script>
+
+    {{-- MODAL ERROR CEK STATUS (menggantikan alert browser) --}}
+    <template x-teleport="body">
+        <div x-show="showErrorModal" style="display: none;"
+            class="fixed inset-0 z-[10001] flex items-center justify-center bg-gray-900/80 backdrop-blur-sm px-4"
+            x-transition.opacity>
+            <div class="absolute inset-0" @click="showErrorModal = false"></div>
+
+            <div class="bg-white rounded-[2rem] shadow-2xl max-w-md w-full relative z-10 flex flex-col overflow-hidden"
+                x-transition:enter="transition ease-out duration-300"
+                x-transition:enter-start="opacity-0 scale-90"
+                x-transition:enter-end="opacity-100 scale-100"
+                x-transition:leave="transition ease-in duration-200"
+                x-transition:leave-start="opacity-100 scale-100"
+                x-transition:leave-end="opacity-0 scale-90">
+
+                {{-- Header Gradient --}}
+                <div class="relative bg-gradient-to-br from-[#800000] via-red-800 to-rose-900 px-8 pt-10 pb-16 text-center overflow-hidden">
+                    <div class="absolute -top-6 -left-6 w-24 h-24 bg-white/10 rounded-full blur-2xl"></div>
+                    <div class="absolute -bottom-4 -right-4 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+
+                    {{-- Close button --}}
+                    <button @click="showErrorModal = false"
+                        class="absolute top-4 right-4 p-1.5 bg-white/20 hover:bg-white/30 text-white rounded-full backdrop-blur-sm transition-colors focus:outline-none">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+
+                    {{-- Animated icon --}}
+                    <div class="relative inline-flex items-center justify-center mx-auto mb-4">
+                        <div class="absolute w-24 h-24 bg-white/20 rounded-full animate-ping opacity-30"></div>
+                        <div class="relative w-20 h-20 bg-white/20 rounded-full flex items-center justify-center border-2 border-white/30 shadow-lg backdrop-blur-sm">
+                            <svg class="w-9 h-9 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                                </path>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <h3 class="text-2xl font-black text-white tracking-tight drop-shadow-md">Laporan Tidak Ditemukan</h3>
+                    <p class="text-red-100/80 text-xs font-semibold mt-1 uppercase tracking-widest">Kode Tiket Tidak Valid</p>
+                </div>
+
+                {{-- Body --}}
+                <div class="relative -mt-8 mx-5 bg-white rounded-2xl shadow-xl px-6 pt-6 pb-5 text-center border border-gray-100">
+                    <p class="text-gray-600 text-sm font-medium leading-relaxed" x-text="errorModalMsg"></p>
+                </div>
+
+                {{-- Footer --}}
+                <div class="px-6 pb-7 pt-4">
+                    <button @click="showErrorModal = false"
+                        class="w-full py-4 bg-gradient-to-r from-[#800000] to-red-800 text-white font-extrabold rounded-2xl hover:from-red-800 hover:to-[#800000] transition-all shadow-lg shadow-red-900/30 active:scale-95 flex items-center justify-center gap-2 text-base tracking-wide">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        </svg>
+                        Coba Lagi
+                    </button>
+                    <p class="text-center text-xs text-gray-400 font-medium mt-3">
+                        Hubungi kami jika Anda yakin kode sudah benar.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </template>
+
 </body>
 
 </html>

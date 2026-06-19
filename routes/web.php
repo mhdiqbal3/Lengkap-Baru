@@ -17,7 +17,7 @@ Route::get('/', function () {
     $kontenKontak = \App\Models\KontenHalaman::where('halaman', 'kontak')->first();
     $kontenPeraturan = \App\Models\KontenHalaman::where('halaman', 'peraturan')->first();
 
-    $galeris = \App\Models\Arsip::whereIn('status_publikasi', ['sosialisasi', 'poster'])
+    $galeris = \App\Models\Arsip::whereNotNull('dokumentasi')
         ->orderBy('tanggal', 'desc')->take(8)->get();
 
     $agendas = \App\Models\Agenda::where('status', 'publikasi')->orderBy('tanggal', 'desc')->take(3)->get();
