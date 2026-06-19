@@ -91,9 +91,6 @@
     showSuccess: false,
     profileOpen: false,
     showNotif: false,
-    showModalNotif: false,
-    activeNotifId: '',
-    activeNotifTitle: '',
     activeNotifMessage: ''
 }">
 
