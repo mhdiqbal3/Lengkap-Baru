@@ -152,7 +152,7 @@
     <table class="kop-surat">
         <tr>
             <td width="15%">
-                <img src="{{ public_path('assets/image/USN.PNG') }}" class="logo-usn" alt="Logo USN">
+                <img src="{{ public_path('assets/image/USN.png') }}" class="logo-usn" alt="Logo USN">
             </td>
             <td width="65%">
                 <div class="header-text">
@@ -163,9 +163,8 @@
                     <strong>PENCEGAHAN DAN PENANGANAN KEKERASAN DI LINGKUNGAN PERGURUAN TINGGI</strong>
                 </div>
                 <div class="header-text-small">
-                    Jl. Pemuda No. 339, Kabupaten Kolaka, Sulawesi Tenggara, 93517 <br>
-                    Telp. (0405) 2321132; Fax. (0405) 2324028 <br>
-                    Email: rektorat@usn.ac.id; Website: http://usn.ac.id
+                    Jl. Pemuda No. 339, Kabupaten Kolaka, Sulawesi Tenggara, 93517 Telp. (0405) 2321132; Fax. (0405)
+                    2324028 Email: rektorat@usn.ac.id; Website: http://usn.ac.id<br>
                 </div>
             </td>
             <td width="15%">
@@ -175,8 +174,27 @@
     </table>
 
     <div class="judul-surat">
-        <h3>BUKTI PENERIMAAN LAPORAN PENGADUAN</h3>
-        <p>Nomor Tiket: <strong>{{ $laporan->kode_tiket }}</strong></p>
+        <h3><u>BUKTI PENERIMAAN LAPORAN PENGADUAN</u></h3>
+        @php
+            $romans = [
+                '1' => 'I',
+                '2' => 'II',
+                '3' => 'III',
+                '4' => 'IV',
+                '5' => 'V',
+                '6' => 'VI',
+                '7' => 'VII',
+                '8' => 'VIII',
+                '9' => 'IX',
+                '10' => 'X',
+                '11' => 'XI',
+                '12' => 'XII',
+            ];
+            $monthRoman = $romans[\Carbon\Carbon::parse($laporan->created_at)->format('n')];
+            $year = \Carbon\Carbon::parse($laporan->created_at)->format('Y');
+            $nomor = str_pad($laporan->id, 3, '0', STR_PAD_LEFT);
+        @endphp
+        <p>Nomor: 000/PPKPT/USNKOLAKA/{{ $monthRoman }}/{{ $year }}</p>
     </div>
 
     <div class="content-laporan">
@@ -255,7 +273,7 @@
         </div>
 
         <p style="text-indent: 30px; margin-top: 10px;">Demikian surat bukti penerimaan laporan ini dibuat secara
-            otomatis oleh sistem informasi Satgas PPKS Universitas Sembilanbelas November Kolaka untuk dipergunakan
+            otomatis oleh sistem informasi Satgas PPKPT Universitas Sembilanbelas November Kolaka untuk dipergunakan
             sebagaimana mestinya.</p>
     </div>
 
