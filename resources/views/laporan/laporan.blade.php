@@ -334,9 +334,22 @@
                                     </span>
                                 </td>
 
-                                <td
+                                <td x-data="{ showActions: false }"
                                     class="px-6 py-4 transition-colors text-center sticky right-0 bg-white group-hover:bg-gray-50 z-20 border-l border-gray-100 shadow-[-10px_0_15px_-3px_rgba(0,0,0,0.05)]">
-                                    <div class="flex items-center justify-center gap-2">
+                                    
+                                    <!-- Tombol Pemicu Mobile (Titik Tiga) -->
+                                    <div class="lg:hidden flex items-center justify-center w-full h-full relative">
+                                        <button @click="showActions = !showActions" @click.away="showActions = false" 
+                                            class="p-2 text-gray-500 bg-gray-50 hover:bg-gray-200 rounded-lg transition-colors border border-gray-200 shadow-sm focus:outline-none">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+
+                                    <!-- Container Tombol -->
+                                    <div :class="showActions ? 'flex absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-white p-2 rounded-xl shadow-[0_0_15px_rgba(0,0,0,0.1)] border border-gray-200 z-[60]' : 'hidden lg:flex'" 
+                                         class="items-center justify-center gap-2 w-max">
                                         {{-- Tombol Lihat Detail --}}
                                         <button @click="showDetail = true"
                                             class="p-2 text-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white rounded-lg transition-colors border border-blue-100 shadow-sm"
