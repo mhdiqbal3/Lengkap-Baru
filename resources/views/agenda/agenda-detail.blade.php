@@ -184,13 +184,6 @@
                                 class="bg-red-50 text-[#800000] px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-md border border-red-100">
                                 Berita Terkini
                             </span>
-                            <span class="text-gray-400 text-[11px] font-medium flex items-center gap-1">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                3 Menit Baca
-                            </span>
                         </div>
 
                         <h1
@@ -227,7 +220,7 @@
                                                 d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
                                             </path>
                                         </svg>
-                                        {{ \Carbon\Carbon::parse($agenda->created_at)->translatedFormat('d F Y') }}
+                                        {{ \Carbon\Carbon::parse($agenda->created_at)->timezone('Asia/Makassar')->translatedFormat('d F Y') }}
                                     </p>
                                     <div class="w-1 h-1 bg-gray-300 rounded-full"></div>
                                     <p class="text-xs text-gray-500 font-medium flex items-center gap-1">
@@ -236,7 +229,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                         </svg>
-                                        {{ \Carbon\Carbon::parse($agenda->created_at)->format('H:i') }} WITA
+                                        {{ \Carbon\Carbon::parse($agenda->created_at)->timezone('Asia/Makassar')->format('H:i') }} WITA
                                     </p>
                                 </div>
                             </div>
@@ -255,7 +248,7 @@
                                                     d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
                                                 </path>
                                             </svg>
-                                            {{ \Carbon\Carbon::parse($agenda->updated_at)->translatedFormat('d F Y') }}
+                                            {{ \Carbon\Carbon::parse($agenda->updated_at)->timezone('Asia/Makassar')->translatedFormat('d F Y') }}
                                         </p>
                                         <div class="w-1 h-1 bg-gray-300 rounded-full"></div>
                                         <p class="text-xs text-gray-500 font-medium flex items-center gap-1">
@@ -264,7 +257,7 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                             </svg>
-                                            {{ \Carbon\Carbon::parse($agenda->updated_at)->format('H:i') }} WITA
+                                            {{ \Carbon\Carbon::parse($agenda->updated_at)->timezone('Asia/Makassar')->format('H:i') }} WITA
                                         </p>
                                     </div>
                                 </div>
@@ -437,7 +430,7 @@
                             <h3 class="text-base font-black leading-tight mb-2">Melihat atau Mengalami Kekerasan?</h3>
                             <p class="text-[11px] text-red-100 mb-5 leading-relaxed">Jangan ragu, laporkan sekarang.
                                 Identitas Anda dijamin kerahasiaannya oleh undang-undang.</p>
-                            <a href="{{ url('/laporkan') }}"
+                            <a href="{{ url('/login') }}"
                                 class="block text-center bg-white text-[#800000] font-black text-[11px] uppercase tracking-wider py-2.5 px-4 rounded-lg shadow-sm hover:scale-105 transition-transform">
                                 Buat Laporan
                             </a>

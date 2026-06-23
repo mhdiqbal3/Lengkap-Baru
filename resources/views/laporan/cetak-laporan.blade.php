@@ -122,7 +122,7 @@
         /* Tanda Tangan Sisi Kanan */
         .wrapper-ttd {
             width: 100%;
-            margin-top: 20px;
+            margin-top: 0;
         }
 
         .ttd-table {
@@ -156,15 +156,16 @@
             </td>
             <td width="65%">
                 <div class="header-text">
-                    KEMENTERIAN PENDIDIKAN TINGGI,<br>SAINS, DAN RISET TEKNOLOGI
+                    KEMENTERIAN PENDIDIKAN TINGGI,<br>SAINS, DAN TEKNOLOGI
                     <br>
                     <strong>UNIVERSITAS SEMBILANBELAS NOVEMBER KOLAKA</strong>
                     <br>
-                    <strong>PENCEGAHAN DAN PENANGANAN KEKERASAN DI LINGKUNGAN PERGURUAN TINGGI</strong>
+                    <strong>SATUAN TUGAS PENCEGAHAN DAN PENANGANAN KEKERASAN DI LINGKUNGAN PERGURUAN TINGGI</strong>
                 </div>
                 <div class="header-text-small">
-                    Jl. Pemuda No. 339, Kabupaten Kolaka, Sulawesi Tenggara, 93517 Telp. (0405) 2321132; Fax. (0405)
-                    2324028 Email: rektorat@usn.ac.id; Website: http://usn.ac.id<br>
+                    Jl. Pemuda No. 339, Kabupaten Kolaka, Sulawesi Tenggara
+                    <br>Telepon (0405) 2321132; Laman: http://usn.ac.id
+                    <br>
                 </div>
             </td>
             <td width="15%">
@@ -192,9 +193,11 @@
             ];
             $monthRoman = $romans[\Carbon\Carbon::parse($laporan->created_at)->format('n')];
             $year = \Carbon\Carbon::parse($laporan->created_at)->format('Y');
-            $nomor = str_pad($laporan->id, 3, '0', STR_PAD_LEFT);
+            // Menghitung urutan laporan ini (berdasarkan ID / urutan pembuatan)
+            $urutan = \App\Models\Laporan::where('id', '<=', $laporan->id)->count();
+            $nomor = str_pad($urutan, 3, '0', STR_PAD_LEFT);
         @endphp
-        <p>Nomor: 000/PPKPT/USNKOLAKA/{{ $monthRoman }}/{{ $year }}</p>
+        <p>Nomor: {{ $nomor }}/DST/UN56/SATGAS-PPKPT/{{ $monthRoman }}/{{ $year }}</p>
     </div>
 
     <div class="content-laporan">
@@ -208,9 +211,9 @@
 
         <table class="tabel-data">
             <tr>
-                <td width="30%">Nama Pelapor/Korban</td>
-                <td width="3%">:</td>
-                <td><strong>{{ $laporan->is_anonim ? 'Anonim (Dirahasiakan)' : $laporan->nama_korban }}</strong></td>
+                <td width="23%">Nama Pelapor/Korban</td>
+                <td width="2%">:</td>
+                <td>{{ $laporan->is_anonim ? 'Anonim (Dirahasiakan)' : $laporan->nama_korban }}</td>
             </tr>
             <tr>
                 <td>Status Korban</td>
@@ -233,7 +236,7 @@
                 <td>{{ ucwords(str_replace('_', ' ', $laporan->status_terlapor)) }}</td>
             </tr>
             <tr>
-                <td>Waktu Kejadian</td>
+                <td>Tanggal Kejadian</td>
                 <td>:</td>
                 <td>{{ \Carbon\Carbon::parse($laporan->tanggal_kejadian)->translatedFormat('d F Y') }}</td>
             </tr>
@@ -272,7 +275,7 @@
             {{ $laporan->deskripsi }}
         </div>
 
-        <p style="text-indent: 30px; margin-top: 10px;">Demikian surat bukti penerimaan laporan ini dibuat secara
+        <p style="text-indent: 30px; margin-top: 25px;">Demikian surat bukti penerimaan laporan ini dibuat secara
             otomatis oleh sistem informasi Satgas PPKPT Universitas Sembilanbelas November Kolaka untuk dipergunakan
             sebagaimana mestinya.</p>
     </div>

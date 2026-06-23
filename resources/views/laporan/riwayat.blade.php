@@ -77,8 +77,8 @@
                                 <tr class="bg-white hover:bg-gray-50/50 transition-colors group" x-data="{ showView: false, showEdit: false, showDelete: false, showBukti: false }">
                                     <td class="px-6 py-4 text-center font-medium text-gray-500">{{ $index + 1 }}</td>
                                     <td class="px-4 py-4 font-bold text-[#800000] whitespace-nowrap">{{ $item->kode_tiket }}</td>
-                                    <td class="px-4 py-4 whitespace-nowrap text-gray-500">
-                                        {{ \Carbon\Carbon::parse($item->tanggal_kejadian)->format('d M Y') }}</td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-gray-500" data-sort="{{ $item->created_at }}">
+                                        {{ \Carbon\Carbon::parse($item->created_at)->timezone('Asia/Makassar')->format('d M Y, H:i') }}</td>
                                     <td class="px-4 py-4 font-bold text-gray-800 min-w-[200px]">{{ $item->judul_lapor }}</td>
                                     <td class="px-4 py-4 whitespace-nowrap">
                                         <span class="px-2.5 py-1 bg-purple-50 text-purple-700 text-xs font-semibold rounded-lg border border-purple-100">{{ ucfirst($item->jenis_kasus) }}</span>

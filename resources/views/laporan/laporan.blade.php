@@ -251,7 +251,7 @@
                                 <td class="px-4 py-4 font-bold text-[#800000] whitespace-nowrap">{{ $item->kode_tiket }}
                                 </td>
                                 <td class="px-4 py-4 whitespace-nowrap text-gray-500" data-sort="{{ $item->created_at }}">
-                                    {{ \Carbon\Carbon::parse($item->created_at)->format('d M Y, H:i') }}</td>
+                                    {{ \Carbon\Carbon::parse($item->created_at)->timezone('Asia/Makassar')->format('d M Y, H:i') }}</td>
                                 <td class="px-4 py-4 font-bold text-gray-800 min-w-[200px]">{{ $item->judul_lapor }}</td>
                                 <td class="px-4 py-4 whitespace-nowrap">
                                     <span
