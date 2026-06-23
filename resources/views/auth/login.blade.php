@@ -38,7 +38,7 @@
                 <div class="text-center mb-6">
                     <div
                         class="w-16 h-16 bg-white p-2 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-center mx-auto mb-4">
-                        <img src="{{ asset('assets/image/logo.png') }}" alt="Logo USN Kolaka"
+                        <img src="{{ asset('assets/image/logo.PNG') }}" alt="Logo USN Kolaka"
                             class="w-full h-full object-contain">
                     </div>
                     <h1 class="text-2xl font-extrabold text-gray-900 tracking-tight mb-1">Selamat Datang</h1>

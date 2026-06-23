@@ -100,7 +100,7 @@
         <div class="flex items-center justify-center h-20 border-b border-white/20 shrink-0 px-4">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-white p-1 rounded-lg shadow flex-shrink-0 flex items-center justify-center">
-                    <img src="{{ asset('assets/image/logo.png') }}" alt="Logo" class="w-full h-full object-contain">
+                    <img src="{{ asset('assets/image/logo.PNG') }}" alt="Logo" class="w-full h-full object-contain">
                 </div>
                 <div class="flex flex-col justify-center whitespace-nowrap overflow-hidden">
                     <h1 class="text-[13px] font-bold uppercase tracking-wider leading-tight text-white">Satgas PPKPT
@@ -254,8 +254,10 @@
                                 <span class="whitespace-nowrap flex-1">Data Laporan</span>
                                 @if ($laporanBaruCount > 0)
                                     <span class="relative flex h-2.5 w-2.5 shrink-0">
-                                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full {{ request()->is('laporan') ? 'bg-red-400' : 'bg-white' }} opacity-75"></span>
-                                        <span class="relative inline-flex rounded-full h-2.5 w-2.5 {{ request()->is('laporan') ? 'bg-red-600' : 'bg-white' }}"></span>
+                                        <span
+                                            class="animate-ping absolute inline-flex h-full w-full rounded-full {{ request()->is('laporan') ? 'bg-red-400' : 'bg-white' }} opacity-75"></span>
+                                        <span
+                                            class="relative inline-flex rounded-full h-2.5 w-2.5 {{ request()->is('laporan') ? 'bg-red-600' : 'bg-white' }}"></span>
                                     </span>
                                 @endif
                             </a>
@@ -369,22 +371,41 @@
                         </div>
                         <div class="max-h-64 overflow-y-auto custom-scroll">
                             @forelse($unreadNotifs as $notif)
-                                <div class="flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition border-b border-gray-50 group">
-                                    <div class="flex-1 cursor-pointer pr-2" @click="activeNotifId = '{{ $notif->id }}'; activeNotifTitle = '{{ addslashes($notif->title) }}'; activeNotifMessage = '{{ addslashes($notif->message) }}'; showModalNotif = true; showNotif = false;">
+                                <div
+                                    class="flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition border-b border-gray-50 group">
+                                    <div class="flex-1 cursor-pointer pr-2"
+                                        @click="activeNotifId = '{{ $notif->id }}'; activeNotifTitle = '{{ addslashes($notif->title) }}'; activeNotifMessage = '{{ addslashes($notif->message) }}'; showModalNotif = true; showNotif = false;">
                                         <p class="text-xs font-bold {{ $themeTextActive }}">{{ $notif->title }}</p>
-                                        <p class="text-[11px] text-gray-600 truncate max-w-[200px]">{{ $notif->message }}</p>
+                                        <p class="text-[11px] text-gray-600 truncate max-w-[200px]">
+                                            {{ $notif->message }}</p>
                                     </div>
-                                    <div class="flex items-center gap-1 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                                    <div
+                                        class="flex items-center gap-1 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
                                         {{-- Tombol Tandai Dibaca --}}
-                                        <form action="{{ url('/notifikasi/' . $notif->id . '/baca') }}" method="POST" class="m-0" title="Tandai Dibaca">
+                                        <form action="{{ url('/notifikasi/' . $notif->id . '/baca') }}"
+                                            method="POST" class="m-0" title="Tandai Dibaca">
                                             @csrf
-                                            <button type="submit" class="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition focus:outline-none">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                            <button type="submit"
+                                                class="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition focus:outline-none">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                </svg>
                                             </button>
                                         </form>
                                         {{-- Tombol Cek Status --}}
-                                        <a href="{{ url('/cek-status') }}" class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition focus:outline-none" title="Cek Status">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                        <a href="{{ url('/cek-status') }}"
+                                            class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition focus:outline-none"
+                                            title="Cek Status">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
+                                                </path>
+                                            </svg>
                                         </a>
                                     </div>
                                 </div>
@@ -467,7 +488,8 @@
                     <p class="text-gray-600 mb-8 leading-relaxed font-medium" x-text="activeNotifMessage"></p>
                     <div class="flex flex-col gap-3">
                         <a href="{{ url('/cek-status') }}"
-                                class="w-full block text-center py-3 {{ $themeModalBtn }} text-white font-bold rounded-xl transition shadow-lg">Cek Status</a>
+                            class="w-full block text-center py-3 {{ $themeModalBtn }} text-white font-bold rounded-xl transition shadow-lg">Cek
+                            Status</a>
                         <button @click="showModalNotif = false" type="button"
                             class="w-full py-3 bg-gray-100 text-gray-500 font-bold rounded-xl hover:bg-gray-200 transition">Tutup</button>
                     </div>
