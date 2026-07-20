@@ -1,8 +1,15 @@
-@extends('layouts.app')
+﻿@extends('layouts.app')
 
 @section('header_title', 'Riwayat Pengaduan Saya')
 
 @section('content')
+    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.css" rel="stylesheet">
+    <style>
+        .note-modal-backdrop { z-index: 10001 !important; display: none !important; }
+        .note-modal { z-index: 10002 !important; }
+        .note-dropdown-menu { z-index: 10005 !important; }
+        .note-editor.note-frame .note-editing-area .note-editable { background-color: #ffffff; }
+    </style>
     <div class="max-w-[100%] mx-auto pb-10">
         {{-- Header Halaman --}}
         <div class="mb-8">
@@ -74,7 +81,7 @@
                     <tbody class="divide-y divide-gray-50">
                         @if (isset($laporans))
                             @foreach ($laporans as $index => $item)
-                                <tr class="bg-white hover:bg-gray-50/50 transition-colors group" x-data="{ showView: false, showEdit: false, showDelete: false, showBukti: false }">
+                                <tr class="bg-white hover:bg-gray-50/50 transition-colors group" x-data="{ showView: false, showEdit: false, showDelete: false, showBukti: false, showKeluhan: false, tanggapanDibaca: false, showStatus: false }">
                                     <td class="px-6 py-4 text-center font-medium text-gray-500">{{ $index + 1 }}</td>
                                     <td class="px-4 py-4 font-bold text-[#800000] whitespace-nowrap">{{ $item->kode_tiket }}</td>
                                     <td class="px-4 py-4 whitespace-nowrap text-gray-500" data-sort="{{ $item->created_at }}">
@@ -141,7 +148,7 @@
 
                                     {{-- Tombol Status Penanganan --}}
                                     <td class="px-4 py-4 text-center whitespace-nowrap">
-                                        <a href="{{ url('/cek-status') }}"
+                                        <button @click="showStatus = true"
                                             class="inline-flex items-center justify-center gap-1.5 text-xs font-bold text-green-700 bg-green-50 border border-green-200 px-3 py-1.5 rounded-lg hover:bg-green-600 hover:text-white transition-all shadow-sm">
                                             Lihat Status
                                             <svg class="w-3 h-3" fill="none" stroke="currentColor"
@@ -149,7 +156,7 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M9 5l7 7-7 7"></path>
                                             </svg>
-                                        </a>
+                                        </button>
                                     </td>
 
                                     {{-- Kolom Aksi Sticky --}}
@@ -193,6 +200,30 @@
                                                             d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z">
                                                         </path>
                                                     </svg>
+                                                </button>
+                                            @endif
+
+                                            {{-- Tombol Keluhan (hanya saat Sedang Diproses) --}}
+                                            @if ($item->status == 'Sedang Diproses')
+                                                @php
+                                                    $latestKeluhan = $item->keluhanss()->whereNotNull('catatan_satgas')->latest('updated_at')->first();
+                                                    $adaTanggapanBaru = $latestKeluhan ? true : false;
+                                                    $tanggapanKey = $latestKeluhan ? 'tanggapan_dibaca_' . $latestKeluhan->id . '_' . $latestKeluhan->updated_at->timestamp : '';
+                                                @endphp
+                                                <button 
+                                                    @click="showKeluhan = true; tanggapanDibaca = true; @if($tanggapanKey) localStorage.setItem('{{ $tanggapanKey }}', 'true') @endif"
+                                                    class="relative p-2 text-orange-600 bg-orange-50 hover:bg-orange-500 hover:text-white rounded-lg transition-colors shadow-sm border border-orange-100"
+                                                    title="{{ $adaTanggapanBaru ? 'Ada tanggapan dari Satgas!' : 'Kirim Keluhan' }}">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                                                        </path>
+                                                    </svg>
+                                                    @if($adaTanggapanBaru)
+                                                        <span x-data="{ dibaca: localStorage.getItem('{{ $tanggapanKey }}') === 'true' }" 
+                                                              x-show="!dibaca && !tanggapanDibaca"
+                                                            class="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white animate-pulse"></span>
+                                                    @endif
                                                 </button>
                                             @endif
 
@@ -445,9 +476,9 @@
                                                                         <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Identitas Lainnya</p>
                                                                         <p class="font-black text-gray-800 text-sm flex flex-wrap gap-1 items-center">
                                                                             <span class="bg-white border border-gray-200 px-2.5 py-1 rounded-md shadow-sm">{{ ucfirst($item->status_korban) }} @if ($item->status_korban === 'lainnya' && $item->status_korban_lainnya) ({{ $item->status_korban_lainnya }}) @endif</span>
-                                                                            <span class="text-gray-300">•</span>
+                                                                            <span class="text-gray-300">â€¢</span>
                                                                             <span class="bg-white border border-gray-200 px-2.5 py-1 rounded-md shadow-sm">{{ $item->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan' }}</span>
-                                                                            <span class="text-gray-300">•</span>
+                                                                            <span class="text-gray-300">â€¢</span>
                                                                             <span class="bg-white border border-gray-200 px-2.5 py-1 rounded-md shadow-sm {{ $item->disabilitas == 'ya' ? 'text-red-600' : '' }}">{{ $item->disabilitas == 'ya' ? 'Disabilitas' : 'Non-Disabilitas' }}</span>
                                                                         </p>
                                                                     </div>
@@ -858,6 +889,282 @@
                                             </div>
                                         </template>
 
+                                        {{-- Modal Keluhan Pelapor (hanya muncul saat Sedang Diproses) --}}
+                                        @if ($item->status == 'Sedang Diproses')
+                                            <template x-teleport="body">
+                                                <div x-show="showKeluhan" style="display: none;"
+                                                    class="fixed inset-0 z-[9999] flex items-center justify-center bg-gray-900/80 backdrop-blur-sm px-4 py-6"
+                                                    x-transition.opacity>
+                                                    <div @click.away="showKeluhan = false"
+                                                        class="bg-white rounded-[2rem] shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col text-left overflow-hidden transform transition-all"
+                                                        x-transition.scale
+                                                        x-data="{ showIsiKeluhan: false }">
+
+                                                        {{-- Header Orange --}}
+                                                        <div class="bg-gradient-to-r from-orange-500 to-amber-500 p-6 text-white flex justify-between items-center shrink-0">
+                                                            <div class="flex items-center gap-3">
+                                                                <div class="w-11 h-11 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm border border-white/20">
+                                                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                                                                        </path>
+                                                                    </svg>
+                                                                </div>
+                                                                <div>
+                                                                    <span class="text-orange-100 text-[10px] font-bold uppercase tracking-widest block">Formulir Keluhan</span>
+                                                                    <h3 class="text-xl font-black tracking-tight">{{ $item->kode_tiket }}</h3>
+                                                                </div>
+                                                            </div>
+                                                            <button @click="showKeluhan = false"
+                                                                class="p-2 bg-white/10 hover:bg-white/20 rounded-xl transition focus:outline-none">
+                                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                                                </svg>
+                                                            </button>
+                                                        </div>
+
+                                                        <div class="overflow-y-auto flex-1 p-6 custom-scroll bg-gray-50">
+
+                                                            {{-- Riwayat keluhan sebelumnya --}}
+                                                            @php
+                                                                $keluhanLama = $item->keluhanss()->get();
+                                                            @endphp
+                                                            @if($keluhanLama->isNotEmpty())
+                                                                <div class="mb-5">
+                                                                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Keluhan Sebelumnya</p>
+                                                                    <div class="space-y-3">
+                                                                        @foreach($keluhanLama as $kl)
+                                                                            <div class="bg-white border {{ $kl->catatan_satgas ? 'border-green-200' : 'border-orange-100' }} rounded-xl shadow-sm overflow-hidden">
+                                                                                <div class="flex items-center justify-between mb-0 gap-2 flex-wrap px-4 pt-4 pb-3 {{ $kl->catatan_satgas ? 'bg-green-50' : '' }}">
+                                                                                    <span class="text-xs font-bold text-orange-700 bg-orange-50 px-2.5 py-1 rounded-lg border border-orange-100">{{ $kl->label_kategori }}</span>
+                                                                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border
+                                                                                        {{ $kl->status === 'ditindaklanjuti' ? 'text-green-600 bg-green-50 border-green-100' : 'text-yellow-700 bg-yellow-50 border-yellow-100' }}">
+                                                                                        {{ $kl->status === 'ditindaklanjuti' ? 'âœ“ Tanggapan' : 'â³ Menunggu Tanggapan' }}
+                                                                                    </span>
+                                                                                </div>
+                                                                                @if($kl->isi_keluhan)
+                                                                                    <p class="text-sm text-gray-700 px-4 pb-2 break-words whitespace-pre-wrap">{{ $kl->isi_keluhan }}</p>
+                                                                                @endif
+                                                                                {{-- Notifikasi Tanggapan Satgas --}}
+                                                                                @if($kl->catatan_satgas)
+                                                                                    <div class="mx-3 mb-3 mt-1 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-3.5">
+                                                                                        <div class="flex items-center gap-2 mb-1.5">
+                                                                                            <div class="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center shrink-0">
+                                                                                                <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                                                                                                </svg>
+                                                                                            </div>
+                                                                                            <p class="text-[10px] font-black text-green-700 uppercase tracking-wider">Tanggapan dari Satgas</p>
+                                                                                        </div>
+                                                                                        <div class="text-sm text-gray-800 font-medium pl-7 prose prose-sm max-w-none">{!! $kl->catatan_satgas !!}</div>
+                                                                                        <p class="text-[10px] text-gray-400 mt-1.5 pl-7">{{ \Carbon\Carbon::parse($kl->updated_at)->translatedFormat('d F Y, H:i') }}</p>
+                                                                                    </div>
+                                                                                @else
+                                                                                    <div class="mx-3 mb-3 mt-1 bg-amber-50 border border-amber-100 rounded-xl p-3 flex items-center gap-2">
+                                                                                        <svg class="w-4 h-4 text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                                                        </svg>
+                                                                                        <p class="text-xs text-amber-700 font-medium">Menunggu tanggapan dari Satgas...</p>
+                                                                                    </div>
+                                                                                @endif
+                                                                                <p class="text-[10px] text-gray-400 px-4 pb-3">Dikirim: {{ \Carbon\Carbon::parse($kl->created_at)->translatedFormat('d F Y, H:i') }}</p>
+                                                                            </div>
+                                                                        @endforeach
+                                                                    </div>
+                                                                </div>
+                                                                <div class="w-full h-px bg-orange-100 mb-5"></div>
+                                                            @endif
+
+                                                            {{-- Form Keluhan Baru --}}
+                                                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">Kirim Keluhan Baru</p>
+                                                            <form id="formKeluhan_{{ $item->id }}" action="{{ route('keluhan.store') }}" method="POST" class="space-y-5">
+                                                                @csrf
+                                                                <input type="hidden" name="laporan_id" value="{{ $item->id }}">
+
+                                                                {{-- Kategori Keluhan (radio) --}}
+                                                                <div>
+                                                                    <label class="block text-sm font-bold text-gray-700 mb-2">Kategori Keluhan <span class="text-red-500">*</span></label>
+                                                                    <div class="space-y-2.5">
+                                                                        <label class="flex items-center gap-3 p-3.5 bg-white border border-gray-200 rounded-xl cursor-pointer hover:border-orange-300 hover:bg-orange-50/50 transition-all has-[:checked]:border-orange-400 has-[:checked]:bg-orange-50">
+                                                                            <input type="radio" name="kategori" value="belum_dihubungi" required
+                                                                                @change="showIsiKeluhan = false"
+                                                                                class="text-orange-500 focus:ring-orange-400">
+                                                                            <div>
+                                                                                <span class="text-sm font-semibold text-gray-700">Belum dihubungi Satgas</span>
+                                                                                <p class="text-xs text-gray-400">Tim Satgas belum menghubungi saya</p>
+                                                                            </div>
+                                                                        </label>
+                                                                        <label class="flex items-center gap-3 p-3.5 bg-white border border-gray-200 rounded-xl cursor-pointer hover:border-orange-300 hover:bg-orange-50/50 transition-all has-[:checked]:border-orange-400 has-[:checked]:bg-orange-50">
+                                                                            <input type="radio" name="kategori" value="terlalu_lama"
+                                                                                @change="showIsiKeluhan = false"
+                                                                                class="text-orange-500 focus:ring-orange-400">
+                                                                            <div>
+                                                                                <span class="text-sm font-semibold text-gray-700">Penanganan terlalu lama</span>
+                                                                                <p class="text-xs text-gray-400">Proses penanganan memakan waktu sangat lama</p>
+                                                                            </div>
+                                                                        </label>
+
+                                                                        <label class="flex items-center gap-3 p-3.5 bg-white border border-gray-200 rounded-xl cursor-pointer hover:border-orange-300 hover:bg-orange-50/50 transition-all has-[:checked]:border-orange-400 has-[:checked]:bg-orange-50">
+                                                                            <input type="radio" name="kategori" value="lainnya"
+                                                                                @change="showIsiKeluhan = true"
+                                                                                class="text-orange-500 focus:ring-orange-400">
+                                                                            <div>
+                                                                                <span class="text-sm font-semibold text-gray-700">Lainnya</span>
+                                                                                <p class="text-xs text-gray-400">Keluhan lain yang tidak termasuk di atas</p>
+                                                                            </div>
+                                                                        </label>
+                                                                    </div>
+                                                                </div>
+
+                                                                {{-- Isi Keluhan (muncul jika Lainnya) --}}
+                                                                <div x-show="showIsiKeluhan" x-transition style="display:none;">
+                                                                    <label class="block text-sm font-bold text-gray-700 mb-1.5">Keterangan Keluhan <span class="text-red-500">*</span></label>
+                                                                    <textarea name="isi_keluhan" id="isiKeluhanEditor_{{ $item->id }}" :required="showIsiKeluhan"
+                                                                        placeholder="Jelaskan keluhan Anda secara detail..."
+                                                                        class="w-full bg-white border border-gray-200 text-gray-900 rounded-xl p-3 outline-none transition-all shadow-sm"></textarea>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+
+                                                        {{-- Tombol Aksi (Freeze â€” di luar area scroll, selalu terlihat) --}}
+                                                        <div class="shrink-0 bg-white border-t border-gray-100 px-6 py-4 flex gap-3">
+                                                            <button type="button" @click="showKeluhan = false"
+                                                                class="flex-1 px-5 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-colors">Batal</button>
+                                                            <button type="submit" form="formKeluhan_{{ $item->id }}"
+                                                                class="flex-1 px-5 py-3 bg-orange-500 text-white font-bold rounded-xl hover:bg-orange-600 transition-all active:scale-95 shadow-md shadow-orange-200 flex items-center justify-center gap-2">
+                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                                                                </svg>
+                                                                Kirim Keluhan
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                        @endif
+                                        
+                                        {{-- Modal Detail Tiket Laporan --}}
+                                        <template x-teleport="body">
+                                            <div x-show="showStatus" style="display: none;"
+                                                class="fixed inset-0 z-[100] flex items-center justify-center bg-gray-900/80 backdrop-blur-sm px-4 py-6"
+                                                x-transition.opacity>
+                                                <div class="absolute inset-0" @click="showStatus = false"></div>
+                                                <div class="bg-white rounded-[2rem] shadow-2xl max-w-3xl w-full relative z-10 flex flex-col max-h-[90vh] overflow-hidden transform transition-all"
+                                                    x-transition.scale>
+                                                    {{-- Header --}}
+                                                    <div class="bg-gradient-to-br from-[#800000] via-red-800 to-rose-900 px-7 py-6 text-white relative shrink-0 overflow-hidden">
+                                                        <div class="absolute -top-8 -right-8 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+                                                        <div class="absolute bottom-0 right-24 w-20 h-20 bg-white/10 rounded-full blur-xl"></div>
+                                                        <button @click="showStatus = false"
+                                                            class="absolute top-4 right-4 z-50 p-2 bg-white/15 hover:bg-white/30 text-white rounded-full transition-colors focus:outline-none backdrop-blur-sm">
+                                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                                        </button>
+                                                        <div class="relative z-10 flex items-center gap-4 pr-12">
+                                                            <div class="w-12 h-12 flex items-center justify-center bg-white/15 rounded-2xl border border-white/25 shadow-lg shrink-0">
+                                                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path></svg>
+                                                            </div>
+                                                            <div class="flex-1 min-w-0">
+                                                                <span class="text-red-200 text-[10px] font-black uppercase tracking-widest block mb-0.5">Detail Tiket Pengaduan</span>
+                                                                <h3 class="text-2xl font-black tracking-widest drop-shadow-md">{{ $item->kode_tiket }}</h3>
+                                                                <p class="text-red-200 text-xs mt-0.5">{{ \Carbon\Carbon::parse($item->created_at)->timezone('Asia/Makassar')->translatedFormat('d F Y, H:i') }} WITA</p>
+                                                            </div>
+                                                            @php
+                                                                $sBadge = ['Menunggu Verifikasi'=>'bg-yellow-400 text-yellow-900','Sedang Diproses'=>'bg-blue-400 text-blue-900','Selesai'=>'bg-green-400 text-green-900','Ditolak'=>'bg-gray-300 text-gray-800'];
+                                                                $bStyle = $sBadge[$item->status] ?? 'bg-white text-gray-800';
+                                                            @endphp
+                                                            <div class="shrink-0 px-4 py-2 rounded-xl font-extrabold text-xs shadow-lg {{ $bStyle }}">{{ $item->status }}</div>
+                                                        </div>
+                                                    </div>
+                                                    {{-- Body --}}
+                                                    <div class="flex-1 overflow-y-auto custom-scroll bg-gray-50/60">
+                                                        <div class="p-6 space-y-5">
+                                                            {{-- Judul --}}
+                                                            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+                                                                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Judul Pengaduan</p>
+                                                                <h4 class="text-lg font-black text-gray-800 leading-tight">{{ $item->judul_lapor }}</h4>
+                                                            </div>
+                                                            {{-- Grid 2 kolom --}}
+                                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                                {{-- Informasi Kejadian --}}
+                                                                <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+                                                                    <div class="flex items-center gap-2 mb-4 pb-3 border-b border-gray-100">
+                                                                        <div class="w-8 h-8 bg-[#800000]/10 rounded-xl flex items-center justify-center">
+                                                                            <svg class="w-4 h-4 text-[#800000]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                                                        </div>
+                                                                        <h5 class="text-xs font-black text-[#800000] uppercase tracking-wide">Informasi Kejadian</h5>
+                                                                    </div>
+                                                                    <div class="space-y-3">
+                                                                        <div><p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Kategori Kasus</p><span class="inline-block bg-purple-50 text-purple-700 text-xs font-bold px-2.5 py-1 rounded-lg border border-purple-100">{{ ucfirst($item->jenis_kasus) }}</span></div>
+                                                                        <div><p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Tanggal Kejadian</p><p class="text-sm font-bold text-gray-800">{{ \Carbon\Carbon::parse($item->tanggal_kejadian)->translatedFormat('d F Y') }}</p></div>
+                                                                        <div><p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Lokasi Kejadian</p><p class="text-sm font-bold text-gray-800">{{ $item->lokasi_kejadian }}</p></div>
+                                                                        <div class="bg-red-50 rounded-xl p-3 border border-red-100"><p class="text-[9px] font-black text-red-500 uppercase tracking-widest mb-0.5">Status Terlapor</p><p class="text-sm font-bold text-red-700">{{ ucwords(str_replace('_',' ',$item->status_terlapor)) }}</p></div>
+                                                                    </div>
+                                                                </div>
+                                                                {{-- Profil Korban --}}
+                                                                <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+                                                                    <div class="flex items-center gap-2 mb-4 pb-3 border-b border-gray-100">
+                                                                        <div class="w-8 h-8 bg-[#800000]/10 rounded-xl flex items-center justify-center">
+                                                                            <svg class="w-4 h-4 text-[#800000]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                                                                        </div>
+                                                                        <h5 class="text-xs font-black text-[#800000] uppercase tracking-wide">Profil Korban / Pelapor</h5>
+                                                                    </div>
+                                                                    <div class="space-y-3">
+                                                                        <div><p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Nama Lengkap</p><p class="text-sm font-bold text-gray-800">{{ $item->nama_korban }}</p></div>
+                                                                        @if($item->no_hp_korban)
+                                                                        <div><p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-0.5">No. HP / WhatsApp</p><p class="text-sm font-bold text-green-700">{{ $item->no_hp_korban }}</p></div>
+                                                                        @endif
+                                                                        <div>
+                                                                            <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Identitas</p>
+                                                                            <div class="flex flex-wrap gap-1.5">
+                                                                                <span class="bg-gray-100 text-gray-700 text-xs font-semibold px-2 py-1 rounded-lg">{{ ucfirst($item->status_korban) }}@if($item->status_korban === 'lainnya' && $item->status_korban_lainnya) ({{ $item->status_korban_lainnya }})@endif</span>
+                                                                                <span class="bg-gray-100 text-gray-700 text-xs font-semibold px-2 py-1 rounded-lg">{{ $item->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan' }}</span>
+                                                                                <span class="text-xs font-semibold px-2 py-1 rounded-lg {{ $item->disabilitas == 'ya' ? 'bg-orange-100 text-orange-700' : 'bg-gray-100 text-gray-600' }}">{{ $item->disabilitas == 'ya' ? 'Disabilitas' : 'Non-Disabilitas' }}</span>
+                                                                            </div>
+                                                                        </div>
+                                                                        @php $saksiR = $item->saksi ? json_decode($item->saksi, true) : null; @endphp
+                                                                        @if($saksiR && !empty($saksiR['nama']))
+                                                                        <div><p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Saksi</p><p class="text-sm font-bold text-gray-800">{{ $saksiR['nama'] }}@if(!empty($saksiR['pekerjaan'])) <span class="font-medium text-gray-500">({{ $saksiR['pekerjaan'] }})</span>@endif</p></div>
+                                                                        @endif
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            {{-- Kronologi --}}
+                                                            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+                                                                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Kronologi / Deskripsi</p>
+                                                                <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                                                                    <p class="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{{ $item->deskripsi }}</p>
+                                                                </div>
+                                                            </div>
+                                                            {{-- Lampiran --}}
+                                                            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+                                                                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Lampiran Bukti</p>
+                                                                <div class="flex flex-wrap gap-3">
+                                                                    @if($item->bukti)
+                                                                        <a href="{{ asset($item->bukti) }}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-50 text-blue-700 font-bold text-sm rounded-xl border border-blue-100 hover:bg-blue-100 transition-colors"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>Lihat Foto Bukti</a>
+                                                                    @else
+                                                                        <span class="text-xs text-gray-400 bg-gray-50 px-3 py-2 rounded-xl border border-gray-100">Tidak ada lampiran foto</span>
+                                                                    @endif
+                                                                    @if($item->link_video)
+                                                                        <a href="{{ $item->link_video }}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2.5 bg-red-50 text-red-700 font-bold text-sm rounded-xl border border-red-100 hover:bg-red-100 transition-colors"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>Buka Video Laporan</a>
+                                                                    @else
+                                                                        <span class="text-xs text-gray-400 bg-gray-50 px-3 py-2 rounded-xl border border-gray-100">Tidak ada lampiran video</span>
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    {{-- Footer --}}
+                                                    <div class="px-6 py-4 flex justify-end border-t border-gray-100 bg-white shrink-0">
+                                                        <button @click="showStatus = false"
+                                                            class="px-8 py-3 bg-gradient-to-r from-[#800000] to-red-800 text-white font-bold rounded-xl hover:from-red-800 hover:to-[#800000] transition-all shadow-md active:scale-95 flex items-center gap-2 text-sm">
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                                            Tutup
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            </template>
+                                        
                                     </td>
                                 </tr>
                             @endforeach
@@ -870,6 +1177,24 @@
 @endsection
 
 @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
+    <script>
+        // Inisialisasi Summernote untuk setiap textarea isi keluhan
+        document.addEventListener('alpine:initialized', () => {
+            document.querySelectorAll('[id^="isiKeluhanEditor_"]').forEach(function(el) {
+                $(el).summernote({
+                    placeholder: 'Jelaskan keluhan Anda secara detail...',
+                    height: 180,
+                    dialogsInBody: true,
+                    toolbar: [
+                        ['font', ['bold', 'italic', 'underline']],
+                        ['para', ['ul', 'ol']],
+                        ['view', ['fullscreen']]
+                    ]
+                });
+            });
+        });
+    </script>
     <script>
         $(document).ready(function() {
             $('#tableRiwayat').DataTable({

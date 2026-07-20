@@ -79,6 +79,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/lapor', [LaporanController::class, 'store'])->name('lapor.store');
     Route::get('/riwayat', [LaporanController::class, 'riwayat'])->name('riwayat');
 
+    // Rute Keluhan (pelapor kirim keluhan)
+    Route::post('/keluhan', [LaporanController::class, 'storeKeluhan'])->name('keluhan.store');
+
     Route::get('/cek-status', [LaporanController::class, 'cekStatus'])->name('cek-status');
 
     // Rute Laporan - Bisa diakses Admin & Satgas (hanya GET)
@@ -105,6 +108,9 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/laporan/{id}', [LaporanController::class, 'update'])->name('laporan.update');
         Route::delete('/laporan/{id}', [LaporanController::class, 'destroy'])->name('laporan.destroy');
         Route::post('/laporan/upload-ttd', [\App\Http\Controllers\LaporanController::class, 'uploadTtd'])->name('laporan.upload-ttd');
+
+        // Rute Tanggapan Keluhan (Admin/Satgas)
+        Route::post('/keluhan/{id}/tanggapi', [LaporanController::class, 'updateKeluhan'])->name('keluhan.update');
 
         Route::get('/agenda', [AgendaController::class, 'index'])->name('agenda.index');
         Route::resource('agenda', AgendaController::class)->except(['index', 'show']);

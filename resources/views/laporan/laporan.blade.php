@@ -3,6 +3,13 @@
 @section('header_title', 'Data Laporan Pengaduan')
 
 @section('content')
+    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.css" rel="stylesheet">
+    <style>
+        .note-modal-backdrop { z-index: 10050 !important; display: none !important; }
+        .note-modal { z-index: 10051 !important; }
+        .note-dropdown-menu { z-index: 10055 !important; }
+        .note-editor.note-frame .note-editing-area .note-editable { background-color: #ffffff; }
+    </style>
     {{-- LOGIKA FILTER KOLEKSI DATA (Diambil dari Dashboard) --}}
     @php
         use Carbon\Carbon;
@@ -246,7 +253,7 @@
 
                     <tbody class="divide-y divide-gray-50">
                         @foreach ($laporans as $index => $item)
-                            <tr class="bg-white hover:bg-gray-50/50 transition-colors group" x-data="{ showEdit: false, showBukti: false, showDetail: false, showDelete: false }">
+                            <tr class="bg-white hover:bg-gray-50/50 transition-colors group" x-data="{ showEdit: false, showBukti: false, showDetail: false, showDelete: false, showKeluhan: false }">
                                 <td class="px-6 py-4 text-center font-medium text-gray-500">{{ $index + 1 }}</td>
                                 <td class="px-4 py-4 font-bold text-[#800000] whitespace-nowrap">{{ $item->kode_tiket }}
                                 </td>
@@ -400,6 +407,27 @@
                                                 </path>
                                             </svg>
                                         </a>
+
+                                        {{-- Tombol Keluhan (Admin/Satgas) --}}
+                                        @php
+                                            $jumlahKeluhan = $item->keluhanss()->count();
+                                            $keluhanPending = $item->keluhanPending()->count();
+                                        @endphp
+                                        @if($jumlahKeluhan > 0)
+                                            <button @click="showKeluhan = true"
+                                                class="relative p-2 rounded-lg transition-colors border shadow-sm
+                                                    {{ $keluhanPending > 0 ? 'text-orange-600 bg-orange-50 hover:bg-orange-500 hover:text-white border-orange-200' : 'text-gray-500 bg-gray-50 hover:bg-gray-200 border-gray-200' }}"
+                                                title="Lihat Keluhan ({{ $jumlahKeluhan }})">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                                                    </path>
+                                                </svg>
+                                                @if($keluhanPending > 0)
+                                                    <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[8px] font-black rounded-full flex items-center justify-center animate-pulse">{{ $keluhanPending }}</span>
+                                                @endif
+                                            </button>
+                                        @endif
                                     </div>
 
                                     {{-- Modal Lihat Detail Data --}}
@@ -730,84 +758,106 @@
                                             class="fixed inset-0 z-[9998] flex items-center justify-center bg-gray-900/80 backdrop-blur-sm px-4"
                                             x-transition.opacity>
                                             <div @click.away="showEdit = false"
-                                                class="bg-white rounded-[2rem] shadow-2xl max-w-sm w-full overflow-hidden transform transition-all text-left"
+                                                class="bg-white rounded-[2rem] shadow-2xl max-w-md w-full overflow-hidden transform transition-all text-left"
                                                 x-transition.scale>
-                                                <div
-                                                    class="bg-gray-50 border-b border-gray-100 px-6 py-5 flex justify-between items-center">
-                                                    <div class="flex items-center gap-3">
-                                                        <div
-                                                            class="w-10 h-10 bg-yellow-100 text-yellow-600 rounded-xl flex items-center justify-center shadow-sm">
-                                                            <svg class="w-5 h-5" fill="none" stroke="currentColor"
-                                                                viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    stroke-width="2"
-                                                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z">
-                                                                </path>
+
+                                                {{-- Header Gradient --}}
+                                                <div class="relative bg-gradient-to-br from-[#800000] via-red-800 to-rose-900 px-7 pt-7 pb-12 overflow-hidden">
+                                                    <div class="absolute -top-6 -right-6 w-28 h-28 bg-white/10 rounded-full blur-2xl"></div>
+                                                    <div class="absolute bottom-0 left-10 w-20 h-20 bg-white/10 rounded-full blur-xl"></div>
+                                                    <button @click="showEdit = false"
+                                                        class="absolute top-4 right-4 p-1.5 bg-white/20 hover:bg-white/30 text-white rounded-full transition-colors focus:outline-none">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path>
+                                                        </svg>
+                                                    </button>
+                                                    <div class="relative z-10 flex items-center gap-4">
+                                                        <div class="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center border border-white/30 shadow-lg backdrop-blur-sm shrink-0">
+                                                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                                             </svg>
                                                         </div>
                                                         <div>
-                                                            <h3 class="text-lg font-black text-gray-800 leading-tight">
-                                                                Verifikasi Status</h3>
-                                                            <p
-                                                                class="text-[11px] font-bold text-gray-500 uppercase tracking-wide">
-                                                                Update penanganan</p>
+                                                            <p class="text-red-200 text-[10px] font-bold uppercase tracking-widest mb-0.5">Update Penanganan</p>
+                                                            <h3 class="text-xl font-black text-white tracking-tight leading-tight">Verifikasi Status</h3>
                                                         </div>
                                                     </div>
-                                                    <button @click="showEdit = false"
-                                                        class="text-gray-400 hover:text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition"><svg
-                                                            class="w-5 h-5" fill="none" stroke="currentColor"
-                                                            viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                                        </svg></button>
                                                 </div>
-                                                <form action="{{ route('laporan.update-status', $item->id) }}"
-                                                    method="POST">
-                                                    @csrf
-                                                    <div class="p-6">
-                                                        <div
-                                                            class="mb-6 p-4 bg-blue-50/50 border border-blue-100 rounded-2xl flex items-center justify-between">
-                                                            <span
-                                                                class="text-[11px] font-bold text-blue-600 uppercase tracking-wider">Nomor
-                                                                Tiket:</span><span
-                                                                class="text-base font-black text-blue-900 tracking-wide">{{ $item->kode_tiket }}</span>
-                                                        </div>
-                                                        <div class="space-y-2.5">
-                                                            <label class="block text-sm font-bold text-gray-700">Tetapkan
-                                                                Status Baru <span class="text-red-500">*</span></label>
-                                                            <div class="relative">
-                                                                <select name="status"
-                                                                    class="w-full bg-white border-2 border-gray-200 text-gray-800 rounded-xl p-3.5 pr-10 outline-none focus:border-[#800000] focus:ring-0 font-bold appearance-none cursor-pointer transition-colors shadow-sm">
-                                                                    <option value="Menunggu Verifikasi"
-                                                                        {{ $item->status == 'Menunggu Verifikasi' ? 'selected' : '' }}>
-                                                                        ⏳ Menunggu Verifikasi</option>
-                                                                    <option value="Sedang Diproses"
-                                                                        {{ $item->status == 'Sedang Diproses' ? 'selected' : '' }}>
-                                                                        🔄 Sedang Diproses</option>
-                                                                    <option value="Selesai"
-                                                                        {{ $item->status == 'Selesai' ? 'selected' : '' }}>
-                                                                        ✅ Selesai</option>
-                                                                </select>
-                                                                <div
-                                                                    class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-400">
-                                                                    <svg class="w-4 h-4" fill="none"
-                                                                        stroke="currentColor" viewBox="0 0 24 24">
-                                                                        <path stroke-linecap="round"
-                                                                            stroke-linejoin="round" stroke-width="2"
-                                                                            d="M19 9l-7 7-7-7"></path>
-                                                                    </svg>
-                                                                </div>
+
+                                                {{-- Body card overlap --}}
+                                                <div class="relative -mt-6 mx-5 bg-white rounded-2xl shadow-lg border border-gray-100 px-5 pt-5 pb-4">
+                                                    {{-- Tiket badge --}}
+                                                    <div class="flex items-center justify-between mb-5 pb-4 border-b border-gray-100">
+                                                        <div class="flex items-center gap-2">
+                                                            <div class="w-8 h-8 bg-[#800000]/10 rounded-xl flex items-center justify-center">
+                                                                <svg class="w-4 h-4 text-[#800000]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path>
+                                                                </svg>
                                                             </div>
+                                                            <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Kode Tiket</span>
                                                         </div>
+                                                        <span class="text-base font-black text-[#800000] tracking-widest bg-red-50 px-3 py-1 rounded-xl border border-red-100">{{ $item->kode_tiket }}</span>
                                                     </div>
-                                                    <div class="bg-gray-50 border-t border-gray-100 px-6 py-4 flex gap-3">
-                                                        <button type="button" @click="showEdit = false"
-                                                            class="w-1/2 py-2.5 bg-white border border-gray-300 text-gray-700 font-bold rounded-xl hover:bg-gray-100 transition">Batal</button>
-                                                        <button type="submit"
-                                                            class="w-1/2 py-2.5 bg-[#800000] text-white font-bold rounded-xl hover:bg-red-900 shadow-md shadow-red-900/20 transition">Update
-                                                            Data</button>
-                                                    </div>
-                                                </form>
+
+                                                    <form action="{{ route('laporan.update-status', $item->id) }}" method="POST" id="formStatus_{{ $item->id }}">
+                                                        @csrf
+                                                        <p class="text-xs font-black text-gray-500 uppercase tracking-wider mb-3">Tetapkan Status Baru <span class="text-red-500">*</span></p>
+                                                        <div class="space-y-2">
+                                                            <label class="flex items-center gap-3 p-3 border-2 rounded-xl cursor-pointer transition-all
+                                                                {{ $item->status == 'Menunggu Verifikasi' ? 'border-yellow-400 bg-yellow-50' : 'border-gray-200 hover:border-yellow-300 hover:bg-yellow-50/50' }}">
+                                                                <input type="radio" name="status" value="Menunggu Verifikasi"
+                                                                    {{ $item->status == 'Menunggu Verifikasi' ? 'checked' : '' }}
+                                                                    class="text-yellow-500 focus:ring-yellow-400 shrink-0">
+                                                                <div class="flex items-center gap-2 flex-1">
+                                                                    <span class="text-xl leading-none">⏳</span>
+                                                                    <div>
+                                                                        <span class="text-sm font-bold text-gray-700 block leading-tight">Menunggu Verifikasi</span>
+                                                                        <span class="text-xs text-gray-400">Laporan menunggu tindak lanjut</span>
+                                                                    </div>
+                                                                </div>
+                                                            </label>
+                                                            <label class="flex items-center gap-3 p-3 border-2 rounded-xl cursor-pointer transition-all
+                                                                {{ $item->status == 'Sedang Diproses' ? 'border-blue-400 bg-blue-50' : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50/50' }}">
+                                                                <input type="radio" name="status" value="Sedang Diproses"
+                                                                    {{ $item->status == 'Sedang Diproses' ? 'checked' : '' }}
+                                                                    class="text-blue-500 focus:ring-blue-400 shrink-0">
+                                                                <div class="flex items-center gap-2 flex-1">
+                                                                    <span class="text-xl leading-none">🔄</span>
+                                                                    <div>
+                                                                        <span class="text-sm font-bold text-gray-700 block leading-tight">Sedang Diproses</span>
+                                                                        <span class="text-xs text-gray-400">Laporan aktif ditangani tim</span>
+                                                                    </div>
+                                                                </div>
+                                                            </label>
+                                                            <label class="flex items-center gap-3 p-3 border-2 rounded-xl cursor-pointer transition-all
+                                                                {{ $item->status == 'Selesai' ? 'border-green-400 bg-green-50' : 'border-gray-200 hover:border-green-300 hover:bg-green-50/50' }}">
+                                                                <input type="radio" name="status" value="Selesai"
+                                                                    {{ $item->status == 'Selesai' ? 'checked' : '' }}
+                                                                    class="text-green-500 focus:ring-green-400 shrink-0">
+                                                                <div class="flex items-center gap-2 flex-1">
+                                                                    <span class="text-xl leading-none">✅</span>
+                                                                    <div>
+                                                                        <span class="text-sm font-bold text-gray-700 block leading-tight">Selesai</span>
+                                                                        <span class="text-xs text-gray-400">Penanganan laporan selesai</span>
+                                                                    </div>
+                                                                </div>
+                                                            </label>
+                                                        </div>
+                                                    </form>
+                                                </div>
+
+                                                {{-- Footer --}}
+                                                <div class="px-5 py-4 flex gap-3">
+                                                    <button type="button" @click="showEdit = false"
+                                                        class="flex-1 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition text-sm">Batal</button>
+                                                    <button type="submit" form="formStatus_{{ $item->id }}"
+                                                        class="flex-1 py-3 bg-gradient-to-r from-[#800000] to-red-800 text-white font-bold rounded-xl hover:from-red-800 hover:to-[#800000] transition shadow-md shadow-red-900/20 active:scale-95 text-sm flex items-center justify-center gap-2">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                        </svg>
+                                                        Simpan Status
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     </template>
@@ -851,6 +901,104 @@
                                             </div>
                                         </div>
                                     </template>
+
+                                    {{-- Modal Keluhan untuk Admin/Satgas --}}
+                                    @if($item->keluhanss()->count() > 0)
+                                        <template x-teleport="body">
+                                            <div x-show="showKeluhan" style="display: none;"
+                                                class="fixed inset-0 z-[10001] flex items-center justify-center bg-gray-900/80 backdrop-blur-sm px-4 py-6"
+                                                x-transition.opacity>
+                                                <div @click.away="showKeluhan = false"
+                                                    class="bg-white rounded-[2rem] shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col text-left overflow-hidden transform transition-all"
+                                                    x-transition.scale>
+
+                                                    {{-- Header --}}
+                                                    <div class="bg-gradient-to-r from-orange-500 to-amber-500 p-6 text-white flex justify-between items-center shrink-0">
+                                                        <div class="flex items-center gap-3">
+                                                            <div class="w-11 h-11 bg-white/20 rounded-xl flex items-center justify-center">
+                                                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                                                                    </path>
+                                                                </svg>
+                                                            </div>
+                                                            <div>
+                                                                <span class="text-orange-100 text-[10px] font-bold uppercase tracking-widest block">Keluhan Pelapor</span>
+                                                                <h3 class="text-xl font-black tracking-tight">{{ $item->kode_tiket }}</h3>
+                                                            </div>
+                                                        </div>
+                                                        <button @click="showKeluhan = false"
+                                                            class="p-2 bg-white/10 hover:bg-white/20 rounded-xl transition focus:outline-none">
+                                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                                            </svg>
+                                                        </button>
+                                                    </div>
+
+                                                    <div class="overflow-y-auto flex-1 p-6 custom-scroll bg-gray-50 space-y-5">
+                                                        @foreach($item->keluhanss()->get() as $kl)
+                                                            <div class="bg-white border {{ $kl->status === 'menunggu_tanggapan' ? 'border-orange-200' : 'border-green-100' }} rounded-2xl shadow-sm overflow-hidden">
+                                                                {{-- Header kartu keluhan --}}
+                                                                <div class="px-5 py-4 border-b {{ $kl->status === 'menunggu_tanggapan' ? 'border-orange-100 bg-orange-50' : 'border-green-100 bg-green-50' }}">
+                                                                    <div class="flex items-center justify-between gap-2 flex-wrap">
+                                                                        <span class="text-xs font-black {{ $kl->status === 'menunggu_tanggapan' ? 'text-orange-700' : 'text-green-700' }}">{{ $kl->label_kategori }}</span>
+                                                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border {{ $kl->status === 'ditindaklanjuti' ? 'text-green-600 bg-green-50 border-green-200' : 'text-orange-700 bg-orange-50 border-orange-200' }}">
+                                                                            {{ $kl->status === 'ditindaklanjuti' ? '✓ Tanggapan' : '⏳ Menunggu Tanggapan' }}
+                                                                        </span>
+                                                                    </div>
+                                                                    <p class="text-[11px] text-gray-400 mt-1">{{ \Carbon\Carbon::parse($kl->created_at)->translatedFormat('d F Y, H:i') }}</p>
+                                                                </div>
+
+                                                                <div class="px-5 py-4 space-y-3">
+                                                                    @if($kl->isi_keluhan)
+                                                                        <div>
+                                                                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Isi Keluhan</p>
+                                                                            <p class="text-sm text-gray-700">{{ $kl->isi_keluhan }}</p>
+                                                                        </div>
+                                                                    @endif
+
+                                                                    @if($kl->catatan_satgas)
+                                                                        <div class="bg-green-50 border border-green-100 rounded-xl p-3">
+                                                                            <p class="text-[10px] font-bold text-green-600 uppercase tracking-wider mb-1">Catatan Satgas</p>
+                                                                            <div class="text-sm text-gray-700 prose prose-sm max-w-none">{!! $kl->catatan_satgas !!}</div>
+                                                                        </div>
+                                                                    @endif
+
+                                                                    {{-- Form Balas / Tanggapi --}}
+                                                                    @if(auth()->user()->role === 'admin')
+                                                                        <form action="{{ route('keluhan.update', $kl->id) }}" method="POST"
+                                                                            class="pt-3 border-t border-gray-100 space-y-3">
+                                                                            @csrf
+                                                                            <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">{{ $kl->catatan_satgas ? 'Perbarui Tanggapan' : 'Beri Tanggapan' }}</p>
+                                                                            <textarea name="catatan_satgas" id="catatanEditor_{{ $kl->id }}" required
+                                                                                placeholder="Tulis catatan/tanggapan untuk keluhan ini..."
+                                                                                class="w-full bg-gray-50 border border-gray-200 text-gray-900 rounded-xl p-3 outline-none transition-all shadow-sm text-sm">{{ $kl->catatan_satgas }}</textarea>
+                                                                            <div class="flex justify-end">
+                                                                                <button type="submit"
+                                                                                    class="w-full justify-center px-4 py-2.5 bg-orange-500 text-white font-bold rounded-xl hover:bg-orange-600 transition-all active:scale-95 shadow-sm text-sm flex items-center gap-1.5 whitespace-nowrap">
+                                                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path>
+                                                                                    </svg>
+                                                                                    Balas
+                                                                                </button>
+                                                                            </div>
+                                                                        </form>
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
+
+                                                    <div class="p-5 border-t border-gray-100 bg-white shrink-0 flex justify-end">
+                                                        <button @click="showKeluhan = false"
+                                                            class="px-6 py-2.5 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-colors">
+                                                            Tutup
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    @endif
 
                                 </td>
                             </tr>
@@ -1063,5 +1211,24 @@
                 obj.style.opacity = 1;
             }, 150);
         }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
+    <script>
+        // Inisialisasi Summernote untuk semua textarea catatan satgas
+        document.addEventListener('alpine:initialized', () => {
+            document.querySelectorAll('[id^="catatanEditor_"]').forEach(function(el) {
+                $(el).summernote({
+                    placeholder: 'Tulis catatan/tanggapan untuk keluhan ini...',
+                    height: 180,
+                    dialogsInBody: true,
+                    toolbar: [
+                        ['font', ['bold', 'italic', 'underline', 'clear']],
+                        ['color', ['color']],
+                        ['para', ['ul', 'ol', 'paragraph']],
+                        ['view', ['fullscreen']]
+                    ]
+                });
+            });
+        });
     </script>
 @endpush

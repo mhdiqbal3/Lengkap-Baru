@@ -106,7 +106,7 @@ class LaporanController extends Controller
 
         try {
             // ---------------------------------------------------------
-            // PERBAIKAN: Logika Generate Kode Tiket Anti-Duplikat (Acak 8 Digit)
+            // Logika Generate Kode Tiket  (Acak 8 Digit)
             // ---------------------------------------------------------
             do {
                 $kodeTiket = strtoupper(\Illuminate\Support\Str::random(8));
@@ -151,6 +151,12 @@ class LaporanController extends Controller
                 'link_video'       => $request->link_video ?? '',
                 'bukti'            => $buktiPath,
                 'status'           => 'Menunggu Verifikasi',
+            ]);
+
+            \App\Models\RiwayatLaporan::create([
+                'laporan_id' => $laporan->id,
+                'status' => 'Menunggu Verifikasi',
+                'catatan' => 'Laporan diterima sistem.'
             ]);
 
             // Jika dipanggil via AJAX (Dari Laporkan Blade)
@@ -213,6 +219,44 @@ class LaporanController extends Controller
         ]);
 
         $laporan = Laporan::findOrFail($id);
+        $activeStatuses = ['Menunggu Verifikasi', 'Sedang Diproses'];
+        $wasActive = in_array($laporan->status, $activeStatuses);
+        $isNowActive = in_array($request->status, $activeStatuses);
+
+        if ($wasActive && !$isNowActive) {
+            // Pausing timer (moving to Selesai or Ditolak)
+            $lastActive = $laporan->diproses_at ?: $laporan->created_at;
+            $diff = now()->diffInSeconds(\Carbon\Carbon::parse($lastActive));
+            $laporan->akumulasi_waktu += $diff;
+            $laporan->diproses_at = null; // Clear so we know it's paused
+        } elseif (!$wasActive && $isNowActive) {
+            // Resuming timer (from Selesai or Ditolak back to active)
+            $laporan->diproses_at = now();
+        }
+
+        if ($request->status === 'Selesai' && $laporan->status !== 'Selesai') {
+            $laporan->selesai_at = now();
+        }
+        
+        if ($laporan->status !== $request->status) {
+            $catatan = '';
+            if ($request->status == 'Sedang Diproses') {
+                $catatan = 'Laporan telah diverifikasi dan sedang diproses.';
+            } elseif ($request->status == 'Selesai') {
+                $catatan = 'Penanganan laporan telah selesai.';
+            } elseif ($request->status == 'Ditolak') {
+                $catatan = 'Laporan ditolak.';
+            } elseif ($request->status == 'Menunggu Verifikasi') {
+                $catatan = 'Laporan menunggu verifikasi.';
+            }
+
+            \App\Models\RiwayatLaporan::create([
+                'laporan_id' => $laporan->id,
+                'status' => $request->status,
+                'catatan' => $catatan
+            ]);
+        }
+
         $laporan->status = $request->status;
         $laporan->save();
 
@@ -373,5 +417,98 @@ class LaporanController extends Controller
         );
 
         return redirect()->back()->with('success', 'Pengaturan Surat (Tanda Tangan & Pejabat) berhasil disimpan!');
+    }
+
+    /**
+     * Pelapor mengirimkan keluhan terkait laporan yang sedang diproses
+     */
+    public function storeKeluhan(Request $request)
+    {
+        $request->validate([
+            'laporan_id'  => 'required|integer|exists:laporans,id',
+            'kategori'    => 'required|in:belum_dihubungi,terlalu_lama,lainnya',
+            'isi_keluhan' => 'nullable|string|max:1000|required_if:kategori,lainnya',
+        ]);
+
+        $laporan = \App\Models\Laporan::findOrFail($request->laporan_id);
+
+        if ($laporan->user_id !== auth()->id()) {
+            return redirect()->back()->with('error', 'Akses ditolak.');
+        }
+        if ($laporan->status !== 'Sedang Diproses') {
+            return redirect()->back()->with('error', 'Keluhan hanya dapat dikirim saat laporan berstatus Sedang Diproses.');
+        }
+
+        $labelKategori = match($request->kategori) {
+            'belum_dihubungi' => 'Belum dihubungi Satgas',
+            'terlalu_lama'    => 'Penanganan terlalu lama',
+            'lainnya'         => 'Lainnya',
+        };
+
+        // Simpan keluhan
+        $keluhan = \App\Models\Keluhan::create([
+            'laporan_id'  => $laporan->id,
+            'kode_tiket'  => $laporan->kode_tiket,
+            'kategori'    => $request->kategori,
+            'isi_keluhan' => $request->kategori === 'lainnya' ? $request->isi_keluhan : null,
+            'status'      => 'menunggu_tanggapan',
+        ]);
+
+        // Catat ke riwayat penanganan
+        if ($request->kategori === 'lainnya' && $request->isi_keluhan) {
+            $catatanKeluhan = $request->isi_keluhan;
+        } else {
+            $catatanKeluhan = $labelKategori;
+        }
+
+        \App\Models\RiwayatLaporan::create([
+            'laporan_id' => $laporan->id,
+            'status'     => $laporan->status,
+            'catatan'    => $catatanKeluhan,
+            'tipe'       => 'keluhan',
+            'keluhan_id' => $keluhan->id,
+        ]);
+
+        return redirect()->back()->with('success', 'Keluhan Anda telah berhasil dikirimkan. Tim Satgas akan segera menanggapi.');
+    }
+
+    /**
+     * Admin/Satgas menanggapi keluhan pelapor
+     */
+    public function updateKeluhan(Request $request, $id)
+    {
+        $request->validate([
+            'catatan_satgas' => 'required|string|max:1000',
+        ]);
+
+        $keluhan = \App\Models\Keluhan::with('laporan')->findOrFail($id);
+        $laporan = $keluhan->laporan;
+
+        $keluhan->update([
+            'catatan_satgas' => $request->catatan_satgas,
+            'status'         => 'ditindaklanjuti',
+        ]);
+
+        // Catat tanggapan ke riwayat penanganan
+        \App\Models\RiwayatLaporan::create([
+            'laporan_id' => $laporan->id,
+            'status'     => $laporan->status,
+            'catatan'    => $request->catatan_satgas,
+            'tipe'       => 'tanggapan_keluhan',
+            'keluhan_id' => $keluhan->id,
+        ]);
+
+        // Kirim notifikasi ke pelapor
+        if ($laporan->user_id) {
+            Notification::create([
+                'user_id' => $laporan->user_id,
+                'title'   => "Keluhan {$laporan->kode_tiket} Ditanggapi",
+                'message' => "Satgas telah menanggapi keluhan Anda: {$request->catatan_satgas}",
+                'url'     => url('/cek-status'),
+                'is_read' => false,
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Tanggapan keluhan berhasil disimpan!');
     }
 }

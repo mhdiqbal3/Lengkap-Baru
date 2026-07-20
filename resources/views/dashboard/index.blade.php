@@ -35,26 +35,10 @@
                 });
             }
             $stats[$key] = [
-                'total' => $filtered->count(),
+                'total'    => $filtered->count(),
                 'menunggu' => $filtered->where('status', 'Menunggu Verifikasi')->count(),
                 'diproses' => $filtered->where('status', 'Sedang Diproses')->count(),
-                'selesai' => $filtered->where('status', 'Selesai')->count(),
-                'ditolak' => $filtered->where('status', 'Ditolak')->count(),
-                'verbal' => $filtered
-                    ->filter(
-                        fn($i) => stripos($i->jenis_kasus ?? '', 'Verbal') !== false &&
-                            stripos($i->jenis_kasus ?? '', 'Non') === false,
-                    )
-                    ->count(),
-                'nonVerbal' => $filtered->filter(fn($i) => stripos($i->jenis_kasus ?? '', 'Non') !== false)->count(),
-                'seksual' => $filtered->filter(fn($i) => stripos($i->jenis_kasus ?? '', 'Seksual') !== false)->count(),
-                'lainnya' => $filtered
-                    ->filter(
-                        fn($i) => stripos($i->jenis_kasus ?? '', 'Verbal') === false &&
-                            stripos($i->jenis_kasus ?? '', 'Seksual') === false &&
-                            stripos($i->jenis_kasus ?? '', 'Non') === false,
-                    )
-                    ->count(),
+                'selesai'  => $filtered->where('status', 'Selesai')->count(),
             ];
         }
 
@@ -75,6 +59,7 @@
             </div>
         @endif
 
+        @if (session('login_success'))
         <div class="bg-green-50 border border-green-200 text-green-800 px-5 py-4 rounded-2xl flex items-start sm:items-center justify-between shadow-sm transition-all duration-300"
             id="welcome-notification" role="alert">
             <div class="flex items-center gap-3">
@@ -97,6 +82,7 @@
                 </svg>
             </button>
         </div>
+        @endif
 
         @if ($canViewSummary)
             <div class="bg-white rounded-3xl p-5 border border-gray-100 shadow-sm space-y-5">
@@ -130,125 +116,102 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
-                    <div
-                        class="bg-gray-50 rounded-2xl p-5 border border-gray-100 hover:bg-white hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group relative overflow-hidden col-span-2 lg:col-span-1">
-                        <div class="flex justify-between items-start mb-3">
-                            <div
-                                class="w-10 h-10 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center group-hover:bg-purple-600 group-hover:text-white transition-colors duration-300">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
-                                    </path>
-                                </svg>
-                            </div>
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    {{-- Kartu Total Laporan --}}
+                    <div class="bg-gradient-to-br from-red-800 to-[#800000] rounded-2xl p-5 text-white shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 col-span-2 lg:col-span-1 relative overflow-hidden">
+                        <div class="absolute -right-4 -top-4 w-20 h-20 bg-white/10 rounded-full"></div>
+                        <div class="absolute -right-2 -bottom-6 w-28 h-28 bg-white/5 rounded-full"></div>
+                        <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mb-4">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
                         </div>
-                        <div>
-                            <h3 id="count-total" class="text-3xl font-black text-gray-800">{{ $stats['semua']['total'] }}
-                            </h3>
-                            <p class="text-xs font-bold text-gray-500 mt-1">Total Laporan</p>
-                        </div>
+                        <h3 id="count-total" class="text-4xl font-black">{{ $stats['semua']['total'] }}</h3>
+                        <p class="text-xs font-bold text-white/80 mt-1 uppercase tracking-wider">Total Laporan</p>
                     </div>
-                    <div
-                        class="bg-gray-50 rounded-2xl p-5 border border-gray-100 hover:bg-white hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group relative overflow-hidden">
-                        <div class="flex justify-between items-start mb-3">
-                            <div
-                                class="w-10 h-10 bg-yellow-100 text-yellow-600 rounded-lg flex items-center justify-center group-hover:bg-yellow-500 group-hover:text-white transition-colors duration-300">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                            </div>
+                    {{-- Kartu Menunggu --}}
+                    <div class="bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl p-5 border border-transparent shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group relative overflow-hidden text-white">
+                        <div class="absolute -right-4 -top-4 w-20 h-20 bg-white/10 rounded-full"></div>
+                        <div class="absolute -right-2 -bottom-6 w-28 h-28 bg-white/5 rounded-full"></div>
+                        <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mb-4 group-hover:bg-white/30 transition-colors duration-300">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
                         </div>
-                        <div>
-                            <h3 id="count-menunggu" class="text-3xl font-black text-gray-800">
-                                {{ $stats['semua']['menunggu'] }}</h3>
-                            <p class="text-xs font-bold text-gray-500 mt-1">Menunggu</p>
-                        </div>
+                        <h3 id="count-menunggu" class="text-4xl font-black">{{ $stats['semua']['menunggu'] }}</h3>
+                        <p class="text-xs font-bold text-white/80 mt-1 uppercase tracking-wider">Menunggu</p>
                     </div>
-                    <div
-                        class="bg-gray-50 rounded-2xl p-5 border border-gray-100 hover:bg-white hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group relative overflow-hidden">
-                        <div class="flex justify-between items-start mb-3">
-                            <div
-                                class="w-10 h-10 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                                </svg>
-                            </div>
+                    {{-- Kartu Diproses --}}
+                    <div class="bg-gradient-to-br from-blue-500 to-cyan-600 rounded-2xl p-5 border border-transparent shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group relative overflow-hidden text-white">
+                        <div class="absolute -right-4 -top-4 w-20 h-20 bg-white/10 rounded-full"></div>
+                        <div class="absolute -right-2 -bottom-6 w-28 h-28 bg-white/5 rounded-full"></div>
+                        <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mb-4 group-hover:bg-white/30 transition-colors duration-300">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
                         </div>
-                        <div>
-                            <h3 id="count-diproses" class="text-3xl font-black text-gray-800">
-                                {{ $stats['semua']['diproses'] }}</h3>
-                            <p class="text-xs font-bold text-gray-500 mt-1">Diproses</p>
-                        </div>
+                        <h3 id="count-diproses" class="text-4xl font-black">{{ $stats['semua']['diproses'] }}</h3>
+                        <p class="text-xs font-bold text-white/80 mt-1 uppercase tracking-wider">Diproses</p>
                     </div>
-                    <div
-                        class="bg-gray-50 rounded-2xl p-5 border border-gray-100 hover:bg-white hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group relative overflow-hidden">
-                        <div class="flex justify-between items-start mb-3">
-                            <div
-                                class="w-10 h-10 bg-green-100 text-green-600 rounded-lg flex items-center justify-center group-hover:bg-green-500 group-hover:text-white transition-colors duration-300">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                            </div>
+                    {{-- Kartu Selesai --}}
+                    <div class="bg-gradient-to-br from-emerald-400 to-green-600 rounded-2xl p-5 border border-transparent shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group relative overflow-hidden text-white">
+                        <div class="absolute -right-4 -top-4 w-20 h-20 bg-white/10 rounded-full"></div>
+                        <div class="absolute -right-2 -bottom-6 w-28 h-28 bg-white/5 rounded-full"></div>
+                        <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mb-4 group-hover:bg-white/30 transition-colors duration-300">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
                         </div>
-                        <div>
-                            <h3 id="count-selesai" class="text-3xl font-black text-gray-800">
-                                {{ $stats['semua']['selesai'] }}</h3>
-                            <p class="text-xs font-bold text-gray-500 mt-1">Selesai</p>
-                        </div>
-                    </div>
-                    <div
-                        class="bg-gray-50 rounded-2xl p-5 border border-gray-100 hover:bg-white hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group relative overflow-hidden">
-                        <div class="flex justify-between items-start mb-3">
-                            <div
-                                class="w-10 h-10 bg-red-100 text-red-600 rounded-lg flex items-center justify-center group-hover:bg-red-500 group-hover:text-white transition-colors duration-300">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                            </div>
-                        </div>
-                        <div>
-                            <h3 id="count-ditolak" class="text-3xl font-black text-gray-800">
-                                {{ $stats['semua']['ditolak'] }}</h3>
-                            <p class="text-xs font-bold text-gray-500 mt-1">Ditolak</p>
-                        </div>
+                        <h3 id="count-selesai" class="text-4xl font-black">{{ $stats['semua']['selesai'] }}</h3>
+                        <p class="text-xs font-bold text-white/80 mt-1 uppercase tracking-wider">Selesai</p>
                     </div>
                 </div>
             </div>
 
+            {{-- GRAFIK LINE CHART + DOUGHNUT PREMIUM --}}
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+
+                {{-- LINE CHART: Statistik Penanganan per Rentang Waktu --}}
                 <div class="lg:col-span-2 bg-white p-7 rounded-3xl border border-gray-100 shadow-sm flex flex-col">
-                    <div class="flex justify-between items-center mb-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
                         <div>
-                            <h3 class="text-xl font-black text-gray-800">Distribusi Status Penanganan</h3>
-                            <p class="text-[11px] font-bold text-gray-400 uppercase tracking-widest mt-0.5"
-                                id="label-periode-bar">Periode: Semua Waktu</p>
+                            <h3 class="text-xl font-black text-gray-800">Statistik Penanganan</h3>
+                            <p class="text-[11px] font-bold text-gray-400 uppercase tracking-widest mt-0.5" id="label-periode-line">Rentang: Bulanan</p>
+                        </div>
+                        <div class="flex gap-1 bg-gray-100 p-1 rounded-xl shrink-0">
+                            <button onclick="switchLineRange('bulanan')" id="btn-bulanan"
+                                class="line-range-btn active-range px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-[#800000] text-white shadow">Bulanan</button>
+                            <button onclick="switchLineRange('mingguan')" id="btn-mingguan"
+                                class="line-range-btn px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-gray-500 hover:text-gray-800">Mingguan</button>
+                            <button onclick="switchLineRange('harian')" id="btn-harian"
+                                class="line-range-btn px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-gray-500 hover:text-gray-800">Harian</button>
+                        </div>
+                    </div>
+                    {{-- Wrapper overflow untuk scroll horizontal --}}
+                    <div class="overflow-x-auto flex-1">
+                        <div id="lineChartWrapper" style="min-width: 600px; height: 300px; position: relative;">
+                            <canvas id="lineChart"></canvas>
+                        </div>
+                    </div>
+                    {{-- Legend Jenis Kekerasan --}}
+                    <div id="lineChartLegend" class="mt-4 flex flex-wrap gap-3"></div>
+                </div>
+
+                {{-- DOUGHNUT: Total Jenis Kekerasan --}}
+                <div class="bg-white p-7 rounded-3xl border border-gray-100 shadow-sm flex flex-col">
+                    <div class="flex justify-between items-start mb-5">
+                        <div>
+                            <h3 class="text-xl font-black text-gray-800">Total Jenis Kekerasan</h3>
+                            <p class="text-[11px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">Semua Data Jenis Kasus</p>
                         </div>
                         <div class="p-2 bg-red-50 rounded-xl text-[#800000]">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012-2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
-                                </path>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path>
                             </svg>
                         </div>
                     </div>
-                    <div class="relative w-full h-[300px]">
-                        <canvas id="barChart"></canvas>
-                    </div>
-                </div>
-                <div class="bg-white p-7 rounded-3xl border border-gray-100 shadow-sm flex flex-col">
-                    <div class="flex justify-between items-center mb-6">
-                        <div>
-                            <h3 class="text-xl font-black text-gray-800">Komposisi Kasus</h3>
-                            <p class="text-[11px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">Jenis Kekerasan
-                            </p>
-                        </div>
-                    </div>
-                    <div class="relative w-full h-[300px] flex justify-center items-center">
+                    <div class="relative flex-1 flex justify-center items-center" style="min-height:220px">
                         <canvas id="doughnutChart"></canvas>
                     </div>
                 </div>
@@ -520,7 +483,7 @@
             </div>
         </div>
 
-        <div class="mt-8 bg-white rounded-3xl p-8 md:p-10 border border-gray-100 shadow-sm text-center">
+        <div class="mt-8 bg-gradient-to-b from-white to-gray-50 rounded-3xl p-8 md:p-10 border border-gray-100 shadow-sm text-center">
             <h3 class="text-xl md:text-2xl font-black text-gray-800 mb-2">
                 {{ $d('alur_title', 'Alur Penanganan Laporan') }}</h3>
             <p class="text-sm text-gray-500 mb-8">{{ $d('alur_desc', 'Langkah nyata kami untuk menjaga keamanan Anda.') }}
@@ -561,133 +524,223 @@
     @if ($canViewSummary)
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script>
-            const dashboardData = @json($stats);
-            let barChart = null;
+            const dashboardData  = @json($stats);
+            const timeSeriesData = @json($timeSeriesData);
+            const allJenisKasus  = @json($allJenisKasus);
+
+            let lineChart    = null;
             let doughnutChart = null;
+            let currentRange = 'bulanan';
+
+            // Palet warna yang premium untuk multi-line
+            const colorPalette = [
+                { line: '#800000', bg: 'rgba(128,0,0,0.08)' },
+                { line: '#F97316', bg: 'rgba(249,115,22,0.08)' },
+                { line: '#3B82F6', bg: 'rgba(59,130,246,0.08)' },
+                { line: '#10B981', bg: 'rgba(16,185,129,0.08)' },
+                { line: '#A855F7', bg: 'rgba(168,85,247,0.08)' },
+                { line: '#EAB308', bg: 'rgba(234,179,8,0.08)' },
+                { line: '#EC4899', bg: 'rgba(236,72,153,0.08)' },
+                { line: '#14B8A6', bg: 'rgba(20,184,166,0.08)' },
+            ];
+
+            function buildLineDatasets(range) {
+                const seriesData = timeSeriesData[range]?.series ?? {};
+                return Object.keys(seriesData).map((jenis, i) => {
+                    const c = colorPalette[i % colorPalette.length];
+                    return {
+                        label: jenis,
+                        data: seriesData[jenis],
+                        borderColor: c.line,
+                        backgroundColor: c.line,
+                        
+                        // Titik bulat
+                        pointStyle: 'circle',
+                        
+                        // Warna titik: hitam jika 0
+                        pointBackgroundColor: (ctx) => ctx.raw === 0 ? '#000000' : c.line,
+                        pointBorderColor: (ctx) => ctx.raw === 0 ? '#000000' : c.line,
+                        pointRadius: (ctx) => ctx.raw === 0 ? 3 : 5,
+                        pointHoverRadius: (ctx) => ctx.raw === 0 ? 4 : 7,
+                        
+                        borderWidth: 2,
+                        tension: 0, 
+                        fill: false,
+                    };
+                });
+            }
+
+            function renderLegend() {
+                const legendEl = document.getElementById('lineChartLegend');
+                if (!legendEl || !lineChart) return;
+                legendEl.innerHTML = '';
+                lineChart.data.datasets.forEach((ds, i) => {
+                    const c = colorPalette[i % colorPalette.length];
+                    const item = document.createElement('div');
+                    item.className = 'flex items-center gap-1.5 cursor-pointer select-none';
+                    item.innerHTML = `
+                        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${c.line};flex-shrink:0;"></span>
+                        <span class="text-xs font-semibold text-gray-600">${ds.label}</span>
+                    `;
+                    item.addEventListener('click', () => {
+                        const meta = lineChart.getDatasetMeta(i);
+                        meta.hidden = !meta.hidden;
+                        lineChart.update();
+                        item.style.opacity = meta.hidden ? '0.4' : '1';
+                    });
+                    legendEl.appendChild(item);
+                });
+            }
 
             document.addEventListener("DOMContentLoaded", function() {
                 try {
-                    Chart.defaults.font.family = "'Inter', 'sans-serif'";
+                    Chart.defaults.font.family = "'Inter', sans-serif";
                     Chart.defaults.color = '#9ca3af';
 
-                    const ctxBar = document.getElementById('barChart');
-                    if (ctxBar) {
-                        barChart = new Chart(ctxBar.getContext('2d'), {
-                            type: 'bar',
+                    // ===== LINE CHART =====
+                    const ctxLine = document.getElementById('lineChart');
+                    if (ctxLine) {
+                        const rangeData = timeSeriesData['bulanan'];
+                        lineChart = new Chart(ctxLine.getContext('2d'), {
+                            type: 'line',
                             data: {
-                                labels: ['Menunggu', 'Diproses', 'Selesai', 'Ditolak'],
-                                datasets: [{
-                                    label: 'Jumlah Laporan',
-                                    data: [
-                                        dashboardData['semua'].menunggu,
-                                        dashboardData['semua'].diproses,
-                                        dashboardData['semua'].selesai,
-                                        dashboardData['semua'].ditolak
-                                    ],
-                                    backgroundColor: ['#EAB308', '#F97316', '#22C55E', '#EF4444'],
-                                    borderRadius: 8,
-                                    barPercentage: 0.5
-                                }]
+                                labels: rangeData?.labels ?? [],
+                                datasets: buildLineDatasets('bulanan'),
                             },
                             options: {
                                 responsive: true,
                                 maintainAspectRatio: false,
+                                interaction: { mode: 'index', intersect: false },
                                 plugins: {
-                                    legend: {
-                                        display: false
+                                    legend: { display: false },
+                                    tooltip: {
+                                        backgroundColor: 'rgba(17,24,39,0.92)',
+                                        titleColor: '#f3f4f6',
+                                        bodyColor: '#d1d5db',
+                                        borderColor: 'rgba(255,255,255,0.08)',
+                                        borderWidth: 1,
+                                        padding: 12,
+                                        usePointStyle: true,
                                     }
                                 },
                                 scales: {
                                     y: {
                                         beginAtZero: true,
-                                        ticks: {
-                                            stepSize: 1
-                                        }
+                                        ticks: { stepSize: 1, precision: 0 },
+                                        grid: { 
+                                            display: true,
+                                            color: '#e5e7eb' // Garis grid horizontal
+                                        },
+                                        border: { display: false }
                                     },
                                     x: {
-                                        grid: {
-                                            display: false
-                                        }
+                                        grid: { 
+                                            display: true,
+                                            color: '#e5e7eb' // Garis grid vertikal
+                                        },
+                                        ticks: { maxRotation: 30, minRotation: 0 },
+                                        border: { display: false }
                                     }
                                 }
                             }
                         });
+                        renderLegend();
                     }
 
+                    // ===== DOUGHNUT CHART (Total Jenis Kekerasan — semua data) =====
                     const ctxDoughnut = document.getElementById('doughnutChart');
                     if (ctxDoughnut) {
+                        const jenisLabels = Object.keys(allJenisKasus);
+                        const jenisValues = Object.values(allJenisKasus);
+                        const doughnutColors = colorPalette.map(c => c.line);
+
                         doughnutChart = new Chart(ctxDoughnut.getContext('2d'), {
                             type: 'doughnut',
                             data: {
-                                labels: ['Verbal', 'Non-Verbal', 'Seksual', 'Lainnya'],
+                                labels: jenisLabels,
                                 datasets: [{
-                                    data: [
-                                        dashboardData['semua'].verbal,
-                                        dashboardData['semua'].nonVerbal,
-                                        dashboardData['semua'].seksual,
-                                        dashboardData['semua'].lainnya
-                                    ],
-                                    backgroundColor: ['#14B8A6', '#A855F7', '#800000', '#F59E0B'],
+                                    data: jenisValues,
+                                    backgroundColor: doughnutColors.slice(0, jenisLabels.length),
                                     borderWidth: 0,
-                                    hoverOffset: 12
+                                    hoverOffset: 14,
                                 }]
                             },
                             options: {
                                 responsive: true,
                                 maintainAspectRatio: false,
-                                cutout: '70%',
+                                cutout: '72%',
                                 plugins: {
                                     legend: {
                                         position: 'bottom',
                                         labels: {
                                             usePointStyle: true,
-                                            boxWidth: 8
+                                            boxWidth: 8,
+                                            padding: 14,
+                                            font: { size: 11, weight: '600' },
                                         }
+                                    },
+                                    tooltip: {
+                                        backgroundColor: 'rgba(17,24,39,0.92)',
+                                        titleColor: '#f3f4f6',
+                                        bodyColor: '#d1d5db',
+                                        padding: 10,
                                     }
                                 }
                             }
                         });
                     }
+
                 } catch (error) {
                     console.error("Gagal meload grafik:", error);
                 }
             });
 
+            // Ganti rentang waktu line chart
+            window.switchLineRange = function(range) {
+                currentRange = range;
+                const rangeData = timeSeriesData[range];
+                if (!lineChart || !rangeData) return;
+
+                lineChart.data.labels   = rangeData.labels;
+                lineChart.data.datasets = buildLineDatasets(range);
+                lineChart.update();
+                renderLegend();
+
+                // Update label
+                const labelMap = { bulanan: 'Bulanan', mingguan: 'Mingguan', harian: 'Harian' };
+                const labelEl = document.getElementById('label-periode-line');
+                if (labelEl) labelEl.innerText = 'Rentang: ' + labelMap[range];
+
+                // Update tombol aktif
+                document.querySelectorAll('.line-range-btn').forEach(btn => {
+                    if (btn.id === 'btn-' + range) {
+                        btn.className = 'line-range-btn active-range px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-[#800000] text-white shadow';
+                    } else {
+                        btn.className = 'line-range-btn px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-gray-500 hover:text-gray-800';
+                    }
+                });
+            }
+
+            // Filter kartu ringkasan (Semua/Hari Ini/dll)
             window.applyFilter = function(period) {
                 if (!dashboardData || !dashboardData[period]) return;
                 const data = dashboardData[period];
-                animateValue("count-total", data.total);
+                animateValue("count-total",    data.total);
                 animateValue("count-menunggu", data.menunggu);
                 animateValue("count-diproses", data.diproses);
-                animateValue("count-selesai", data.selesai);
-                animateValue("count-ditolak", data.ditolak);
+                animateValue("count-selesai",  data.selesai);
 
                 const labels = {
-                    'semua': 'Semua Waktu',
-                    'harian': 'Hari Ini',
-                    'mingguan': 'Minggu Ini',
-                    'bulanan': 'Bulan Ini',
-                    'tahunan': 'Tahun Ini'
+                    'semua': 'Semua Waktu', 'harian': 'Hari Ini',
+                    'mingguan': 'Minggu Ini', 'bulanan': 'Bulan Ini', 'tahunan': 'Tahun Ini'
                 };
-                const labelEl = document.getElementById('label-periode-bar');
-                if (labelEl) labelEl.innerText = 'Periode: ' + labels[period];
-
                 document.querySelectorAll('.filter-btn').forEach(btn => {
                     if (btn.dataset.period === period) {
-                        btn.className =
-                            `filter-btn active flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-bold transition-all bg-[#800000] text-white shadow-md`;
+                        btn.className = `filter-btn active flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-bold transition-all bg-[#800000] text-white shadow-md`;
                     } else {
-                        btn.className =
-                            "filter-btn flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-bold transition-all text-gray-500 hover:text-gray-800 hover:bg-gray-200";
+                        btn.className = "filter-btn flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-bold transition-all text-gray-500 hover:text-gray-800 hover:bg-gray-200";
                     }
                 });
-
-                if (barChart && doughnutChart) {
-                    barChart.data.datasets[0].data = [data.menunggu, data.diproses, data.selesai, data.ditolak];
-                    barChart.update();
-                    doughnutChart.data.datasets[0].data = [data.verbal, data.nonVerbal, data.seksual, data.lainnya];
-                    doughnutChart.update();
-                }
             }
 
             function animateValue(id, end) {
@@ -701,11 +754,7 @@
             }
         </script>
         <style>
-            #count-total,
-            #count-menunggu,
-            #count-diproses,
-            #count-selesai,
-            #count-ditolak {
+            #count-total, #count-menunggu, #count-diproses, #count-selesai {
                 transition: opacity 0.2s ease-in-out;
             }
         </style>

@@ -55,7 +55,7 @@
 
             @if (isset($laporan))
                 <div id="modal-content-laporan"
-                    class="bg-white rounded-[2rem] shadow-2xl max-w-3xl w-full relative z-10 flex flex-col max-h-full overflow-hidden transform transition-all"
+                    class="bg-white rounded-[2rem] shadow-2xl max-w-3xl w-full relative z-10 flex flex-col max-h-[85vh] overflow-hidden transform transition-all"
                     x-transition.scale>
                     <button @click="showModal = false"
                         class="absolute top-4 right-4 z-50 p-2 bg-black/20 hover:bg-black/40 text-white rounded-full backdrop-blur-md transition-colors focus:outline-none">
@@ -96,7 +96,7 @@
                         </div>
                     </div>
 
-                    <div class="overflow-y-auto custom-scroll p-0 relative">
+                    <div class="flex-1 overflow-y-auto custom-scroll relative bg-white">
                         <div class="px-6 sm:px-10 pt-10 pb-6 border-b border-gray-100 bg-gray-50/50">
                             <h4 class="text-center font-extrabold text-gray-400 mb-8 uppercase tracking-widest text-xs">
                                 Jalur Penanganan Laporan</h4>
@@ -106,13 +106,16 @@
                                 </div>
                                 @php
                                     $progressWidth = '0%';
+                                    $progressColor = 'bg-[#800000]';
+                                    
                                     if ($laporan->status == 'Sedang Diproses') {
                                         $progressWidth = '50%';
-                                    }
-                                    if ($laporan->status == 'Selesai' || $laporan->status == 'Ditolak') {
+                                    } elseif ($laporan->status == 'Selesai') {
                                         $progressWidth = '100%';
+                                    } elseif ($laporan->status == 'Ditolak') {
+                                        $progressWidth = '100%';
+                                        $progressColor = 'bg-red-500';
                                     }
-                                    $progressColor = $laporan->status == 'Ditolak' ? 'bg-red-500' : 'bg-[#800000]';
                                 @endphp
                                 <div class="absolute left-0 top-1/2 transform -translate-y-1/2 h-1.5 {{ $progressColor }} rounded-full transition-all duration-1000"
                                     style="width: {{ $progressWidth }}"></div>
@@ -133,9 +136,9 @@
                                         'Ditolak',
                                     ]);
                                     $step2Bg = $step2Active
-                                        ? 'bg-[#800000] border-red-200 text-white shadow-md'
+                                        ? 'bg-blue-600 border-blue-200 text-white shadow-md'
                                         : 'bg-white border-gray-300 text-gray-400';
-                                    $step2Text = $step2Active ? 'text-[#800000]' : 'text-gray-400';
+                                    $step2Text = $step2Active ? 'text-blue-600' : 'text-gray-400';
                                 @endphp
                                 <div class="relative z-10 flex flex-col items-center group">
                                     <div
@@ -171,24 +174,191 @@
                                         {{ $laporan->status == 'Ditolak' ? 'Ditolak' : 'Selesai' }}</p>
                                 </div>
                             </div>
-                            <div class="h-10"></div>
-                        </div>
+                            
+                            {{-- Spacer to account for absolute positioned text below timeline circles --}}
+                            <div class="h-14"></div>
 
+                            @if(in_array($laporan->status, ['Menunggu Verifikasi', 'Sedang Diproses', 'Selesai']))
+                                @php
+                                    $startTime = $laporan->diproses_at ? \Carbon\Carbon::parse($laporan->diproses_at)->timestamp : (\Carbon\Carbon::parse($laporan->created_at)->timestamp);
+                                    $endTime = $laporan->selesai_at ? \Carbon\Carbon::parse($laporan->selesai_at)->timestamp : (\Carbon\Carbon::parse($laporan->updated_at)->timestamp);
+                                    $isFinished = $laporan->status === 'Selesai';
+                                    
+                                    // jika selesai tapi endtime < starttime (anomali data lama)
+                                    if ($isFinished && $endTime < $startTime) {
+                                        $startTime = \Carbon\Carbon::parse($laporan->created_at)->timestamp;
+                                    }
+                                @endphp
 
-
-                        <div class="px-6 sm:px-10 pb-8 flex flex-col sm:flex-row justify-center gap-3 border-t border-white pt-6">
-                            @if (!request()->ajax())
-                                <a href="{{ url('/riwayat') }}"
-                                    class="px-8 py-3.5 bg-[#800000] text-white hover:bg-red-900 font-bold rounded-xl transition-colors text-center inline-block">
-                                    Detail Laporan
-                                </a>
-                            @else
-                                <button @click="showModal = false"
-                                    class="px-8 py-3.5 bg-[#800000] text-white hover:bg-red-900 font-bold rounded-xl transition-colors text-center">
-                                    Tutup Kartu Laporan
-                                </button>
+                                <div class="mt-2 flex justify-center w-full" 
+                                    @if(!$isFinished)
+                                    x-data="{ 
+                                        start: {{ $startTime }} * 1000, 
+                                        now: Date.now(), 
+                                        timeString: '',
+                                        interval: null,
+                                        init() {
+                                            this.updateTime();
+                                            this.interval = setInterval(() => { this.now = Date.now(); this.updateTime(); }, 1000);
+                                        },
+                                        updateTime() {
+                                            let diff = Math.max(0, Math.floor((this.now - this.start) / 1000)) + {{ $laporan->akumulasi_waktu ?? 0 }};
+                                            let d = Math.floor(diff / 86400);
+                                            let h = Math.floor((diff % 86400) / 3600);
+                                            let m = Math.floor((diff % 3600) / 60);
+                                            let s = diff % 60;
+                                            
+                                            let parts = [];
+                                            if (d > 0) parts.push(d + ' Hari');
+                                            if (h > 0 || d > 0) parts.push(h + ' Jam');
+                                            if (m > 0 || h > 0 || d > 0) parts.push(m + ' Menit');
+                                            parts.push(s + ' Detik');
+                                            
+                                            this.timeString = parts.join(' ');
+                                        }
+                                    }"
+                                    @endif
+                                    >
+                                    <div class="inline-flex items-center gap-3.5 px-6 py-3 bg-white border-2 {{ $isFinished ? 'border-green-100 shadow-green-100/50' : ($laporan->status === 'Sedang Diproses' ? 'border-blue-100 shadow-blue-100/50' : 'border-[#800000]/20 shadow-[#800000]/10') }} rounded-2xl shadow-lg transition-transform duration-300 hover:scale-[1.02]">
+                                        <div class="flex items-center justify-center w-10 h-10 rounded-full {{ $isFinished ? 'bg-green-50 text-green-500' : ($laporan->status === 'Sedang Diproses' ? 'bg-blue-50 text-blue-600' : 'bg-red-50 text-[#800000]') }}">
+                                            @if($isFinished)
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                                            </svg>
+                                            @else
+                                            <svg class="w-5 h-5 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                            @endif
+                                        </div>
+                                        <div class="flex flex-col text-left">
+                                            <span class="text-[10px] font-black {{ $isFinished ? 'text-green-600' : ($laporan->status === 'Sedang Diproses' ? 'text-blue-600' : 'text-[#800000]') }} uppercase tracking-widest mb-0.5">
+                                                {{ $isFinished ? 'Total Waktu Penanganan' : 'Waktu Penanganan Berjalan' }}
+                                            </span>
+                                            <span class="text-sm font-extrabold text-gray-800 tracking-wide" 
+                                                @if(!$isFinished) x-text="timeString" @endif>
+                                                @if($isFinished)
+                                                    @php
+                                                        $diff = $endTime - $startTime + ($laporan->akumulasi_waktu ?? 0);
+                                                        if($diff < 0) $diff = 0;
+                                                        $d = floor($diff / 86400);
+                                                        $h = floor(($diff % 86400) / 3600);
+                                                        $m = floor(($diff % 3600) / 60);
+                                                        $s = $diff % 60;
+                                                        $parts = [];
+                                                        if ($d > 0) $parts[] = $d . ' Hari';
+                                                        if ($h > 0 || $d > 0) $parts[] = $h . ' Jam';
+                                                        if ($m > 0 || $h > 0 || $d > 0) $parts[] = $m . ' Menit';
+                                                        $parts[] = $s . ' Detik';
+                                                        echo implode(' ', $parts);
+                                                    @endphp
+                                                @endif
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
                             @endif
                         </div>
+
+                        <div class="px-6 sm:px-10 py-6 bg-white">
+                            <div class="w-full max-w-lg mx-auto px-4">
+                                <h5 class="text-sm font-extrabold text-gray-800 mb-4">Riwayat Penanganan</h5>
+                                <div class="flex flex-col gap-4">
+                                    @php
+                                        $riwayats = current(get_included_files()) !== false && method_exists($laporan, 'riwayats') ? $laporan->riwayats : collect();
+                                        if($riwayats->isEmpty()) {
+                                            // Fallback untuk data lama
+                                            $riwayats->push((object)[
+                                                'status' => 'Menunggu Verifikasi',
+                                                'catatan' => 'Laporan diterima sistem.',
+                                                'created_at' => $laporan->created_at
+                                            ]);
+                                            if ($laporan->diproses_at) {
+                                                $riwayats->push((object)[
+                                                    'status' => 'Sedang Diproses',
+                                                    'catatan' => 'Laporan telah diverifikasi dan sedang diproses.',
+                                                    'created_at' => $laporan->diproses_at
+                                                ]);
+                                            }
+                                            if ($laporan->status == 'Selesai' && $laporan->selesai_at) {
+                                                $riwayats->push((object)[
+                                                    'status' => 'Selesai',
+                                                    'catatan' => 'Penanganan laporan telah selesai.',
+                                                    'created_at' => $laporan->selesai_at
+                                                ]);
+                                            } elseif ($laporan->status == 'Ditolak') {
+                                                $riwayats->push((object)[
+                                                    'status' => 'Ditolak',
+                                                    'catatan' => 'Laporan ditolak.',
+                                                    'created_at' => $laporan->updated_at
+                                                ]);
+                                            }
+                                        }
+                                    @endphp
+
+                                    @foreach($riwayats as $index => $riwayat)
+                                        @php
+                                            $tipe = $riwayat->tipe ?? 'status';
+                                            $isKeluhan = $tipe === 'keluhan';
+                                            $isTanggapan = $tipe === 'tanggapan_keluhan';
+                                            $isDitolak = $riwayat->status == 'Ditolak';
+                                        @endphp
+                                        {{-- Sembunyikan entri keluhan & tanggapan dari riwayat penanganan --}}
+                                        @if(!$isKeluhan && !$isTanggapan)
+                                        <div class="flex gap-3 py-1">
+                                            {{-- Ikon kiri --}}
+                                            <div class="shrink-0 mt-0.5">
+                                                <div class="w-7 h-7 rounded-full flex items-center justify-center
+                                                    {{ $isDitolak ? 'bg-red-100 text-red-500' : 'bg-[#800000]/10 text-[#800000]' }}">
+                                                    @if($isDitolak)
+                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                                    @elseif($riwayat->status === 'Selesai')
+                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                                                    @else
+                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                            <div class="flex-1 min-w-0">
+                                                {{-- Baris: Tanggal + Badge --}}
+                                                <div class="flex items-center gap-2 flex-wrap mb-0.5">
+                                                    <span class="text-xs font-bold text-gray-400">
+                                                        {{ \Carbon\Carbon::parse($riwayat->created_at)->translatedFormat('d F Y, H:i') }}
+                                                    </span>
+                                                    @if($isDitolak)
+                                                        <span class="text-[9px] font-black text-red-600 bg-red-50 border border-red-100 px-2 py-0.5 rounded-full uppercase tracking-wider">Ditolak</span>
+                                                    @endif
+                                                </div>
+                                                {{-- Catatan --}}
+                                                <p class="text-sm font-medium leading-relaxed break-words
+                                                    {{ $isDitolak ? 'text-red-700' : 'text-gray-700' }}">{{ $riwayat->catatan }}</p>
+                                            </div>
+                                        </div>
+                                        @if(!$loop->last)
+                                        <div class="w-full h-px bg-gray-100 my-0.5 ml-10"></div>
+                                        @endif
+                                        @endif
+                                    @endforeach
+                                </div>
+                            </div>
+
+                            <div class="h-6"></div>
+                            </div>
+                        </div>
+
+                    {{-- Footer Buttons: Freeze / Sticky --}}
+                    <div class="px-6 sm:px-10 py-5 flex flex-col sm:flex-row justify-center gap-3 border-t border-gray-100 bg-white shrink-0">
+                        @if (!request()->ajax())
+                            <a href="{{ url('/riwayat') }}"
+                                class="px-8 py-3.5 bg-[#800000] text-white hover:bg-red-900 font-bold rounded-xl transition-colors text-center inline-block">
+                                Detail Laporan
+                            </a>
+                        @else
+                            <button @click="showModal = false"
+                                class="px-8 py-3.5 bg-[#800000] text-white hover:bg-red-900 font-bold rounded-xl transition-colors text-center">
+                                Tutup Kartu Laporan
+                            </button>
+                        @endif
                     </div>
                 </div>
             @elseif (isset($error))

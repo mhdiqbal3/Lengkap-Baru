@@ -39,25 +39,44 @@ class DashboardController extends Controller
             'menunggu' => (clone $query)->where('status', 'Menunggu Verifikasi')->count(),
             'diproses' => (clone $query)->where('status', 'Sedang Diproses')->count(),
             'selesai' => (clone $query)->where('status', 'Selesai')->count(),
-            'ditolak' => (clone $query)->where('status', 'Ditolak')->count(),
         ];
 
         $chartStatus = [
             'Menunggu' => $cards['menunggu'],
             'Diproses' => $cards['diproses'],
             'Selesai' => $cards['selesai'],
-            'Ditolak' => $cards['ditolak'],
         ];
 
-        $jenisKasusData = (clone $query)
-            ->selectRaw('jenis_kasus, count(*) as total')
+        // Bentuk Kekerasan Standar
+        $predefinedJenisKasus = [
+            'Kekerasan Seksual' => 0,
+            'Kekerasan Fisik' => 0,
+            'Kekerasan Psikis' => 0,
+            'Perundungan' => 0,
+            'Diskriminasi dan Intoleransi' => 0,
+            'Kebijakan Unsur Kekerasan' => 0,
+        ];
+
+        // Ambil semua jenis kasus dari data laporan
+        $dbJenisKasus = Laporan::selectRaw('jenis_kasus, count(*) as total')
+            ->whereNotNull('jenis_kasus')
+            ->where('jenis_kasus', '!=', '')
             ->groupBy('jenis_kasus')
             ->pluck('total', 'jenis_kasus')
             ->toArray();
 
-        if (empty($jenisKasusData)) {
-            $jenisKasusData = ['Belum ada data' => 1];
+        // Gabungkan predefined dengan data aktual dari DB
+        $allJenisKasus = $predefinedJenisKasus;
+        foreach ($dbJenisKasus as $jenis => $total) {
+            if (isset($allJenisKasus[$jenis])) {
+                $allJenisKasus[$jenis] += $total;
+            } else {
+                $allJenisKasus[$jenis] = $total; // Kasus "Lainnya" yang diketik manual
+            }
         }
+
+        // Data time-series untuk line chart (12 bulan terakhir)
+        $timeSeriesData = $this->buildTimeSeriesData();
 
         $carouselPath = public_path('assets/image/kolosel');
         $carousels = [];
@@ -74,7 +93,89 @@ class DashboardController extends Controller
 
         $kontenDashboard = KontenHalaman::where('halaman', 'dashboard')->first();
 
-        return view('dashboard.index', compact('cards', 'filter', 'chartStatus', 'jenisKasusData', 'carousels', 'kontenDashboard'));
+        return view('dashboard.index', compact('cards', 'filter', 'chartStatus', 'allJenisKasus', 'timeSeriesData', 'carousels', 'kontenDashboard'));
+    }
+
+    private function buildTimeSeriesData(): array
+    {
+        $now = Carbon::now();
+
+        // === DATA BULANAN: 12 bulan terakhir ===
+        $monthlyLabels = [];
+        $monthlyJenisKasus = [];
+        $predefinedJenisKasus = [
+            'Kekerasan Seksual',
+            'Kekerasan Fisik',
+            'Kekerasan Psikis',
+            'Perundungan',
+            'Diskriminasi dan Intoleransi',
+            'Kebijakan Unsur Kekerasan',
+        ];
+
+        $dbJenisKasus = Laporan::selectRaw('DISTINCT jenis_kasus')
+            ->whereNotNull('jenis_kasus')
+            ->where('jenis_kasus', '!=', '')
+            ->pluck('jenis_kasus')
+            ->toArray();
+
+        // Gabung predefined dengan yg ada di DB
+        $allJenisKasus = array_unique(array_merge($predefinedJenisKasus, $dbJenisKasus));
+
+        for ($i = 11; $i >= 0; $i--) {
+            $month = $now->copy()->subMonths($i);
+            $monthlyLabels[] = $month->translatedFormat('M Y');
+        }
+
+        foreach ($allJenisKasus as $jenis) {
+            $monthlyJenisKasus[$jenis] = [];
+            for ($i = 11; $i >= 0; $i--) {
+                $month = $now->copy()->subMonths($i);
+                $monthlyJenisKasus[$jenis][] = Laporan::where('jenis_kasus', $jenis)
+                    ->where('created_at', '<=', $month->copy()->endOfMonth())
+                    ->count();
+            }
+        }
+
+        // === DATA MINGGUAN: 12 minggu terakhir ===
+        $weeklyLabels = [];
+        $weeklyJenisKasus = [];
+        for ($i = 11; $i >= 0; $i--) {
+            $weekStart = $now->copy()->subWeeks($i)->startOfWeek();
+            $weekEnd   = $now->copy()->subWeeks($i)->endOfWeek();
+            $weeklyLabels[] = $weekStart->format('d M') . ' - ' . $weekEnd->format('d M');
+        }
+        foreach ($allJenisKasus as $jenis) {
+            $weeklyJenisKasus[$jenis] = [];
+            for ($i = 11; $i >= 0; $i--) {
+                $weekEnd = $now->copy()->subWeeks($i)->endOfWeek();
+                $weeklyJenisKasus[$jenis][] = Laporan::where('jenis_kasus', $jenis)
+                    ->where('created_at', '<=', $weekEnd)
+                    ->count();
+            }
+        }
+
+        // === DATA HARIAN: 14 hari terakhir ===
+        $dailyLabels = [];
+        $dailyJenisKasus = [];
+        for ($i = 13; $i >= 0; $i--) {
+            $day = $now->copy()->subDays($i);
+            $dailyLabels[] = $day->format('d M');
+        }
+        foreach ($allJenisKasus as $jenis) {
+            $dailyJenisKasus[$jenis] = [];
+            for ($i = 13; $i >= 0; $i--) {
+                $day = $now->copy()->subDays($i);
+                $dailyJenisKasus[$jenis][] = Laporan::where('jenis_kasus', $jenis)
+                    ->where('created_at', '<=', $day->copy()->endOfDay())
+                    ->count();
+            }
+        }
+
+        return [
+            'bulanan'  => ['labels' => $monthlyLabels,  'series' => $monthlyJenisKasus],
+            'mingguan' => ['labels' => $weeklyLabels,   'series' => $weeklyJenisKasus],
+            'harian'   => ['labels' => $dailyLabels,    'series' => $dailyJenisKasus],
+        ];
     }
 
     public function uploadCarousel(Request $request)

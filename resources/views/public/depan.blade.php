@@ -943,8 +943,8 @@
             x-transition.opacity>
             <div @click.away="showResultModal = false"
                 class="w-full flex justify-center relative transform transition-all" x-transition.scale>
-                <div x-html="resultHtml"
-                    class="w-full flex justify-center max-h-[85vh] overflow-y-auto custom-scroll"></div>
+                <div id="result-modal-container"
+                    class="w-full flex justify-center max-h-[90vh]"></div>
             </div>
         </div>
     </template>
@@ -1013,7 +1013,7 @@
                             // Sinkronkan fungsi close modal ke variabel milik landing page
                             finalHtml = finalHtml.replaceAll('showModal', 'showResultModal');
 
-                            this.resultHtml = finalHtml;
+                            document.getElementById('result-modal-container').innerHTML = finalHtml;
                             this.showResultModal = true;
                         } else if (res.ok) {
                             // Tiket tidak ditemukan - tampilkan modal error kustom
