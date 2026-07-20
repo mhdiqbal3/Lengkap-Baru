@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('keluhans', function (Blueprint $table) {
-            $table->boolean('is_read')->default(false)->after('catatan_satgas');
+            $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('set null')->after('status');
         });
     }
 
@@ -22,7 +22,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('keluhans', function (Blueprint $table) {
-            $table->dropColumn('is_read');
+            $table->dropForeign(['user_id']);
+            $table->dropColumn('user_id');
         });
     }
 };

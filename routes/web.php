@@ -81,6 +81,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Rute Keluhan (pelapor kirim keluhan)
     Route::post('/keluhan', [LaporanController::class, 'storeKeluhan'])->name('keluhan.store');
+    Route::post('/keluhan/{id}/baca', [LaporanController::class, 'bacaKeluhan'])->name('keluhan.baca');
 
     Route::get('/cek-status', [LaporanController::class, 'cekStatus'])->name('cek-status');
 
@@ -102,6 +103,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/pengaturan/password', [PengaturanController::class, 'updatePassword'])->name('pengaturan.password');
     Route::post('/pengaturan/notifikasi', [PengaturanController::class, 'updateNotifikasi'])->name('pengaturan.notifikasi');
 
+    // Rute Tanggapan Keluhan (Admin/Satgas)
+    Route::post('/keluhan/{id}/tanggapi', [LaporanController::class, 'updateKeluhan'])->name('keluhan.update');
+
     // --- KHUSUS ADMIN ---
     Route::middleware(['admin'])->group(function () {
         Route::post('/laporan/{id}/status', [LaporanController::class, 'updateStatus'])->name('laporan.update-status');
@@ -109,8 +113,6 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/laporan/{id}', [LaporanController::class, 'destroy'])->name('laporan.destroy');
         Route::post('/laporan/upload-ttd', [\App\Http\Controllers\LaporanController::class, 'uploadTtd'])->name('laporan.upload-ttd');
 
-        // Rute Tanggapan Keluhan (Admin/Satgas)
-        Route::post('/keluhan/{id}/tanggapi', [LaporanController::class, 'updateKeluhan'])->name('keluhan.update');
 
         Route::get('/agenda', [AgendaController::class, 'index'])->name('agenda.index');
         Route::resource('agenda', AgendaController::class)->except(['index', 'show']);

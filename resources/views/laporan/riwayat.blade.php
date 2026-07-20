@@ -1,4 +1,4 @@
-﻿@extends('layouts.app')
+@extends('layouts.app')
 
 @section('header_title', 'Riwayat Pengaduan Saya')
 
@@ -211,8 +211,27 @@
                                                     $tanggapanKey = $latestKeluhan ? 'tanggapan_dibaca_' . $latestKeluhan->id . '_' . $latestKeluhan->updated_at->timestamp : '';
                                                 @endphp
                                                 <button 
-                                                    @click="showKeluhan = true; tanggapanDibaca = true; @if($tanggapanKey) localStorage.setItem('{{ $tanggapanKey }}', 'true') @endif"
-                                                    class="relative p-2 text-orange-600 bg-orange-50 hover:bg-orange-500 hover:text-white rounded-lg transition-colors shadow-sm border border-orange-100"
+                                                    x-data="{ dibaca: localStorage.getItem('{{ $tanggapanKey }}') === 'true' || {{ $latestKeluhan && $latestKeluhan->is_read ? 'true' : 'false' }} }"
+                                                    @click="
+                                                        showKeluhan = true; 
+                                                        if (!tanggapanDibaca && !dibaca) {
+                                                            tanggapanDibaca = true; 
+                                                            dibaca = true;
+                                                            @if($tanggapanKey) localStorage.setItem('{{ $tanggapanKey }}', 'true'); @endif
+                                                            @if($latestKeluhan)
+                                                            fetch('{{ route('keluhan.baca', $latestKeluhan->id) }}', {
+                                                                method: 'POST',
+                                                                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
+                                                            }).then(() => {
+                                                                $dispatch('keluhan-dibaca');
+                                                            });
+                                                            @endif
+                                                        }
+                                                    "
+                                                    class="relative p-2 rounded-lg transition-colors shadow-sm border"
+                                                    :class="(dibaca || tanggapanDibaca) && {{ $adaTanggapanBaru ? 'true' : 'false' }} 
+                                                        ? 'text-gray-500 bg-gray-100 hover:bg-gray-200 border-gray-200' 
+                                                        : 'text-orange-600 bg-orange-50 hover:bg-orange-500 hover:text-white border-orange-100'"
                                                     title="{{ $adaTanggapanBaru ? 'Ada tanggapan dari Satgas!' : 'Kirim Keluhan' }}">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -220,9 +239,8 @@
                                                         </path>
                                                     </svg>
                                                     @if($adaTanggapanBaru)
-                                                        <span x-data="{ dibaca: localStorage.getItem('{{ $tanggapanKey }}') === 'true' }" 
-                                                              x-show="!dibaca && !tanggapanDibaca"
-                                                            class="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white animate-pulse"></span>
+                                                        <span x-show="!dibaca && !tanggapanDibaca"
+                                                            class="absolute -top-1 -right-1 w-3 h-3 bg-green-500 animate-pulse rounded-full border-2 border-white"></span>
                                                     @endif
                                                 </button>
                                             @endif
@@ -939,7 +957,7 @@
                                                                                     <span class="text-xs font-bold text-orange-700 bg-orange-50 px-2.5 py-1 rounded-lg border border-orange-100">{{ $kl->label_kategori }}</span>
                                                                                     <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border
                                                                                         {{ $kl->status === 'ditindaklanjuti' ? 'text-green-600 bg-green-50 border-green-100' : 'text-yellow-700 bg-yellow-50 border-yellow-100' }}">
-                                                                                        {{ $kl->status === 'ditindaklanjuti' ? 'âœ“ Tanggapan' : 'â³ Menunggu Tanggapan' }}
+                                                                                        {{ $kl->status === 'ditindaklanjuti' ? '✓ Tanggapan' : '⏳ Menunggu Tanggapan' }}
                                                                                     </span>
                                                                                 </div>
                                                                                 @if($kl->isi_keluhan)
@@ -954,7 +972,7 @@
                                                                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
                                                                                                 </svg>
                                                                                             </div>
-                                                                                            <p class="text-[10px] font-black text-green-700 uppercase tracking-wider">Tanggapan dari Satgas</p>
+                                                                                            <p class="text-[10px] font-black text-green-700 uppercase tracking-wider">Tanggapan dari {{ $kl->user ? ($kl->user->role === 'admin' ? 'Admin' : $kl->user->username) : 'Satgas' }}</p>
                                                                                         </div>
                                                                                         <div class="text-sm text-gray-800 font-medium pl-7 prose prose-sm max-w-none">{!! $kl->catatan_satgas !!}</div>
                                                                                         <p class="text-[10px] text-gray-400 mt-1.5 pl-7">{{ \Carbon\Carbon::parse($kl->updated_at)->translatedFormat('d F Y, H:i') }}</p>

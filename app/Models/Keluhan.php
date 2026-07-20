@@ -16,11 +16,18 @@ class Keluhan extends Model
         'isi_keluhan',
         'status',
         'catatan_satgas',
+        'user_id',
+        'is_read',
     ];
 
     public function laporan()
     {
         return $this->belongsTo(Laporan::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 
     /**

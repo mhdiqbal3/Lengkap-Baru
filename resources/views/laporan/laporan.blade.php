@@ -917,13 +917,13 @@
 
                                                                     @if($kl->catatan_satgas)
                                                                         <div class="bg-green-50 border border-green-100 rounded-xl p-3">
-                                                                            <p class="text-[10px] font-bold text-green-600 uppercase tracking-wider mb-1">Catatan Satgas</p>
+                                                                            <p class="text-[10px] font-bold text-green-600 uppercase tracking-wider mb-1">Balasan dari {{ $kl->user ? ($kl->user->role === 'admin' ? 'Admin' : $kl->user->username) : 'Satgas' }}</p>
                                                                             <div class="text-sm text-gray-700 prose prose-sm max-w-none">{!! $kl->catatan_satgas !!}</div>
                                                                         </div>
                                                                     @endif
 
                                                                     {{-- Form Balas / Tanggapi --}}
-                                                                    @if(auth()->user()->role === 'admin')
+                                                                    @if(in_array(auth()->user()->role, ['admin', 'satgas']))
                                                                         <form action="{{ route('keluhan.update', $kl->id) }}" method="POST"
                                                                             class="pt-3 border-t border-gray-100 space-y-3">
                                                                             @csrf

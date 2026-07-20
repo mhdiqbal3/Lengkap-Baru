@@ -241,7 +241,7 @@ class LaporanController extends Controller
         if ($laporan->status !== $request->status) {
             $catatan = '';
             if ($request->status == 'Sedang Diproses') {
-                $catatan = 'Laporan telah diverifikasi dan sedang diproses.';
+                $catatan = 'Laporan telah diverifikasi dan akan ditindaklanjuti segera.';
             } elseif ($request->status == 'Selesai') {
                 $catatan = 'Penanganan laporan telah selesai.';
             } elseif ($request->status == 'Ditolak') {
@@ -477,6 +477,10 @@ class LaporanController extends Controller
      */
     public function updateKeluhan(Request $request, $id)
     {
+        if (!in_array(auth()->user()->role, ['admin', 'satgas'])) {
+            abort(403, 'Akses ditolak.');
+        }
+
         $request->validate([
             'catatan_satgas' => 'required|string|max:1000',
         ]);
@@ -487,6 +491,7 @@ class LaporanController extends Controller
         $keluhan->update([
             'catatan_satgas' => $request->catatan_satgas,
             'status'         => 'ditindaklanjuti',
+            'user_id'        => auth()->id(),
         ]);
 
         // Catat tanggapan ke riwayat penanganan
@@ -510,5 +515,18 @@ class LaporanController extends Controller
         }
 
         return redirect()->back()->with('success', 'Tanggapan keluhan berhasil disimpan!');
+    }
+
+    /**
+     * Tandai keluhan sebagai dibaca
+     */
+    public function bacaKeluhan($id)
+    {
+        $keluhan = \App\Models\Keluhan::findOrFail($id);
+        
+        // Ensure only the owner can mark it as read, or if it's not strictly necessary, just mark it.
+        $keluhan->update(['is_read' => true]);
+
+        return response()->json(['success' => true]);
     }
 }

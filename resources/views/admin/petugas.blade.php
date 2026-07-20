@@ -4,7 +4,7 @@
 
 @section('content')
     {{-- Tambahkan state showEditModal dan editData untuk AlpineJS --}}
-    <div class="max-w-[100%] mx-auto pb-10" x-data="{ showModal: false, showEditModal: false, editFormAction: '', editData: { name: '', username: '' } }">
+    <div class="max-w-[100%] mx-auto pb-10" x-data="{ showModal: false, showEditModal: false, editFormAction: '', editData: { name: '', username: '', email: '' } }">
         {{-- Header Halaman --}}
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
             <div>
@@ -107,7 +107,7 @@
                                     <div class="flex items-center justify-center gap-2">
                                         {{-- Tombol Edit --}}
                                         <button
-                                            @click="showEditModal = true; editFormAction = '{{ route('petugas.update', $item->id) }}'; editData.name = '{{ $item->name }}'; editData.username = '{{ $item->username }}';"
+                                            @click="showEditModal = true; editFormAction = '{{ route('petugas.update', $item->id) }}'; editData.name = '{{ $item->name }}'; editData.username = '{{ $item->username }}'; editData.email = '{{ $item->email }}';"
                                             class="p-2 text-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white rounded-lg transition-all shadow-sm border border-blue-100"
                                             title="Edit">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -182,17 +182,15 @@
                             <input type="text" name="name" required placeholder="Masukkan Nama Lengkap"
                                 class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 outline-none focus:border-[#800000] focus:ring-2 focus:ring-[#800000]/10 text-sm font-bold text-gray-700 transition-all">
                         </div>
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">Username</label>
-                                <input type="text" name="username" required placeholder="Username"
-                                    class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 outline-none focus:border-[#800000] focus:ring-2 focus:ring-[#800000]/10 text-sm font-bold text-gray-700 transition-all">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">Email</label>
-                                <input type="email" name="email" required placeholder="Email"
-                                    class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 outline-none focus:border-[#800000] focus:ring-2 focus:ring-[#800000]/10 text-sm font-bold text-gray-700 transition-all">
-                            </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">Username</label>
+                            <input type="text" name="username" required placeholder="Username"
+                                class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 outline-none focus:border-[#800000] focus:ring-2 focus:ring-[#800000]/10 text-sm font-bold text-gray-700 transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">Email</label>
+                            <input type="email" name="email" required placeholder="Email"
+                                class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 outline-none focus:border-[#800000] focus:ring-2 focus:ring-[#800000]/10 text-sm font-bold text-gray-700 transition-all">
                         </div>
                         <div x-data="{ show: false }">
                             <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">Password</label>
@@ -229,84 +227,77 @@
                 class="fixed inset-0 z-[100] flex items-center justify-center bg-gray-900/80 backdrop-blur-sm px-4"
                 x-transition.opacity>
                 <div @click.away="showEditModal = false"
-                    class="bg-white rounded-[2.5rem] shadow-2xl max-w-lg w-full overflow-hidden transform transition-all"
+                    class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden transform transition-all"
                     x-transition.scale>
 
-                    {{-- Header --}}
-                    <div class="bg-blue-600 p-10 text-white relative">
-                        <div class="flex items-center gap-5">
-                            <div
-                                class="w-16 h-16 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center shadow-inner">
-                                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
+                    {{-- Header Compact --}}
+                    <div class="bg-blue-600 px-6 py-4 text-white flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center">
+                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
                                     </path>
                                 </svg>
                             </div>
                             <div>
-                                <h3 class="text-3xl font-black tracking-tight leading-none mb-1">Edit SATGAS</h3>
-                                <p class="text-blue-200 text-sm font-bold uppercase tracking-widest">Perbarui Data Petugas
-                                </p>
+                                <h3 class="text-base font-black tracking-tight">Edit SATGAS</h3>
+                                <p class="text-blue-200 text-[10px] font-bold uppercase tracking-widest">Perbarui Data Petugas</p>
                             </div>
                         </div>
-                        <button @click="showEditModal = false"
-                            class="absolute top-8 right-8 text-white/40 hover:text-white transition focus:outline-none">
-                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path d="M6 18L18 6M6 6l12 12" stroke-width="3" stroke-linecap="round"
-                                    stroke-linejoin="round"></path>
+                        <button @click="showEditModal = false" class="text-white/50 hover:text-white transition focus:outline-none">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path d="M6 18L18 6M6 6l12 12" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
                             </svg>
                         </button>
                     </div>
 
-                    {{-- Form --}}
-                    <form :action="editFormAction" method="POST" class="p-10 space-y-6 bg-white">
+                    {{-- Form Compact --}}
+                    <form :action="editFormAction" method="POST" class="p-5 space-y-4 bg-white">
                         @csrf
                         @method('PUT')
                         <div>
-                            <label class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Nama
-                                Lengkap</label>
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">Nama Lengkap</label>
                             <input type="text" name="name" x-model="editData.name" required
                                 placeholder="Masukkan Nama Lengkap"
-                                class="w-full bg-gray-50 border-2 border-gray-100 rounded-2xl p-4 outline-none focus:border-blue-600 font-bold text-gray-700 transition-all">
+                                class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10 text-sm font-bold text-gray-700 transition-all">
                         </div>
                         <div>
-                            <label
-                                class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Username</label>
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">Username</label>
                             <input type="text" name="username" x-model="editData.username" required
                                 placeholder="Username"
-                                class="w-full bg-gray-50 border-2 border-gray-100 rounded-2xl p-4 outline-none focus:border-blue-600 font-bold text-gray-700 text-sm transition-all">
+                                class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10 text-sm font-bold text-gray-700 transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">Email</label>
+                            <input type="email" name="email" x-model="editData.email" required
+                                placeholder="Email"
+                                class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10 text-sm font-bold text-gray-700 transition-all">
                         </div>
                         <div x-data="{ show: false }">
-                            <label
-                                class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Password
-                                Baru <span class="text-gray-400 text-[10px] lowercase normal-case">(Opsional, isi jika
-                                    ingin mengubah password)</span></label>
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">Password Baru <span class="text-gray-400 text-[10px] lowercase normal-case">(Opsional, kosongkan jika tidak diubah)</span></label>
                             <div class="relative">
                                 <input :type="show ? 'text' : 'password'" name="password" minlength="6"
                                     placeholder="Biarkan kosong jika tidak diubah"
-                                    class="w-full bg-gray-50 border-2 border-gray-100 rounded-2xl p-4 pr-14 outline-none focus:border-blue-600 font-bold text-gray-700 transition-all">
+                                    class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 pr-12 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/10 text-sm font-bold text-gray-700 transition-all">
                                 <button type="button" @click="show = !show"
-                                    class="absolute right-5 top-4 text-gray-400 hover:text-blue-600 transition-colors focus:outline-none">
-                                    <svg x-show="!show" class="w-6 h-6" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
+                                    class="absolute right-3 top-2.5 text-gray-400 hover:text-blue-600 transition-colors focus:outline-none">
+                                    <svg x-show="!show" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-width="2"></path>
-                                        <path
-                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                                            stroke-width="2"></path>
+                                        <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" stroke-width="2"></path>
                                     </svg>
-                                    <svg x-show="show" style="display: none;" class="w-6 h-6" fill="none"
-                                        stroke="currentColor" viewBox="0 0 24 24">
-                                        <path
-                                            d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.29 3.29m0 0a9.97 9.97 0 015.71-2.29c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
-                                            stroke-width="2"></path>
+                                    <svg x-show="show" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display: none;">
+                                        <path d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.29 3.29m0 0a9.97 9.97 0 015.71-2.29c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" stroke-width="2"></path>
                                     </svg>
                                 </button>
                             </div>
                         </div>
-                        <button type="submit"
-                            class="w-full py-4 bg-blue-600 text-white font-black rounded-2xl hover:bg-blue-700 transition shadow-xl shadow-blue-900/20 active:scale-[0.98] uppercase tracking-widest text-sm">Simpan
-                            Perubahan</button>
+                        <div class="flex gap-3 pt-1">
+                            <button type="button" @click="showEditModal = false"
+                                class="flex-1 py-2.5 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition text-sm">Batal</button>
+                            <button type="submit"
+                                class="flex-1 py-2.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition shadow-lg active:scale-[0.98] text-sm">Simpan Perubahan</button>
+                        </div>
                     </form>
                 </div>
             </div>

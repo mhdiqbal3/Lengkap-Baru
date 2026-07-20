@@ -191,14 +191,29 @@
                             <span class="whitespace-nowrap">Galeri</span>
                         </a>
                     </li>
+                    @php
+                        $unreadKeluhanCount = 0;
+                        if (auth()->check()) {
+                            $unreadKeluhanCount = \App\Models\Keluhan::whereHas('laporan', function($q) {
+                                $q->where('user_id', auth()->id());
+                            })->whereNotNull('catatan_satgas')->where('is_read', false)->count();
+                        }
+                    @endphp
                     <li>
                         <a href="{{ url('/riwayat') }}"
-                            class="flex items-center gap-3 px-4 py-2.5 text-sm rounded-xl transition-all duration-200 {{ request()->is('riwayat') ? 'bg-white ' . $themeTextActive . ' shadow-sm font-bold' : 'text-gray-100 hover:bg-white/10 hover:text-white font-medium' }}">
+                            class="relative flex items-center gap-3 px-4 py-2.5 text-sm rounded-xl transition-all duration-200 {{ request()->is('riwayat') ? 'bg-white ' . $themeTextActive . ' shadow-sm font-bold' : 'text-gray-100 hover:bg-white/10 hover:text-white font-medium' }}">
                             <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
-                            <span class="whitespace-nowrap">Riwayat Saya</span>
+                            <span class="whitespace-nowrap flex-1">Riwayat Saya</span>
+                            @if($unreadKeluhanCount > 0)
+                                <span 
+                                    x-data="{ count: {{ $unreadKeluhanCount }} }"
+                                    x-show="count > 0"
+                                    @keluhan-dibaca.window="count--"
+                                    class="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]"></span>
+                            @endif
                         </a>
                     </li>
 

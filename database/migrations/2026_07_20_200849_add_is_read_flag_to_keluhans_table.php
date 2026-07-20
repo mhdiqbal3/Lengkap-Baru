@@ -12,7 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('keluhans', function (Blueprint $table) {
-            $table->boolean('is_read')->default(false)->after('catatan_satgas');
+            if (!Schema::hasColumn('keluhans', 'is_read')) {
+                $table->boolean('is_read')->default(false)->after('catatan_satgas');
+            }
         });
     }
 
@@ -22,7 +24,9 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('keluhans', function (Blueprint $table) {
-            $table->dropColumn('is_read');
+            if (Schema::hasColumn('keluhans', 'is_read')) {
+                $table->dropColumn('is_read');
+            }
         });
     }
 };

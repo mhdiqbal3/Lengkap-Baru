@@ -80,6 +80,12 @@
                                 Kartu Tiket Laporan
                             </span>
                             <h3 class="text-3xl font-black tracking-wider drop-shadow-md">{{ $laporan->kode_tiket }}</h3>
+                            <div class="flex items-center gap-1.5 text-red-100/90 text-sm mt-1 font-medium">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span>{{ \Carbon\Carbon::parse($laporan->created_at)->translatedFormat('d F Y, H:i') }} WITA</span>
+                            </div>
                         </div>
                         @php
                             $statusStyles = [
@@ -276,7 +282,7 @@
                                             if ($laporan->diproses_at) {
                                                 $riwayats->push((object)[
                                                     'status' => 'Sedang Diproses',
-                                                    'catatan' => 'Laporan telah diverifikasi dan sedang diproses.',
+                                                    'catatan' => 'Laporan telah diverifikasi dan akan ditindaklanjuti segera.',
                                                     'created_at' => $laporan->diproses_at
                                                 ]);
                                             }
