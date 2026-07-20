@@ -62,136 +62,94 @@
     <div class="max-w-[100%] mx-auto pb-10">
 
         {{-- Statistik Laporan dengan Filter (Persis seperti Dashboard) --}}
-        <div class="bg-white rounded-3xl p-5 border border-gray-100 shadow-sm space-y-5 mb-8">
+        <div x-data="{ showRingkasan: true }" class="bg-white rounded-3xl p-5 border border-gray-100 shadow-sm space-y-5 mb-8 transition-all duration-300">
             <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-4 border-b border-gray-50 pb-4">
                 <div class="flex items-center gap-3">
-                    <div
-                        class="w-10 h-10 {{ $isAdmin ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600' }} rounded-xl flex items-center justify-center">
+                    <div class="w-10 h-10 {{ $isAdmin ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600' }} rounded-xl flex items-center justify-center shrink-0">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012-2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
-                            </path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012-2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                         </svg>
                     </div>
-                    <div>
-                        <h3 class="text-lg font-bold text-gray-800">Ringkasan Laporan</h3>
-                        <p class="text-[11px] font-medium text-gray-400 uppercase tracking-wider mt-0.5">Filter data
-                            berdasarkan waktu</p>
+                    <div class="flex-1 cursor-pointer" @click="showRingkasan = !showRingkasan">
+                        <h3 class="text-lg font-bold text-gray-800 hover:text-[#800000] transition-colors">Ringkasan Laporan</h3>
+                        <p class="text-[11px] font-medium text-gray-400 uppercase tracking-wider mt-0.5">Filter data berdasarkan waktu</p>
                     </div>
                 </div>
 
-                {{-- Panel Filter Tombol --}}
-                <div
-                    class="flex overflow-x-auto w-full xl:w-auto bg-gray-50 p-1.5 rounded-xl border border-gray-200 hide-scroll">
-                    <button type="button" onclick="applyFilter('semua')" data-period="semua"
-                        class="filter-btn active w-full sm:w-auto px-5 py-2 rounded-lg text-xs font-bold transition-all {{ $themeBg }} text-white shadow-md">Semua</button>
-                    {{-- TOMBOL HARI INI DENGAN INDIKATOR MERAH --}}
-                    <button type="button" onclick="applyFilter('harian')" data-period="harian"
-                        class="filter-btn w-full sm:w-auto px-5 py-2 rounded-lg text-xs font-bold transition-all text-gray-500 hover:text-gray-800 hover:bg-gray-200 relative flex items-center justify-center gap-1.5">
-                        Hari Ini
-                        {{-- Logika: Munculkan titik merah berkedip JIKA ada laporan 'menunggu' hari ini --}}
-                        @if ($stats['harian']['menunggu'] > 0)
-                            <span class="relative flex h-2.5 w-2.5">
-                                <span
-                                    class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                                <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
-                            </span>
-                        @endif
+                <div class="flex flex-row items-center gap-2 xl:gap-4 w-full xl:w-auto">
+                    {{-- Panel Filter Tombol --}}
+                    <div x-show="showRingkasan" x-transition.opacity class="flex overflow-x-auto w-full xl:w-auto bg-gray-50 p-1.5 rounded-xl border border-gray-200 hide-scroll">
+                        <button type="button" onclick="applyFilter('semua')" data-period="semua" class="filter-btn active shrink-0 px-4 py-2 rounded-lg text-xs font-bold transition-all {{ $themeBg }} text-white shadow-md">Semua</button>
+                        <button type="button" onclick="applyFilter('harian')" data-period="harian" class="filter-btn shrink-0 px-4 py-2 rounded-lg text-xs font-bold transition-all text-gray-500 hover:text-gray-800 hover:bg-gray-200 relative flex items-center justify-center gap-1.5">
+                            Hari Ini
+                            @if ($stats['harian']['menunggu'] > 0)
+                                <span class="relative flex h-2.5 w-2.5">
+                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                    <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
+                                </span>
+                            @endif
+                        </button>
+                        <button type="button" onclick="applyFilter('mingguan')" data-period="mingguan" class="filter-btn shrink-0 px-4 py-2 rounded-lg text-xs font-bold transition-all text-gray-500 hover:text-gray-800 hover:bg-gray-200">Mingguan</button>
+                        <button type="button" onclick="applyFilter('bulanan')" data-period="bulanan" class="filter-btn shrink-0 px-4 py-2 rounded-lg text-xs font-bold transition-all text-gray-500 hover:text-gray-800 hover:bg-gray-200">Bulanan</button>
+                        <button type="button" onclick="applyFilter('tahunan')" data-period="tahunan" class="filter-btn shrink-0 px-4 py-2 rounded-lg text-xs font-bold transition-all text-gray-500 hover:text-gray-800 hover:bg-gray-200">Tahunan</button>
+                    </div>
+
+                    {{-- Toggle Button --}}
+                    <button @click="showRingkasan = !showRingkasan" class="shrink-0 p-2.5 bg-gray-50 border border-gray-200 hover:bg-gray-100 text-gray-600 hover:text-gray-800 rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-[#800000]/20">
+                        <svg x-show="showRingkasan" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"></path></svg>
+                        <svg x-show="!showRingkasan" style="display: none;" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
                     </button>
-                    <button type="button" onclick="applyFilter('mingguan')" data-period="mingguan"
-                        class="filter-btn w-full sm:w-auto px-5 py-2 rounded-lg text-xs font-bold transition-all text-gray-500 hover:text-gray-800 hover:bg-gray-200">Mingguan</button>
-                    <button type="button" onclick="applyFilter('bulanan')" data-period="bulanan"
-                        class="filter-btn w-full sm:w-auto px-5 py-2 rounded-lg text-xs font-bold transition-all text-gray-500 hover:text-gray-800 hover:bg-gray-200">Bulanan</button>
-                    <button type="button" onclick="applyFilter('tahunan')" data-period="tahunan"
-                        class="filter-btn w-full sm:w-auto px-5 py-2 rounded-lg text-xs font-bold transition-all text-gray-500 hover:text-gray-800 hover:bg-gray-200">Tahunan</button>
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
-                <div
-                    class="bg-gray-50 rounded-2xl p-5 border border-gray-100 hover:bg-white hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group relative overflow-hidden col-span-2 lg:col-span-1">
-                    <div class="flex justify-between items-start mb-3">
-                        <div
-                            class="w-10 h-10 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center group-hover:bg-purple-600 group-hover:text-white transition-colors duration-300">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
-                                </path>
-                            </svg>
-                        </div>
+            <div x-show="showRingkasan" x-transition.opacity class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                {{-- Kartu Total Laporan --}}
+                <div class="bg-gradient-to-br from-red-800 to-[#800000] rounded-2xl p-5 text-white shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 col-span-2 lg:col-span-1 relative overflow-hidden">
+                    <div class="absolute -right-4 -top-4 w-20 h-20 bg-white/10 rounded-full"></div>
+                    <div class="absolute -right-2 -bottom-6 w-28 h-28 bg-white/5 rounded-full"></div>
+                    <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mb-4">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
                     </div>
-                    <div>
-                        <h3 id="count-total" class="text-3xl font-black text-gray-800">{{ $stats['semua']['total'] }}</h3>
-                        <p class="text-xs font-bold text-gray-500 mt-1">Total Laporan</p>
-                    </div>
+                    <h3 id="count-total" class="text-4xl font-black">{{ $stats['semua']['total'] }}</h3>
+                    <p class="text-xs font-bold text-white/80 mt-1 uppercase tracking-wider">Total Laporan</p>
                 </div>
-                <div
-                    class="bg-gray-50 rounded-2xl p-5 border border-gray-100 hover:bg-white hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group relative overflow-hidden">
-                    <div class="flex justify-between items-start mb-3">
-                        <div
-                            class="w-10 h-10 bg-yellow-100 text-yellow-600 rounded-lg flex items-center justify-center group-hover:bg-yellow-500 group-hover:text-white transition-colors duration-300">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                        </div>
+                {{-- Kartu Menunggu --}}
+                <div class="bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl p-5 border border-transparent shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group relative overflow-hidden text-white">
+                    <div class="absolute -right-4 -top-4 w-20 h-20 bg-white/10 rounded-full"></div>
+                    <div class="absolute -right-2 -bottom-6 w-28 h-28 bg-white/5 rounded-full"></div>
+                    <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mb-4 group-hover:bg-white/30 transition-colors duration-300">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
                     </div>
-                    <div>
-                        <h3 id="count-menunggu" class="text-3xl font-black text-gray-800">{{ $stats['semua']['menunggu'] }}
-                        </h3>
-                        <p class="text-xs font-bold text-gray-500 mt-1">Menunggu</p>
-                    </div>
+                    <h3 id="count-menunggu" class="text-4xl font-black">{{ $stats['semua']['menunggu'] }}</h3>
+                    <p class="text-xs font-bold text-white/80 mt-1 uppercase tracking-wider">Menunggu</p>
                 </div>
-                <div
-                    class="bg-gray-50 rounded-2xl p-5 border border-gray-100 hover:bg-white hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group relative overflow-hidden">
-                    <div class="flex justify-between items-start mb-3">
-                        <div
-                            class="w-10 h-10 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                            </svg>
-                        </div>
+                {{-- Kartu Diproses --}}
+                <div class="bg-gradient-to-br from-blue-500 to-cyan-600 rounded-2xl p-5 border border-transparent shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group relative overflow-hidden text-white">
+                    <div class="absolute -right-4 -top-4 w-20 h-20 bg-white/10 rounded-full"></div>
+                    <div class="absolute -right-2 -bottom-6 w-28 h-28 bg-white/5 rounded-full"></div>
+                    <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mb-4 group-hover:bg-white/30 transition-colors duration-300">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
                     </div>
-                    <div>
-                        <h3 id="count-diproses" class="text-3xl font-black text-gray-800">{{ $stats['semua']['diproses'] }}
-                        </h3>
-                        <p class="text-xs font-bold text-gray-500 mt-1">Diproses</p>
-                    </div>
+                    <h3 id="count-diproses" class="text-4xl font-black">{{ $stats['semua']['diproses'] }}</h3>
+                    <p class="text-xs font-bold text-white/80 mt-1 uppercase tracking-wider">Diproses</p>
                 </div>
-                <div
-                    class="bg-gray-50 rounded-2xl p-5 border border-gray-100 hover:bg-white hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group relative overflow-hidden">
-                    <div class="flex justify-between items-start mb-3">
-                        <div
-                            class="w-10 h-10 bg-green-100 text-green-600 rounded-lg flex items-center justify-center group-hover:bg-green-500 group-hover:text-white transition-colors duration-300">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                        </div>
+                {{-- Kartu Selesai --}}
+                <div class="bg-gradient-to-br from-emerald-400 to-green-600 rounded-2xl p-5 border border-transparent shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group relative overflow-hidden text-white">
+                    <div class="absolute -right-4 -top-4 w-20 h-20 bg-white/10 rounded-full"></div>
+                    <div class="absolute -right-2 -bottom-6 w-28 h-28 bg-white/5 rounded-full"></div>
+                    <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mb-4 group-hover:bg-white/30 transition-colors duration-300">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
                     </div>
-                    <div>
-                        <h3 id="count-selesai" class="text-3xl font-black text-gray-800">{{ $stats['semua']['selesai'] }}
-                        </h3>
-                        <p class="text-xs font-bold text-gray-500 mt-1">Selesai</p>
-                    </div>
-                </div>
-                <div
-                    class="bg-gray-50 rounded-2xl p-5 border border-gray-100 hover:bg-white hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group relative overflow-hidden">
-                    <div class="flex justify-between items-start mb-3">
-                        <div
-                            class="w-10 h-10 bg-red-100 text-red-600 rounded-lg flex items-center justify-center group-hover:bg-red-500 group-hover:text-white transition-colors duration-300">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 id="count-ditolak" class="text-3xl font-black text-gray-800">{{ $stats['semua']['ditolak'] }}
-                        </h3>
-                        <p class="text-xs font-bold text-gray-500 mt-1">Ditolak</p>
-                    </div>
+                    <h3 id="count-selesai" class="text-4xl font-black">{{ $stats['semua']['selesai'] }}</h3>
+                    <p class="text-xs font-bold text-white/80 mt-1 uppercase tracking-wider">Selesai</p>
                 </div>
             </div>
         </div>
@@ -702,7 +660,7 @@
                                                     class="p-6 bg-gray-100/50 flex flex-col justify-start items-center gap-6 flex-1 overflow-y-auto custom-scroll min-h-[300px]">
                                                     {{-- Bukti Foto --}}
                                                     @if ($item->bukti)
-                                                        <img src="{{ asset('storage/' . $item->bukti) }}" alt="Bukti Laporan"
+                                                        <img src="{{ asset($item->bukti) }}" alt="Bukti Laporan"
                                                             class="w-full h-auto object-contain rounded-xl shadow-sm border border-gray-200">
                                                     @endif
 
@@ -736,7 +694,7 @@
                                                     <button @click="showBukti = false"
                                                         class="px-6 py-2.5 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition">Tutup</button>
                                                     @if ($item->bukti)
-                                                        <a href="{{ asset('storage/' . $item->bukti) }}" download
+                                                        <a href="{{ asset($item->bukti) }}" download
                                                             class="px-6 py-2.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition shadow-md flex items-center gap-2">
                                                             <svg class="w-4 h-4" fill="none" stroke="currentColor"
                                                                 viewBox="0 0 24 24">
