@@ -47,16 +47,4 @@ class Laporan extends Model
         return $this->hasMany(RiwayatLaporan::class, 'laporan_id')->orderBy('created_at', 'asc');
     }
 
-    public function keluhanss()
-    {
-        return $this->hasMany(Keluhan::class, 'laporan_id')->orderBy('created_at', 'desc');
-    }
-
-    /**
-     * Keluhan yang masih menunggu tanggapan (pending)
-     */
-    public function keluhanPending()
-    {
-        return $this->hasMany(Keluhan::class, 'laporan_id')->where('status', 'menunggu_tanggapan');
-    }
 }

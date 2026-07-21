@@ -105,14 +105,11 @@
                         <button type="button" onclick="applyFilter('semua')" data-period="semua"
                             class="filter-btn active flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-bold transition-all {{ $themeBg }} text-white shadow-md">Semua</button>
                         <button type="button" onclick="applyFilter('harian')" data-period="harian"
-                            class="filter-btn flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-bold transition-all text-gray-500 hover:text-gray-800 hover:bg-gray-200">Hari
-                            Ini</button>
+                            class="filter-btn flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-bold transition-all text-gray-500 hover:text-gray-800 hover:bg-gray-200">Harian</button>
                         <button type="button" onclick="applyFilter('mingguan')" data-period="mingguan"
                             class="filter-btn flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-bold transition-all text-gray-500 hover:text-gray-800 hover:bg-gray-200">Mingguan</button>
                         <button type="button" onclick="applyFilter('bulanan')" data-period="bulanan"
                             class="filter-btn flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-bold transition-all text-gray-500 hover:text-gray-800 hover:bg-gray-200">Bulanan</button>
-                        <button type="button" onclick="applyFilter('tahunan')" data-period="tahunan"
-                            class="filter-btn flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-bold transition-all text-gray-500 hover:text-gray-800 hover:bg-gray-200">Tahunan</button>
                     </div>
                 </div>
 
@@ -179,12 +176,12 @@
                             <p class="text-[11px] font-bold text-gray-400 uppercase tracking-widest mt-0.5" id="label-periode-line">Rentang: Bulanan</p>
                         </div>
                         <div class="flex gap-1 bg-gray-100 p-1 rounded-xl shrink-0">
-                            <button onclick="switchLineRange('bulanan')" id="btn-bulanan"
-                                class="line-range-btn active-range px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-[#800000] text-white shadow">Bulanan</button>
+                            <button onclick="switchLineRange('harian')" id="btn-harian"
+                                class="line-range-btn active-range px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-[#800000] text-white shadow">Harian</button>
                             <button onclick="switchLineRange('mingguan')" id="btn-mingguan"
                                 class="line-range-btn px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-gray-500 hover:text-gray-800">Mingguan</button>
-                            <button onclick="switchLineRange('harian')" id="btn-harian"
-                                class="line-range-btn px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-gray-500 hover:text-gray-800">Harian</button>
+                            <button onclick="switchLineRange('bulanan')" id="btn-bulanan"
+                                class="line-range-btn px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-gray-500 hover:text-gray-800">Bulanan</button>
                         </div>
                     </div>
                     {{-- Wrapper overflow untuk scroll horizontal --}}
@@ -530,7 +527,7 @@
 
             let lineChart    = null;
             let doughnutChart = null;
-            let currentRange = 'bulanan';
+            let currentRange = 'harian';
 
             // Palet warna yang premium untuk multi-line
             const colorPalette = [
@@ -600,12 +597,12 @@
                     // ===== LINE CHART =====
                     const ctxLine = document.getElementById('lineChart');
                     if (ctxLine) {
-                        const rangeData = timeSeriesData['bulanan'];
+                        const rangeData = timeSeriesData['harian'];
                         lineChart = new Chart(ctxLine.getContext('2d'), {
                             type: 'line',
                             data: {
                                 labels: rangeData?.labels ?? [],
-                                datasets: buildLineDatasets('bulanan'),
+                                datasets: buildLineDatasets('harian'),
                             },
                             options: {
                                 responsive: true,
@@ -731,8 +728,8 @@
                 animateValue("count-selesai",  data.selesai);
 
                 const labels = {
-                    'semua': 'Semua Waktu', 'harian': 'Hari Ini',
-                    'mingguan': 'Minggu Ini', 'bulanan': 'Bulan Ini', 'tahunan': 'Tahun Ini'
+                    'semua': 'Semua Waktu', 'harian': 'Harian',
+                    'mingguan': 'Mingguan', 'bulanan': 'Bulanan'
                 };
                 document.querySelectorAll('.filter-btn').forEach(btn => {
                     if (btn.dataset.period === period) {

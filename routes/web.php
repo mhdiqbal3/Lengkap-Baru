@@ -71,6 +71,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/index', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard', [DashboardController::class, 'index']);
     Route::post('/notifikasi/{id}/baca', [LaporanController::class, 'bacaNotifikasi'])->name('notifikasi.baca');
+    Route::post('/notifikasi/hapus-semua', [LaporanController::class, 'hapusSemuaNotifikasi'])->name('notifikasi.hapus_semua');
 
     Route::get('/dashboard/edit', [DashboardController::class, 'editDashboard'])->name('dashboard.edit');
     Route::post('/dashboard/update', [DashboardController::class, 'updateDashboard'])->name('dashboard.update');
@@ -79,9 +80,6 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/lapor', [LaporanController::class, 'store'])->name('lapor.store');
     Route::get('/riwayat', [LaporanController::class, 'riwayat'])->name('riwayat');
 
-    // Rute Keluhan (pelapor kirim keluhan)
-    Route::post('/keluhan', [LaporanController::class, 'storeKeluhan'])->name('keluhan.store');
-    Route::post('/keluhan/{id}/baca', [LaporanController::class, 'bacaKeluhan'])->name('keluhan.baca');
 
     Route::get('/cek-status', [LaporanController::class, 'cekStatus'])->name('cek-status');
 
@@ -103,8 +101,6 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/pengaturan/password', [PengaturanController::class, 'updatePassword'])->name('pengaturan.password');
     Route::post('/pengaturan/notifikasi', [PengaturanController::class, 'updateNotifikasi'])->name('pengaturan.notifikasi');
 
-    // Rute Tanggapan Keluhan (Admin/Satgas)
-    Route::post('/keluhan/{id}/tanggapi', [LaporanController::class, 'updateKeluhan'])->name('keluhan.update');
 
     // --- KHUSUS ADMIN ---
     Route::middleware(['admin'])->group(function () {

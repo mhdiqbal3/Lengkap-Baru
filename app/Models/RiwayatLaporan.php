@@ -9,7 +9,7 @@ class RiwayatLaporan extends Model
 {
     use HasFactory;
     
-    protected $fillable = ['laporan_id', 'status', 'catatan', 'tipe', 'keluhan_id'];
+    protected $fillable = ['laporan_id', 'status', 'catatan'];
 
     public function laporan()
     {

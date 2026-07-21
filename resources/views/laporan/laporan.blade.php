@@ -3,13 +3,7 @@
 @section('header_title', 'Data Laporan Pengaduan')
 
 @section('content')
-    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.css" rel="stylesheet">
-    <style>
-        .note-modal-backdrop { z-index: 10050 !important; display: none !important; }
-        .note-modal { z-index: 10051 !important; }
-        .note-dropdown-menu { z-index: 10055 !important; }
-        .note-editor.note-frame .note-editing-area .note-editable { background-color: #ffffff; }
-    </style>
+
     {{-- LOGIKA FILTER KOLEKSI DATA (Diambil dari Dashboard) --}}
     @php
         use Carbon\Carbon;
@@ -81,7 +75,7 @@
                     <div x-show="showRingkasan" x-transition.opacity class="flex overflow-x-auto w-full xl:w-auto bg-gray-50 p-1.5 rounded-xl border border-gray-200 hide-scroll">
                         <button type="button" onclick="applyFilter('semua')" data-period="semua" class="filter-btn active shrink-0 px-4 py-2 rounded-lg text-xs font-bold transition-all {{ $themeBg }} text-white shadow-md">Semua</button>
                         <button type="button" onclick="applyFilter('harian')" data-period="harian" class="filter-btn shrink-0 px-4 py-2 rounded-lg text-xs font-bold transition-all text-gray-500 hover:text-gray-800 hover:bg-gray-200 relative flex items-center justify-center gap-1.5">
-                            Hari Ini
+                            Harian
                             @if ($stats['harian']['menunggu'] > 0)
                                 <span class="relative flex h-2.5 w-2.5">
                                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
@@ -91,7 +85,6 @@
                         </button>
                         <button type="button" onclick="applyFilter('mingguan')" data-period="mingguan" class="filter-btn shrink-0 px-4 py-2 rounded-lg text-xs font-bold transition-all text-gray-500 hover:text-gray-800 hover:bg-gray-200">Mingguan</button>
                         <button type="button" onclick="applyFilter('bulanan')" data-period="bulanan" class="filter-btn shrink-0 px-4 py-2 rounded-lg text-xs font-bold transition-all text-gray-500 hover:text-gray-800 hover:bg-gray-200">Bulanan</button>
-                        <button type="button" onclick="applyFilter('tahunan')" data-period="tahunan" class="filter-btn shrink-0 px-4 py-2 rounded-lg text-xs font-bold transition-all text-gray-500 hover:text-gray-800 hover:bg-gray-200">Tahunan</button>
                     </div>
 
                     {{-- Toggle Button --}}
@@ -211,7 +204,7 @@
 
                     <tbody class="divide-y divide-gray-50">
                         @foreach ($laporans as $index => $item)
-                            <tr class="bg-white hover:bg-gray-50/50 transition-colors group" x-data="{ showEdit: false, showBukti: false, showDetail: false, showDelete: false, showKeluhan: false }">
+                            <tr class="bg-white hover:bg-gray-50/50 transition-colors group" x-data="{ showEdit: false, showBukti: false, showDetail: false, showDelete: false }">
                                 <td class="px-6 py-4 text-center font-medium text-gray-500">{{ $index + 1 }}</td>
                                 <td class="px-4 py-4 font-bold text-[#800000] whitespace-nowrap">{{ $item->kode_tiket }}
                                 </td>
@@ -365,27 +358,6 @@
                                                 </path>
                                             </svg>
                                         </a>
-
-                                        {{-- Tombol Keluhan (Admin/Satgas) --}}
-                                        @php
-                                            $jumlahKeluhan = $item->keluhanss()->count();
-                                            $keluhanPending = $item->keluhanPending()->count();
-                                        @endphp
-                                        @if($jumlahKeluhan > 0)
-                                            <button @click="showKeluhan = true"
-                                                class="relative p-2 rounded-lg transition-colors border shadow-sm
-                                                    {{ $keluhanPending > 0 ? 'text-orange-600 bg-orange-50 hover:bg-orange-500 hover:text-white border-orange-200' : 'text-gray-500 bg-gray-50 hover:bg-gray-200 border-gray-200' }}"
-                                                title="Lihat Keluhan ({{ $jumlahKeluhan }})">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
-                                                    </path>
-                                                </svg>
-                                                @if($keluhanPending > 0)
-                                                    <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[8px] font-black rounded-full flex items-center justify-center animate-pulse">{{ $keluhanPending }}</span>
-                                                @endif
-                                            </button>
-                                        @endif
                                     </div>
 
                                     {{-- Modal Lihat Detail Data --}}
@@ -860,104 +832,6 @@
                                         </div>
                                     </template>
 
-                                    {{-- Modal Keluhan untuk Admin/Satgas --}}
-                                    @if($item->keluhanss()->count() > 0)
-                                        <template x-teleport="body">
-                                            <div x-show="showKeluhan" style="display: none;"
-                                                class="fixed inset-0 z-[10001] flex items-center justify-center bg-gray-900/80 backdrop-blur-sm px-4 py-6"
-                                                x-transition.opacity>
-                                                <div @click.away="showKeluhan = false"
-                                                    class="bg-white rounded-[2rem] shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col text-left overflow-hidden transform transition-all"
-                                                    x-transition.scale>
-
-                                                    {{-- Header --}}
-                                                    <div class="bg-gradient-to-r from-orange-500 to-amber-500 p-6 text-white flex justify-between items-center shrink-0">
-                                                        <div class="flex items-center gap-3">
-                                                            <div class="w-11 h-11 bg-white/20 rounded-xl flex items-center justify-center">
-                                                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
-                                                                    </path>
-                                                                </svg>
-                                                            </div>
-                                                            <div>
-                                                                <span class="text-orange-100 text-[10px] font-bold uppercase tracking-widest block">Keluhan Pelapor</span>
-                                                                <h3 class="text-xl font-black tracking-tight">{{ $item->kode_tiket }}</h3>
-                                                            </div>
-                                                        </div>
-                                                        <button @click="showKeluhan = false"
-                                                            class="p-2 bg-white/10 hover:bg-white/20 rounded-xl transition focus:outline-none">
-                                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                                            </svg>
-                                                        </button>
-                                                    </div>
-
-                                                    <div class="overflow-y-auto flex-1 p-6 custom-scroll bg-gray-50 space-y-5">
-                                                        @foreach($item->keluhanss()->get() as $kl)
-                                                            <div class="bg-white border {{ $kl->status === 'menunggu_tanggapan' ? 'border-orange-200' : 'border-green-100' }} rounded-2xl shadow-sm overflow-hidden">
-                                                                {{-- Header kartu keluhan --}}
-                                                                <div class="px-5 py-4 border-b {{ $kl->status === 'menunggu_tanggapan' ? 'border-orange-100 bg-orange-50' : 'border-green-100 bg-green-50' }}">
-                                                                    <div class="flex items-center justify-between gap-2 flex-wrap">
-                                                                        <span class="text-xs font-black {{ $kl->status === 'menunggu_tanggapan' ? 'text-orange-700' : 'text-green-700' }}">{{ $kl->label_kategori }}</span>
-                                                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border {{ $kl->status === 'ditindaklanjuti' ? 'text-green-600 bg-green-50 border-green-200' : 'text-orange-700 bg-orange-50 border-orange-200' }}">
-                                                                            {{ $kl->status === 'ditindaklanjuti' ? '✓ Tanggapan' : '⏳ Menunggu Tanggapan' }}
-                                                                        </span>
-                                                                    </div>
-                                                                    <p class="text-[11px] text-gray-400 mt-1">{{ \Carbon\Carbon::parse($kl->created_at)->translatedFormat('d F Y, H:i') }}</p>
-                                                                </div>
-
-                                                                <div class="px-5 py-4 space-y-3">
-                                                                    @if($kl->isi_keluhan)
-                                                                        <div>
-                                                                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Isi Keluhan</p>
-                                                                            <p class="text-sm text-gray-700">{{ $kl->isi_keluhan }}</p>
-                                                                        </div>
-                                                                    @endif
-
-                                                                    @if($kl->catatan_satgas)
-                                                                        <div class="bg-green-50 border border-green-100 rounded-xl p-3">
-                                                                            <p class="text-[10px] font-bold text-green-600 uppercase tracking-wider mb-1">Balasan dari {{ $kl->user ? ($kl->user->role === 'admin' ? 'Admin' : $kl->user->username) : 'Satgas' }}</p>
-                                                                            <div class="text-sm text-gray-700 prose prose-sm max-w-none">{!! $kl->catatan_satgas !!}</div>
-                                                                        </div>
-                                                                    @endif
-
-                                                                    {{-- Form Balas / Tanggapi --}}
-                                                                    @if(in_array(auth()->user()->role, ['admin', 'satgas']))
-                                                                        <form action="{{ route('keluhan.update', $kl->id) }}" method="POST"
-                                                                            class="pt-3 border-t border-gray-100 space-y-3">
-                                                                            @csrf
-                                                                            <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">{{ $kl->catatan_satgas ? 'Perbarui Tanggapan' : 'Beri Tanggapan' }}</p>
-                                                                            <textarea name="catatan_satgas" id="catatanEditor_{{ $kl->id }}" required
-                                                                                placeholder="Tulis catatan/tanggapan untuk keluhan ini..."
-                                                                                class="w-full bg-gray-50 border border-gray-200 text-gray-900 rounded-xl p-3 outline-none transition-all shadow-sm text-sm">{{ $kl->catatan_satgas }}</textarea>
-                                                                            <div class="flex justify-end">
-                                                                                <button type="submit"
-                                                                                    class="w-full justify-center px-4 py-2.5 bg-orange-500 text-white font-bold rounded-xl hover:bg-orange-600 transition-all active:scale-95 shadow-sm text-sm flex items-center gap-1.5 whitespace-nowrap">
-                                                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path>
-                                                                                    </svg>
-                                                                                    Balas
-                                                                                </button>
-                                                                            </div>
-                                                                        </form>
-                                                                    @endif
-                                                                </div>
-                                                            </div>
-                                                        @endforeach
-                                                    </div>
-
-                                                    <div class="p-5 border-t border-gray-100 bg-white shrink-0 flex justify-end">
-                                                        <button @click="showKeluhan = false"
-                                                            class="px-6 py-2.5 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-colors">
-                                                            Tutup
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </template>
-                                    @endif
-
                                 </td>
                             </tr>
                         @endforeach
@@ -1169,24 +1043,4 @@
                 obj.style.opacity = 1;
             }, 150);
         }
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
-    <script>
-        // Inisialisasi Summernote untuk semua textarea catatan satgas
-        document.addEventListener('alpine:initialized', () => {
-            document.querySelectorAll('[id^="catatanEditor_"]').forEach(function(el) {
-                $(el).summernote({
-                    placeholder: 'Tulis catatan/tanggapan untuk keluhan ini...',
-                    height: 180,
-                    dialogsInBody: true,
-                    toolbar: [
-                        ['font', ['bold', 'italic', 'underline', 'clear']],
-                        ['color', ['color']],
-                        ['para', ['ul', 'ol', 'paragraph']],
-                        ['view', ['fullscreen']]
-                    ]
-                });
-            });
-        });
-    </script>
 @endpush

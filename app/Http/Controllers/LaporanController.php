@@ -284,6 +284,12 @@ class LaporanController extends Controller
         return back();
     }
 
+    public function hapusSemuaNotifikasi()
+    {
+        Notification::where('user_id', Auth::id())->delete();
+        return back()->with('success', 'Semua pemberitahuan berhasil dihapus.');
+    }
+
     public function update(Request $request, $id)
     {
         $request->validate([
@@ -419,114 +425,5 @@ class LaporanController extends Controller
         return redirect()->back()->with('success', 'Pengaturan Surat (Tanda Tangan & Pejabat) berhasil disimpan!');
     }
 
-    /**
-     * Pelapor mengirimkan keluhan terkait laporan yang sedang diproses
-     */
-    public function storeKeluhan(Request $request)
-    {
-        $request->validate([
-            'laporan_id'  => 'required|integer|exists:laporans,id',
-            'kategori'    => 'required|in:belum_dihubungi,terlalu_lama,lainnya',
-            'isi_keluhan' => 'nullable|string|max:1000|required_if:kategori,lainnya',
-        ]);
 
-        $laporan = \App\Models\Laporan::findOrFail($request->laporan_id);
-
-        if ($laporan->user_id !== auth()->id()) {
-            return redirect()->back()->with('error', 'Akses ditolak.');
-        }
-        if ($laporan->status !== 'Sedang Diproses') {
-            return redirect()->back()->with('error', 'Keluhan hanya dapat dikirim saat laporan berstatus Sedang Diproses.');
-        }
-
-        $labelKategori = match($request->kategori) {
-            'belum_dihubungi' => 'Belum dihubungi Satgas',
-            'terlalu_lama'    => 'Penanganan terlalu lama',
-            'lainnya'         => 'Lainnya',
-        };
-
-        // Simpan keluhan
-        $keluhan = \App\Models\Keluhan::create([
-            'laporan_id'  => $laporan->id,
-            'kode_tiket'  => $laporan->kode_tiket,
-            'kategori'    => $request->kategori,
-            'isi_keluhan' => $request->kategori === 'lainnya' ? $request->isi_keluhan : null,
-            'status'      => 'menunggu_tanggapan',
-        ]);
-
-        // Catat ke riwayat penanganan
-        if ($request->kategori === 'lainnya' && $request->isi_keluhan) {
-            $catatanKeluhan = $request->isi_keluhan;
-        } else {
-            $catatanKeluhan = $labelKategori;
-        }
-
-        \App\Models\RiwayatLaporan::create([
-            'laporan_id' => $laporan->id,
-            'status'     => $laporan->status,
-            'catatan'    => $catatanKeluhan,
-            'tipe'       => 'keluhan',
-            'keluhan_id' => $keluhan->id,
-        ]);
-
-        return redirect()->back()->with('success', 'Keluhan Anda telah berhasil dikirimkan. Tim Satgas akan segera menanggapi.');
-    }
-
-    /**
-     * Admin/Satgas menanggapi keluhan pelapor
-     */
-    public function updateKeluhan(Request $request, $id)
-    {
-        if (!in_array(auth()->user()->role, ['admin', 'satgas'])) {
-            abort(403, 'Akses ditolak.');
-        }
-
-        $request->validate([
-            'catatan_satgas' => 'required|string|max:1000',
-        ]);
-
-        $keluhan = \App\Models\Keluhan::with('laporan')->findOrFail($id);
-        $laporan = $keluhan->laporan;
-
-        $keluhan->update([
-            'catatan_satgas' => $request->catatan_satgas,
-            'status'         => 'ditindaklanjuti',
-            'user_id'        => auth()->id(),
-        ]);
-
-        // Catat tanggapan ke riwayat penanganan
-        \App\Models\RiwayatLaporan::create([
-            'laporan_id' => $laporan->id,
-            'status'     => $laporan->status,
-            'catatan'    => $request->catatan_satgas,
-            'tipe'       => 'tanggapan_keluhan',
-            'keluhan_id' => $keluhan->id,
-        ]);
-
-        // Kirim notifikasi ke pelapor
-        if ($laporan->user_id) {
-            Notification::create([
-                'user_id' => $laporan->user_id,
-                'title'   => "Keluhan {$laporan->kode_tiket} Ditanggapi",
-                'message' => "Satgas telah menanggapi keluhan Anda: {$request->catatan_satgas}",
-                'url'     => url('/cek-status'),
-                'is_read' => false,
-            ]);
-        }
-
-        return redirect()->back()->with('success', 'Tanggapan keluhan berhasil disimpan!');
-    }
-
-    /**
-     * Tandai keluhan sebagai dibaca
-     */
-    public function bacaKeluhan($id)
-    {
-        $keluhan = \App\Models\Keluhan::findOrFail($id);
-        
-        // Ensure only the owner can mark it as read, or if it's not strictly necessary, just mark it.
-        $keluhan->update(['is_read' => true]);
-
-        return response()->json(['success' => true]);
-    }
 }
