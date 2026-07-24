@@ -19,23 +19,24 @@
             $filtered = $allLaporans;
 
             if ($key === 'harian') {
+                // FIX: gunakan created_at (tanggal laporan masuk) bukan tanggal_kejadian
                 $filtered = $allLaporans->filter(function ($item) use ($now) {
-                    $tanggalLapor = $item->tanggal_kejadian ? Carbon::parse($item->tanggal_kejadian) : null;
+                    $tanggalLapor = $item->created_at ? Carbon::parse($item->created_at) : null;
                     return $tanggalLapor && $tanggalLapor->isSameDay($now);
                 });
             } elseif ($key === 'mingguan') {
                 $filtered = $allLaporans->filter(function ($item) use ($now) {
-                    $tanggalLapor = $item->tanggal_kejadian ? Carbon::parse($item->tanggal_kejadian) : null;
+                    $tanggalLapor = $item->created_at ? Carbon::parse($item->created_at) : null;
                     return $tanggalLapor && $tanggalLapor->isSameWeek($now);
                 });
             } elseif ($key === 'bulanan') {
                 $filtered = $allLaporans->filter(function ($item) use ($now) {
-                    $tanggalLapor = $item->tanggal_kejadian ? Carbon::parse($item->tanggal_kejadian) : null;
+                    $tanggalLapor = $item->created_at ? Carbon::parse($item->created_at) : null;
                     return $tanggalLapor && $tanggalLapor->isSameMonth($now);
                 });
             } elseif ($key === 'tahunan') {
                 $filtered = $allLaporans->filter(function ($item) use ($now) {
-                    $tanggalLapor = $item->tanggal_kejadian ? Carbon::parse($item->tanggal_kejadian) : null;
+                    $tanggalLapor = $item->created_at ? Carbon::parse($item->created_at) : null;
                     return $tanggalLapor && $tanggalLapor->isSameYear($now);
                 });
             }
@@ -164,9 +165,29 @@
             </div>
         @endif
 
-        <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden flex flex-col p-6">
-            <div class="overflow-x-auto custom-scroll flex-1 relative w-full">
-                <table id="tableLaporan" class="w-full text-sm text-left text-gray-600 min-w-[1700px] mt-4">
+        <div class="bg-white rounded-3xl border border-gray-100 shadow-sm p-6">
+
+            {{-- Header Kontrol Tabel --}}
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                <div>
+                    <h3 class="text-base font-bold text-gray-800">Tabel Laporan</h3>
+                    <span id="tabel-periode-label" class="text-xs font-bold text-gray-400 uppercase tracking-wider">Periode: Semua Waktu</span>
+                </div>
+                <div class="flex items-center gap-2 flex-wrap">
+                    <div id="dt-export-btn-area"></div>
+                    @if(auth()->check() && auth()->user()->role === 'admin')
+                    <button type="button" onclick="document.getElementById('modalTtd').classList.remove('hidden')"
+                        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg inline-flex items-center text-sm shadow-sm transition gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                        Tanda Tangan
+                    </button>
+                    @endif
+                </div>
+            </div>
+
+            {{-- DataTable --}}
+            <div class="overflow-x-auto w-full">
+                <table id="tableLaporan" class="w-full text-sm text-left text-gray-600" style="min-width: 1700px;">
                     <thead class="text-xs text-gray-500 uppercase bg-gray-50 border-b border-gray-100">
                         <tr>
                             <th scope="col" class="px-6 py-5 font-bold tracking-wider text-center w-16">No</th>
@@ -204,7 +225,10 @@
 
                     <tbody class="divide-y divide-gray-50">
                         @foreach ($laporans as $index => $item)
-                            <tr class="bg-white hover:bg-gray-50/50 transition-colors group" x-data="{ showEdit: false, showBukti: false, showDetail: false, showDelete: false }">
+                            <tr class="bg-white hover:bg-gray-50/50 transition-colors group laporan-row" 
+                                data-date="{{ \Carbon\Carbon::parse($item->created_at)->format('Y-m-d') }}"
+                                data-status="{{ $item->status }}"
+                                x-data="{ showEdit: false, showBukti: false, showDetail: false, showDelete: false }">
                                 <td class="px-6 py-4 text-center font-medium text-gray-500">{{ $index + 1 }}</td>
                                 <td class="px-4 py-4 font-bold text-[#800000] whitespace-nowrap">{{ $item->kode_tiket }}
                                 </td>
@@ -933,17 +957,98 @@
             background-color: #16a34a !important;
             color: white !important;
             border: none !important;
-            padding: 0.5rem 1rem !important;
+            padding: 0.45rem 0.9rem !important;
             border-radius: 0.5rem !important;
             font-weight: bold !important;
-            font-size: 0.875rem !important;
+            font-size: 0.8rem !important;
             transition: all 0.3s !important;
-            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+            box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05) !important;
+            display: inline-flex !important;
+            align-items: center !important;
         }
-
         .dt-buttons .dt-button:hover {
             background-color: #15803d !important;
         }
+
+        /* Sembunyikan hanya default buttons karena sudah dipindah */
+        div.dataTables_wrapper > div.dt-buttons { display: none; }
+
+        /* Styling kontrol filter dan length */
+        div.dataTables_wrapper div.dataTables_length,
+        div.dataTables_wrapper div.dataTables_filter {
+            float: none;
+            font-size: 0.8rem;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            margin-bottom: 0;
+            text-align: left;
+        }
+        div.dataTables_wrapper div.dataTables_filter label {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            white-space: nowrap;
+        }
+        div.dataTables_wrapper div.dataTables_filter input {
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 0.4rem 0.85rem;
+            font-size: 0.8rem;
+            outline: none;
+            background: #f9fafb;
+            width: 220px;
+            transition: border-color 0.2s, background 0.2s;
+            margin-left: 0.5rem;
+        }
+        div.dataTables_wrapper div.dataTables_filter input:focus {
+            border-color: #800000;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(128,0,0,0.08);
+        }
+        div.dataTables_wrapper div.dataTables_length select {
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 0.35rem 0.5rem;
+            font-size: 0.8rem;
+            background: #f9fafb;
+            margin: 0 0.3rem;
+        }
+
+        /* Info + Pagination */
+        div.dataTables_wrapper div.dataTables_info {
+            padding-top: 0.5rem;
+            font-size: 0.8rem;
+            color: #6b7280;
+            float: none;
+        }
+        div.dataTables_wrapper div.dataTables_paginate {
+            padding-top: 0;
+            float: none;
+            text-align: right;
+        }
+        div.dataTables_wrapper div.dataTables_paginate .paginate_button {
+            padding: 0.3rem 0.6rem;
+            border-radius: 0.4rem;
+            font-size: 0.8rem;
+            border: 1px solid transparent;
+        }
+        div.dataTables_wrapper div.dataTables_paginate .paginate_button.current {
+            background: #800000 !important;
+            color: white !important;
+            border-color: #800000 !important;
+        }
+        div.dataTables_wrapper div.dataTables_paginate .paginate_button:hover {
+            background: #f3f4f6 !important;
+            color: #374151 !important;
+            border-color: #e5e7eb !important;
+        }
+        div.dataTables_wrapper div.dataTables_paginate .paginate_button.current:hover {
+            background: #900000 !important;
+            color: white !important;
+        }
+
     </style>
 @endsection
 
@@ -957,90 +1062,146 @@
         const dashboardData = @json($stats);
         const isAdmin = {{ $isAdmin ? 'true' : 'false' }};
 
-        $(document).ready(function() {
-            $('#tableLaporan').DataTable({
+        // ============================================================
+        // VARIABEL FILTER AKTIF (disimpan di scope modul)
+        // ============================================================
+        let activePeriod   = 'semua';
+        let filterStart    = null;
+        let filterEnd      = null;
+        let dtTable        = null;
+
+        $(document).ready(function () {
+            // ---- Daftarkan SATU custom search function (sekali, di awal) ----
+            $.fn.dataTable.ext.search.push(function (settings, rowData, dataIndex) {
+                // Hanya berlaku untuk tabel laporan ini
+                if (settings.nTable.id !== 'tableLaporan') return true;
+                // Jika periode "semua", tampilkan semua baris
+                if (activePeriod === 'semua' || !filterStart || !filterEnd) return true;
+
+                // Ambil data-date dari node <tr>
+                const node       = dtTable ? dtTable.row(dataIndex).node() : null;
+                const dateStr    = node ? $(node).data('date') : null;
+                if (!dateStr) return false;
+
+                const parts   = dateStr.split('-');
+                const rowDate = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+
+                return rowDate >= filterStart && rowDate <= filterEnd;
+            });
+
+            // ---- Inisialisasi DataTable ----
+            dtTable = $('#tableLaporan').DataTable({
                 "language": {
-                    "search": "Cari Data:",
-                    "lengthMenu": "Tampilkan _MENU_ entri",
-                    "emptyTable": "Belum ada laporan pengaduan yang masuk.",
-                    "info": "Menampilkan _START_ sampai _END_ dari _TOTAL_ entri",
+                    "search":      "Cari Data:",
+                    "lengthMenu":  "Tampilkan _MENU_ entri",
+                    "emptyTable":  "Tidak ada laporan pada periode yang dipilih.",
+                    "zeroRecords": "Tidak ada laporan yang sesuai dengan filter ini.",
+                    "info":        "Menampilkan _START_ sampai _END_ dari _TOTAL_ entri",
+                    "infoEmpty":   "Menampilkan 0 sampai 0 dari 0 entri",
                     "paginate": {
                         "previous": "Sebelumnya",
-                        "next": "Selanjutnya"
+                        "next":     "Selanjutnya"
                     }
                 },
                 "pagingType": "simple_numbers",
-
-                "dom": '<"flex flex-col md:flex-row justify-between items-start gap-4 mb-6"<"left-side flex flex-col gap-3"l><"right-side flex flex-col items-end gap-2"Bf>>rt<"flex flex-col md:flex-row justify-between items-center gap-4 mt-6"ip>',
-
+                "dom": '<"flex flex-col sm:flex-row justify-between items-center gap-4 mb-4"lf>Brt<"flex flex-col sm:flex-row justify-between items-center gap-4 mt-4"ip>',
                 "buttons": [{
                     extend: 'excelHtml5',
                     text: '<svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg> Export Excel',
                     title: 'Data Laporan Pengaduan PPKS',
-                    exportOptions: {
-                        columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12]
-                    }
+                    exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12] }
                 }],
-                "pageLength": 10,
-                "scrollX": true,
-                "order": [
-                    [2, "desc"]
+                "pageLength":  10,
+                "scrollX":     false,
+                "order":       [[2, "desc"]],
+                "columnDefs": [
+                    { "orderable": false, "targets": -1 },
+                    { "orderable": false, "targets": -3 }
                 ],
-                "columnDefs": [{
-                        "orderable": false,
-                        "targets": -1
-                    },
-                    {
-                        "orderable": false,
-                        "targets": -3
+                "initComplete": function () {
+                    // Pindahkan tombol Export ke area header
+                    var exportArea = document.getElementById('dt-export-btn-area');
+                    if (exportArea) {
+                        var dtBtns = document.querySelector('.dt-buttons');
+                        if (dtBtns) exportArea.appendChild(dtBtns);
                     }
-                ],
-                "initComplete": function() {
-                    var tableTitle =
-                        '<span class="text-base text-gray-700 font-bold mt-1">Tabel Laporan</span>';
-                    $('.left-side').prepend(tableTitle);
-
-                    // SCRIPT BARU UNTUK TOMBOL UPLOAD TTD DI SAMPING TOMBOL EXCEL
-                    @if(auth()->check() && auth()->user()->role === 'admin')
-                    var btnUploadTTD = `<button type="button" onclick="document.getElementById('modalTtd').classList.remove('hidden')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg inline-flex items-center text-sm shadow-sm transition gap-2 ml-2 h-[38px]">
-                        <svg class="w-4 h-4 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                        Tanda Tangan
-                    </button>`;
-                    $('.dt-buttons').append(btnUploadTTD);
-                    @endif
                 }
             });
         });
 
-        window.applyFilter = function(period) {
+        // ============================================================
+        // FUNGSI APPLY FILTER — dipanggil oleh tombol periode
+        // ============================================================
+        window.applyFilter = function (period) {
             if (!dashboardData || !dashboardData[period]) return;
 
+            // --- Update kartu statistik ---
             const data = dashboardData[period];
-
-            animateValue("count-total", data.total);
+            animateValue("count-total",    data.total);
             animateValue("count-menunggu", data.menunggu);
             animateValue("count-diproses", data.diproses);
-            animateValue("count-selesai", data.selesai);
-            animateValue("count-ditolak", data.ditolak);
+            animateValue("count-selesai",  data.selesai);
+            animateValue("count-ditolak",  data.ditolak);
 
-            document.querySelectorAll('.filter-btn').forEach(btn => {
+            // --- Highlight tombol aktif ---
+            document.querySelectorAll('.filter-btn').forEach(function (btn) {
                 if (btn.dataset.period === period) {
-                    btn.className =
-                        `filter-btn active w-full sm:w-auto px-5 py-2 rounded-lg text-xs font-bold transition-all ${isAdmin ? 'bg-[#800000]' : 'bg-blue-900'} text-white shadow-md`;
+                    btn.className = `filter-btn active shrink-0 px-4 py-2 rounded-lg text-xs font-bold transition-all ${isAdmin ? 'bg-[#800000]' : 'bg-blue-900'} text-white shadow-md`;
                 } else {
-                    btn.className =
-                        "filter-btn w-full sm:w-auto px-5 py-2 rounded-lg text-xs font-bold transition-all text-gray-500 hover:text-gray-800 hover:bg-gray-200";
+                    btn.className = 'filter-btn shrink-0 px-4 py-2 rounded-lg text-xs font-bold transition-all text-gray-500 hover:text-gray-800 hover:bg-gray-200';
                 }
             });
-        }
+
+            // --- Hitung rentang tanggal ---
+            const now   = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+            activePeriod = period;
+            filterStart  = null;
+            filterEnd    = null;
+
+            if (period === 'harian') {
+                filterStart = today;
+                filterEnd   = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999);
+            } else if (period === 'mingguan') {
+                const dow   = today.getDay() === 0 ? 6 : today.getDay() - 1; // Senin = 0
+                filterStart = new Date(today.getTime() - dow * 86400000);
+                filterEnd   = new Date(filterStart.getTime() + 7 * 86400000 - 1);
+            } else if (period === 'bulanan') {
+                filterStart = new Date(now.getFullYear(), now.getMonth(), 1);
+                filterEnd   = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+            } else if (period === 'tahunan') {
+                filterStart = new Date(now.getFullYear(), 0, 1);
+                filterEnd   = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999);
+            }
+
+            // --- Trigger redraw DataTable (custom search function di atas akan membaca filterStart/filterEnd) ---
+            if (dtTable) {
+                dtTable.draw();
+            }
+
+            // --- Update label periode ---
+            const periodLabels = {
+                'semua':   'Semua Waktu',
+                'harian':  'Hari Ini (' + today.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) + ')',
+                'mingguan':'Minggu Ini',
+                'bulanan': 'Bulan Ini (' + now.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' }) + ')',
+                'tahunan': 'Tahun ' + now.getFullYear(),
+            };
+            const labelEl = document.getElementById('tabel-periode-label');
+            if (labelEl) {
+                labelEl.textContent = 'Periode: ' + (periodLabels[period] || 'Semua Waktu');
+            }
+        };
 
         function animateValue(id, end) {
-            let obj = document.getElementById(id);
+            const obj = document.getElementById(id);
             if (!obj) return;
             obj.style.opacity = 0;
-            setTimeout(() => {
+            setTimeout(function () {
                 obj.innerText = end;
                 obj.style.opacity = 1;
             }, 150);
         }
+    </script>
 @endpush

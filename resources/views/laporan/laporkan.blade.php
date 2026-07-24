@@ -594,12 +594,12 @@
                                                         x-show="!fileName">Klik untuk unggah foto</p>
                                                     <p class="mb-0.5 text-sm font-black text-[#800000] truncate max-w-[200px]"
                                                         x-show="fileName" x-text="fileName"></p>
-                                                    <p class="text-[10px] font-medium text-gray-400">JPEG, PNG (Maks. 5MB)</p>
+                                                    <p class="text-[10px] font-medium text-gray-400">JPEG, PNG, WebP (Ukuran berapapun, otomatis dikompres ke maks. 2MB)</p>
                                                 </div>
                                                 <input id="dropzone-file" name="bukti" type="file"
                                                     class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                                                     @change="fileName = $event.target.files.length ? $event.target.files[0].name : ''"
-                                                    accept="image/jpeg, image/png, image/jpg" />
+                                                    accept="image/jpeg, image/png, image/jpg, image/webp" />
                                             </label>
                                         </div>
                                     </div>

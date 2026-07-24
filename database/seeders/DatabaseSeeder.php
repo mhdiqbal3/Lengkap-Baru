@@ -23,7 +23,17 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('satgas123'), // Password untuk admin
         ]);
 
-        // 2. Buat Akun Pelapor (Contoh: Mahasiswa)
+        // 2. Buat Akun Admin Kedua (Admin Satgas 2)
+        User::create([
+            'name'     => 'Admin Satgas 2',
+            'username' => 'admin_satgas_2',
+            'email'    => 'admin2@usn.ac.id',
+            'no_hp'    => '081200003333',
+            'role'     => 'admin',
+            'password' => Hash::make('satgas123'), // Password sama seperti admin utama
+        ]);
+
+        // 3. Buat Akun Pelapor (Contoh: Mahasiswa)
         User::create([
             'name'     => 'Andi Budi (Pelapor)',
             'username' => '19000123', // Menggunakan NIM sebagai username

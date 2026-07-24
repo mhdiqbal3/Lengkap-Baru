@@ -130,8 +130,10 @@ class DashboardController extends Controller
             $monthlyJenisKasus[$jenis] = [];
             for ($i = 11; $i >= 0; $i--) {
                 $month = $now->copy()->subMonths($i);
+                // FIX: Hitung hanya laporan BARU di bulan tersebut (bukan kumulatif)
                 $monthlyJenisKasus[$jenis][] = Laporan::where('jenis_kasus', $jenis)
-                    ->where('created_at', '<=', $month->copy()->endOfMonth())
+                    ->whereYear('created_at', $month->year)
+                    ->whereMonth('created_at', $month->month)
                     ->count();
             }
         }
@@ -147,9 +149,11 @@ class DashboardController extends Controller
         foreach ($allJenisKasus as $jenis) {
             $weeklyJenisKasus[$jenis] = [];
             for ($i = 11; $i >= 0; $i--) {
-                $weekEnd = $now->copy()->subWeeks($i)->endOfWeek();
+                $weekStart = $now->copy()->subWeeks($i)->startOfWeek();
+                $weekEnd   = $now->copy()->subWeeks($i)->endOfWeek();
+                // FIX: Hitung hanya laporan BARU di minggu tersebut (bukan kumulatif)
                 $weeklyJenisKasus[$jenis][] = Laporan::where('jenis_kasus', $jenis)
-                    ->where('created_at', '<=', $weekEnd)
+                    ->whereBetween('created_at', [$weekStart, $weekEnd])
                     ->count();
             }
         }
@@ -165,8 +169,9 @@ class DashboardController extends Controller
             $dailyJenisKasus[$jenis] = [];
             for ($i = 13; $i >= 0; $i--) {
                 $day = $now->copy()->subDays($i);
+                // FIX: Hitung hanya laporan BARU di hari tersebut (bukan kumulatif)
                 $dailyJenisKasus[$jenis][] = Laporan::where('jenis_kasus', $jenis)
-                    ->where('created_at', '<=', $day->copy()->endOfDay())
+                    ->whereDate('created_at', $day->toDateString())
                     ->count();
             }
         }

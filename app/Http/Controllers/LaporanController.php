@@ -101,7 +101,7 @@ class LaporanController extends Controller
             'lokasi_kejadian'  => 'required|string|max:255',
             'deskripsi'        => 'required|string',
             'link_video'       => 'nullable|url',
-            'bukti'            => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
+            'bukti'            => 'nullable|image|mimes:jpeg,png,jpg,webp',
         ]);
 
         try {
@@ -116,7 +116,7 @@ class LaporanController extends Controller
             // Upload bukti jika ada
             $buktiPath = null;
             if ($request->hasFile('bukti')) {
-                $buktiPath = $request->file('bukti')->store('assets/bukti', 'public');
+                $buktiPath = $this->compressAndStoreBukti($request->file('bukti'));
             }
 
             // Siapkan data saksi jika diisi
@@ -305,7 +305,7 @@ class LaporanController extends Controller
             'lokasi_kejadian' => 'required|string',
             'deskripsi' => 'required|string',
             'link_video' => 'nullable|url',
-            'bukti' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
+            'bukti' => 'nullable|image|mimes:jpeg,png,jpg,webp',
         ]);
 
         $laporan = Laporan::findOrFail($id);
@@ -321,16 +321,7 @@ class LaporanController extends Controller
                 File::delete(public_path($laporan->bukti));
             }
 
-            $file = $request->file('bukti');
-            $fileName = time() . '_' . $file->getClientOriginalName();
-            $destinationPath = public_path('assets/bukti');
-
-            if (!File::exists($destinationPath)) {
-                File::makeDirectory($destinationPath, 0755, true);
-            }
-
-            $file->move($destinationPath, $fileName);
-            $pathBukti = 'assets/bukti/' . $fileName;
+            $pathBukti = $this->compressAndStoreBukti($request->file('bukti'));
         }
 
         $isAnonim = $request->has('is_anonim') ? true : false;
@@ -425,5 +416,107 @@ class LaporanController extends Controller
         return redirect()->back()->with('success', 'Pengaturan Surat (Tanda Tangan & Pejabat) berhasil disimpan!');
     }
 
+    /**
+     * Kompres dan simpan gambar bukti laporan.
+     * Gambar akan dikompres otomatis hingga ukurannya di bawah 2MB (2048 KB).
+     * Mendukung JPEG, PNG, dan WebP menggunakan native PHP GD.
+     *
+     * @param  \Illuminate\Http\UploadedFile  $file
+     * @return string  Path relatif file yang disimpan (dari folder public)
+     */
+    private function compressAndStoreBukti($file): string
+    {
+        $destinationPath = public_path('assets/bukti');
+        if (!File::exists($destinationPath)) {
+            File::makeDirectory($destinationPath, 0755, true, true);
+        }
+
+        $mime         = $file->getMimeType();
+        $targetSizeKB = 2048; // 2 MB dalam KB
+        $quality      = 90;   // Kualitas awal
+        $minQuality   = 20;   // Kualitas minimum sebelum resize
+
+        // Baca gambar berdasarkan tipe MIME
+        $image = null;
+        if ($mime === 'image/jpeg') {
+            $image = @imagecreatefromjpeg($file->getRealPath());
+        } elseif ($mime === 'image/png') {
+            $image = @imagecreatefrompng($file->getRealPath());
+            if ($image) {
+                // Konversi ke truecolor agar bisa disimpan sebagai JPEG
+                $trueColor = imagecreatetruecolor(imagesx($image), imagesy($image));
+                imagefill($trueColor, 0, 0, imagecolorallocate($trueColor, 255, 255, 255));
+                imagecopy($trueColor, $image, 0, 0, 0, 0, imagesx($image), imagesy($image));
+                imagedestroy($image);
+                $image = $trueColor;
+            }
+        } elseif ($mime === 'image/webp') {
+            $image = @imagecreatefromwebp($file->getRealPath());
+        }
+
+        // Jika gagal baca dengan GD, simpan file apa adanya
+        if (!$image) {
+            $fileName = time() . '_' . preg_replace('/[^a-zA-Z0-9_.]/', '', $file->getClientOriginalName());
+            $file->move($destinationPath, $fileName);
+            return 'assets/bukti/' . $fileName;
+        }
+
+        $fileName      = time() . '_bukti.jpg';
+        $outputPath    = $destinationPath . '/' . $fileName;
+        $origWidth     = imagesx($image);
+        $origHeight    = imagesy($image);
+        $currentWidth  = $origWidth;
+        $currentHeight = $origHeight;
+
+        // Loop kompresi: turunkan kualitas, lalu resize jika masih terlalu besar
+        while (true) {
+            ob_start();
+            imagejpeg($image, null, $quality);
+            $imageData = ob_get_clean();
+            $sizeKB = strlen($imageData) / 1024;
+
+            if ($sizeKB <= $targetSizeKB) {
+                // Ukuran sudah di bawah target, simpan
+                file_put_contents($outputPath, $imageData);
+                break;
+            }
+
+            if ($quality > $minQuality) {
+                // Kurangi kualitas dulu
+                $quality = max($minQuality, $quality - 10);
+            } else {
+                // Kualitas sudah minimum, resize gambar
+                $scaleFactor   = sqrt($targetSizeKB / $sizeKB) * 0.9;
+                $newWidth      = max(100, (int)($currentWidth * $scaleFactor));
+                $newHeight     = max(100, (int)($currentHeight * $scaleFactor));
+                $resized       = imagecreatetruecolor($newWidth, $newHeight);
+                imagefill($resized, 0, 0, imagecolorallocate($resized, 255, 255, 255));
+                imagecopyresampled($resized, $image, 0, 0, 0, 0, $newWidth, $newHeight, $currentWidth, $currentHeight);
+                imagedestroy($image);
+                $image         = $resized;
+                $currentWidth  = $newWidth;
+                $currentHeight = $newHeight;
+                $quality       = 85; // Reset kualitas setelah resize
+
+                // Cek apakah setelah resize masih terlalu besar
+                ob_start();
+                imagejpeg($image, null, $quality);
+                $checkData = ob_get_clean();
+                if (strlen($checkData) / 1024 <= $targetSizeKB) {
+                    file_put_contents($outputPath, $checkData);
+                    break;
+                }
+
+                // Paksa simpan jika gambar sudah sangat kecil (mencegah infinite loop)
+                if ($newWidth <= 100 || $newHeight <= 100) {
+                    file_put_contents($outputPath, $checkData);
+                    break;
+                }
+            }
+        }
+
+        imagedestroy($image);
+        return 'assets/bukti/' . $fileName;
+    }
 
 }
