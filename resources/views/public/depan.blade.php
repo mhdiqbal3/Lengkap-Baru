@@ -8,6 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         .glass-nav {
             background: rgba(255, 255, 255, 0.95);
@@ -325,6 +326,22 @@
                     </svg>
                     Baca Panduan (PDF)
                 </button>
+            </div>
+        </div>
+    </section>
+
+    <section id="tren-kekerasan" class="py-16 bg-white border-t border-gray-100">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-10" data-aos="fade-up">
+                <span class="text-[#800000] font-bold tracking-widest uppercase text-[10px] mb-1 block">Statistik</span>
+                <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight">Tren Kekerasan Sepanjang Tahun</h2>
+                <div class="w-12 h-1.5 bg-[#800000] mx-auto mt-4 rounded-full"></div>
+            </div>
+
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100" data-aos="fade-up" data-aos-delay="100">
+                <div class="relative h-80 w-full">
+                    <canvas id="trenKekerasanChart"></canvas>
+                </div>
             </div>
         </div>
     </section>
@@ -1105,6 +1122,71 @@
         </div>
     </template>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const chartData = {!! $chartJson ?? '{}' !!};
+            if (chartData && chartData.labels) {
+                const ctx = document.getElementById('trenKekerasanChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: chartData,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: {
+                            mode: 'index',
+                            intersect: false,
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'left',
+                                labels: {
+                                    usePointStyle: true,
+                                    padding: 20,
+                                    font: {
+                                        family: "'Inter', sans-serif",
+                                        weight: '600'
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                                titleColor: '#1f2937',
+                                bodyColor: '#4b5563',
+                                borderColor: '#e5e7eb',
+                                borderWidth: 1,
+                                padding: 12,
+                                boxPadding: 6,
+                                usePointStyle: true,
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1,
+                                    font: { family: "'Inter', sans-serif" }
+                                },
+                                grid: {
+                                    color: '#f3f4f6',
+                                    drawBorder: false,
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false,
+                                    drawBorder: false,
+                                },
+                                ticks: {
+                                    font: { family: "'Inter', sans-serif", weight: 'bold' }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 
 </html>

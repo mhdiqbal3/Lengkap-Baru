@@ -4,6 +4,27 @@
 
 @section('content')
 
+    {{-- Summernote CSS + z-index fix (untuk modal Alpine) --}}
+    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.css" rel="stylesheet">
+    <style>
+        /* Fix z-index Summernote di dalam modal Alpine */
+        .note-modal-backdrop { z-index: 10001 !important; display: none !important; }
+        .note-modal { z-index: 10002 !important; }
+        .note-dropdown-menu { z-index: 10005 !important; }
+        .note-editor.note-frame .note-editing-area .note-editable { background-color: #fff; min-height: 120px; }
+        /* Styling Summernote agar sesuai tema biru catatan penanganan */
+        [id^="catatan-penanganan-wrapper-"] .note-editor.note-frame { border: 1px solid #bfdbfe !important; border-radius: 0.5rem !important; overflow: hidden; }
+        [id^="catatan-penanganan-wrapper-"] .note-toolbar { background: #eff6ff !important; border-bottom: 1px solid #bfdbfe !important; }
+        [id^="catatan-penanganan-wrapper-"] .note-statusbar { background: #eff6ff !important; border-top: 1px solid #bfdbfe !important; }
+        [id^="catatan-penanganan-wrapper-"] .note-editable { font-size: 13px; }
+
+        /* Custom Scrollbar */
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+
     {{-- LOGIKA FILTER KOLEKSI DATA (Diambil dari Dashboard) --}}
     @php
         use Carbon\Carbon;
@@ -712,11 +733,13 @@
                                             class="fixed inset-0 z-[9998] flex items-center justify-center bg-gray-900/80 backdrop-blur-sm px-4"
                                             x-transition.opacity>
                                             <div @click.away="showEdit = false"
-                                                class="bg-white rounded-[2rem] shadow-2xl max-w-md w-full overflow-hidden transform transition-all text-left"
+                                                class="bg-white rounded-[2rem] shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden transform transition-all text-left"
                                                 x-transition.scale>
 
-                                                {{-- Header Gradient --}}
-                                                <div class="relative bg-gradient-to-br from-[#800000] via-red-800 to-rose-900 px-7 pt-7 pb-12 overflow-hidden">
+                                                {{-- Scrollable Header & Body --}}
+                                                <div class="flex-1 overflow-y-auto custom-scroll pb-6">
+                                                    {{-- Header Gradient --}}
+                                                    <div class="relative bg-gradient-to-br from-[#800000] via-red-800 to-rose-900 px-7 pt-7 pb-12 overflow-hidden shrink-0">
                                                     <div class="absolute -top-6 -right-6 w-28 h-28 bg-white/10 rounded-full blur-2xl"></div>
                                                     <div class="absolute bottom-0 left-10 w-20 h-20 bg-white/10 rounded-full blur-xl"></div>
                                                     <button @click="showEdit = false"
@@ -753,14 +776,49 @@
                                                         <span class="text-base font-black text-[#800000] tracking-widest bg-red-50 px-3 py-1 rounded-xl border border-red-100">{{ $item->kode_tiket }}</span>
                                                     </div>
 
-                                                    <form action="{{ route('laporan.update-status', $item->id) }}" method="POST" id="formStatus_{{ $item->id }}">
+                                                    <form action="{{ route('laporan.update-status', $item->id) }}" method="POST" id="formStatus_{{ $item->id }}"
+                                                        x-data="{
+                                                            selectedStatus: '{{ $item->status }}',
+                                                            editRiwayatId: '',
+                                                            get isDiproses() { return this.selectedStatus === 'Sedang Diproses'; },
+                                                            loadIntoEditor(id, content) {
+                                                                this.editRiwayatId = id;
+                                                                var el = $('#catatan_penanganan_{{ $item->id }}');
+                                                                if(el.length) {
+                                                                    el.summernote('code', content);
+                                                                    el.summernote('focus');
+                                                                    
+                                                                    // Scroll smoothly to editor
+                                                                    var scrollContainer = el.closest('.custom-scroll');
+                                                                    var editorEl = scrollContainer.find('.note-editor');
+                                                                    if(scrollContainer.length && editorEl.length) {
+                                                                        scrollContainer.animate({
+                                                                            scrollTop: editorEl.offset().top - scrollContainer.offset().top + scrollContainer.scrollTop() - 20
+                                                                        }, 500);
+                                                                    }
+                                                                }
+                                                            },
+                                                            cancelEdit() {
+                                                                this.editRiwayatId = '';
+                                                                var el = $('#catatan_penanganan_{{ $item->id }}');
+                                                                if(el.length) el.summernote('code', '');
+                                                            }
+                                                        }"
+                                                        x-init="
+                                                            $watch('isDiproses', val => {
+                                                                if (val) $nextTick(() => window.initCatatanSummernote && window.initCatatanSummernote('{{ $item->id }}'));
+                                                            });
+                                                            if (isDiproses) $nextTick(() => window.initCatatanSummernote && window.initCatatanSummernote('{{ $item->id }}'));
+                                                        ">
                                                         @csrf
                                                         <p class="text-xs font-black text-gray-500 uppercase tracking-wider mb-3">Tetapkan Status Baru <span class="text-red-500">*</span></p>
                                                         <div class="space-y-2">
                                                             <label class="flex items-center gap-3 p-3 border-2 rounded-xl cursor-pointer transition-all
-                                                                {{ $item->status == 'Menunggu Verifikasi' ? 'border-yellow-400 bg-yellow-50' : 'border-gray-200 hover:border-yellow-300 hover:bg-yellow-50/50' }}">
+                                                                {{ $item->status == 'Menunggu Verifikasi' ? 'border-yellow-400 bg-yellow-50' : 'border-gray-200 hover:border-yellow-300 hover:bg-yellow-50/50' }}"
+                                                                :class="selectedStatus === 'Menunggu Verifikasi' ? 'border-yellow-400 bg-yellow-50' : 'border-gray-200 hover:border-yellow-300 hover:bg-yellow-50/50'">
                                                                 <input type="radio" name="status" value="Menunggu Verifikasi"
                                                                     {{ $item->status == 'Menunggu Verifikasi' ? 'checked' : '' }}
+                                                                    x-model="selectedStatus"
                                                                     class="text-yellow-500 focus:ring-yellow-400 shrink-0">
                                                                 <div class="flex items-center gap-2 flex-1">
                                                                     <span class="text-xl leading-none">⏳</span>
@@ -770,10 +828,11 @@
                                                                     </div>
                                                                 </div>
                                                             </label>
-                                                            <label class="flex items-center gap-3 p-3 border-2 rounded-xl cursor-pointer transition-all
-                                                                {{ $item->status == 'Sedang Diproses' ? 'border-blue-400 bg-blue-50' : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50/50' }}">
+                                                            <label class="flex items-center gap-3 p-3 border-2 rounded-xl cursor-pointer transition-all"
+                                                                :class="selectedStatus === 'Sedang Diproses' ? 'border-blue-400 bg-blue-50' : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50/50'">
                                                                 <input type="radio" name="status" value="Sedang Diproses"
                                                                     {{ $item->status == 'Sedang Diproses' ? 'checked' : '' }}
+                                                                    x-model="selectedStatus"
                                                                     class="text-blue-500 focus:ring-blue-400 shrink-0">
                                                                 <div class="flex items-center gap-2 flex-1">
                                                                     <span class="text-xl leading-none">🔄</span>
@@ -783,10 +842,11 @@
                                                                     </div>
                                                                 </div>
                                                             </label>
-                                                            <label class="flex items-center gap-3 p-3 border-2 rounded-xl cursor-pointer transition-all
-                                                                {{ $item->status == 'Selesai' ? 'border-green-400 bg-green-50' : 'border-gray-200 hover:border-green-300 hover:bg-green-50/50' }}">
+                                                            <label class="flex items-center gap-3 p-3 border-2 rounded-xl cursor-pointer transition-all"
+                                                                :class="selectedStatus === 'Selesai' ? 'border-green-400 bg-green-50' : 'border-gray-200 hover:border-green-300 hover:bg-green-50/50'">
                                                                 <input type="radio" name="status" value="Selesai"
                                                                     {{ $item->status == 'Selesai' ? 'checked' : '' }}
+                                                                    x-model="selectedStatus"
                                                                     class="text-green-500 focus:ring-green-400 shrink-0">
                                                                 <div class="flex items-center gap-2 flex-1">
                                                                     <span class="text-xl leading-none">✅</span>
@@ -797,11 +857,99 @@
                                                                 </div>
                                                             </label>
                                                         </div>
+
+                                                        {{-- Catatan Penanganan (hanya muncul jika status = Sedang Diproses) --}}
+                                                        <div x-show="isDiproses" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" class="mt-4">
+                                                            <div class="bg-blue-50 border-2 border-blue-200 rounded-xl p-4">
+                                                                <div class="flex items-center gap-2 mb-3">
+                                                                    <div class="w-6 h-6 bg-blue-500 rounded-lg flex items-center justify-center shrink-0">
+                                                                        <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                                                    </div>
+                                                                    <label class="text-xs font-black text-blue-700 uppercase tracking-wider">Catatan Penanganan</label>
+                                                                </div>
+                                                                <input type="hidden" name="edit_riwayat_id" x-model="editRiwayatId">
+                                                                
+                                                                <div x-show="editRiwayatId" style="display: none;" class="mb-3 p-3 bg-yellow-50 text-yellow-800 text-xs font-bold rounded-xl border border-yellow-200 flex items-center justify-between">
+                                                                    <div class="flex items-center gap-2">
+                                                                        <svg class="w-4 h-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                                                        <span>Anda sedang dalam mode Edit Catatan Sebelumnya.</span>
+                                                                    </div>
+                                                                    <button type="button" @click="cancelEdit()" class="text-yellow-900 hover:bg-yellow-200 px-2 py-1 rounded transition">Batal Edit</button>
+                                                                </div>
+
+                                                                <div id="catatan-penanganan-wrapper-{{ $item->id }}">
+                                                                    <textarea
+                                                                        name="catatan_penanganan"
+                                                                        id="catatan_penanganan_{{ $item->id }}"
+                                                                    ></textarea>
+                                                                </div>
+                                                                <p class="text-[10px] text-blue-500 mt-2 font-medium">💡 Catatan ini akan tampil kepada pelapor. Mendukung format teks (bold, list, link, dll).</p>
+
+                                                                {{-- Riwayat Catatan Sebelumnya --}}
+                                                                @php
+                                                                    $riwayatDiproses = $item->riwayats->where('status', 'Sedang Diproses')->sortByDesc('created_at');
+                                                                @endphp
+                                                                @if($riwayatDiproses->isNotEmpty())
+                                                                <div class="mt-3 pt-3 border-t border-blue-200">
+                                                                    <p class="text-[10px] font-black text-blue-600 uppercase tracking-wider mb-2">📋 Riwayat Catatan Sebelumnya</p>
+                                                                    <div class="space-y-2 max-h-40 overflow-y-auto pr-1">
+                                                                        @foreach($riwayatDiproses as $rw)
+                                                                        <div class="bg-white rounded-lg px-3 py-2.5 border border-blue-100 shadow-sm relative group"
+                                                                            x-data="{ 
+                                                                                isDeleting: false,
+                                                                                isDeleted: false,
+                                                                                catatanHtml: {{ json_encode($rw->catatan) }},
+                                                                                deleteRiwayat() {
+                                                                                    if(!confirm('Yakin ingin menghapus catatan ini?')) return;
+                                                                                    this.isDeleting = true;
+                                                                                    fetch('{{ url('laporan/riwayat') }}/{{ $rw->id }}', {
+                                                                                        method: 'DELETE',
+                                                                                        headers: {
+                                                                                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                                                                        }
+                                                                                    }).then(res => res.json()).then(data => {
+                                                                                        if(data.success) {
+                                                                                            this.isDeleted = true;
+                                                                                        } else {
+                                                                                            this.isDeleting = false;
+                                                                                            alert('Gagal menghapus catatan');
+                                                                                        }
+                                                                                    }).catch(err => {
+                                                                                        this.isDeleting = false;
+                                                                                        alert('Terjadi kesalahan jaringan');
+                                                                                    });
+                                                                                }
+                                                                            }"
+                                                                            x-show="!isDeleted"
+                                                                            x-transition.opacity>
+                                                                            
+                                                                            <div>
+                                                                                <div class="flex justify-between items-start mb-1">
+                                                                                    <p class="text-[10px] text-blue-400 font-bold">🕐 {{ \Carbon\Carbon::parse($rw->created_at)->translatedFormat('d M Y, H:i') }}</p>
+                                                                                    <div class="opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                                                                                        <button type="button" @click.prevent="loadIntoEditor({{ $rw->id }}, catatanHtml)" class="text-blue-500 hover:text-blue-700 bg-blue-50 p-1 rounded shadow-sm transition-colors" title="Edit Catatan (Pindah ke atas)">
+                                                                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                                                                        </button>
+                                                                                        <button type="button" @click.prevent="deleteRiwayat()" class="text-red-500 hover:text-red-700 bg-red-50 p-1 rounded shadow-sm transition-colors" :disabled="isDeleting" title="Hapus Catatan">
+                                                                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                                                                        </button>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="text-xs text-gray-600 leading-relaxed [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_b]:font-bold [&_i]:italic [&_u]:underline" x-html="catatanHtml"></div>
+                                                                            </div>
+                                                                        </div>
+                                                                        @endforeach
+                                                                    </div>
+                                                                </div>
+                                                                @endif
+                                                            </div>
+                                                        </div>
                                                     </form>
                                                 </div>
+                                                </div>
 
-                                                {{-- Footer --}}
-                                                <div class="px-5 py-4 flex gap-3">
+                                                {{-- Footer (Fixed) --}}
+                                                <div class="px-5 py-4 flex gap-3 border-t border-gray-100 bg-gray-50/50 shrink-0">
                                                     <button type="button" @click="showEdit = false"
                                                         class="flex-1 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition text-sm">Batal</button>
                                                     <button type="submit" form="formStatus_{{ $item->id }}"
@@ -1053,6 +1201,31 @@
 @endsection
 
 @push('scripts')
+    {{-- SUMMERNOTE JS --}}
+    <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
+
+    {{-- Inisialisasi Summernote untuk field catatan penanganan --}}
+    <script>
+        window.initCatatanSummernote = function(itemId) {
+            var el = document.getElementById('catatan_penanganan_' + itemId);
+            if (!el) return;
+            var $el = $(el);
+            if ($el.data('summernote-initialized')) return;
+            $el.summernote({
+                height: 150,
+                dialogsInBody: true,
+                placeholder: 'Tuliskan perkembangan penanganan kasus sesuai SOP yang berlaku...',
+                toolbar: [
+                    ['style', ['bold', 'italic', 'underline', 'clear']],
+                    ['para',  ['ul', 'ol']],
+                    ['insert',['link']],
+                    ['view',  ['codeview']]
+                ]
+            });
+            $el.data('summernote-initialized', true);
+        };
+    </script>
+
     {{-- SCRIPT UNTUK EXPORT EXCEL DATATABLES --}}
     <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>

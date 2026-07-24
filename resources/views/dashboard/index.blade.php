@@ -48,7 +48,7 @@
         $themeBg = 'bg-[#800000]';
     @endphp
 
-    <div class="max-w-[100%] mx-auto pb-12 space-y-6">
+<div class="max-w-[100%] mx-auto pb-12 space-y-6">
         @if (session('success'))
             <div class="fixed top-20 left-1/2 transform -translate-x-1/2 z-[9999] bg-green-500 text-white px-6 py-3 rounded-full shadow-xl text-sm font-bold flex items-center gap-2"
                 x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 4000)">
@@ -85,35 +85,32 @@
         @endif
 
         @if ($canViewSummary)
-            <div class="bg-white rounded-3xl p-5 border border-gray-100 shadow-sm space-y-5">
-                <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-4 border-b border-gray-50 pb-4">
+            <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+                {{-- Header Gradient --}}
+                <div class="bg-gradient-to-r from-[#800000] to-red-800 px-6 py-5 flex flex-col xl:flex-row xl:items-center justify-between gap-4">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-red-50 text-[#800000] rounded-xl flex items-center justify-center">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012-2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
-                                </path>
+                        <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                             </svg>
                         </div>
                         <div>
-                            <h3 class="text-lg font-bold text-gray-800">Ringkasan Keseluruhan Laporan</h3>
-                            <p class="text-[11px] font-medium text-gray-400 uppercase tracking-wider mt-0.5">Filter data
-                                berdasarkan waktu</p>
+                            <h3 class="text-lg font-black text-white">Ringkasan Laporan</h3>
+                            <p class="text-[11px] font-medium text-white/70 uppercase tracking-wider mt-0.5">Filter data berdasarkan waktu</p>
                         </div>
                     </div>
-                    <div class="flex flex-wrap gap-2 w-full xl:w-auto bg-gray-50 p-2 rounded-xl border border-gray-200">
+                    <div class="flex flex-wrap gap-2 w-full xl:w-auto bg-white/20 p-1.5 rounded-xl">
                         <button type="button" onclick="applyFilter('semua')" data-period="semua"
-                            class="filter-btn active flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-bold transition-all {{ $themeBg }} text-white shadow-md">Semua</button>
+                            class="filter-btn active flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-bold transition-all bg-white text-[#800000] shadow-md">Semua</button>
                         <button type="button" onclick="applyFilter('harian')" data-period="harian"
-                            class="filter-btn flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-bold transition-all text-gray-500 hover:text-gray-800 hover:bg-gray-200">Harian</button>
+                            class="filter-btn flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-bold transition-all text-white/80 hover:text-white hover:bg-white/20">Harian</button>
                         <button type="button" onclick="applyFilter('mingguan')" data-period="mingguan"
-                            class="filter-btn flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-bold transition-all text-gray-500 hover:text-gray-800 hover:bg-gray-200">Mingguan</button>
+                            class="filter-btn flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-bold transition-all text-white/80 hover:text-white hover:bg-white/20">Mingguan</button>
                         <button type="button" onclick="applyFilter('bulanan')" data-period="bulanan"
-                            class="filter-btn flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-bold transition-all text-gray-500 hover:text-gray-800 hover:bg-gray-200">Bulanan</button>
+                            class="filter-btn flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-bold transition-all text-white/80 hover:text-white hover:bg-white/20">Bulanan</button>
                     </div>
                 </div>
-
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="p-5 grid grid-cols-2 lg:grid-cols-4 gap-4">
                     {{-- Kartu Total Laporan --}}
                     <div class="bg-gradient-to-br from-red-800 to-[#800000] rounded-2xl p-5 text-white shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 col-span-2 lg:col-span-1 relative overflow-hidden">
                         <div class="absolute -right-4 -top-4 w-20 h-20 bg-white/10 rounded-full"></div>
@@ -186,12 +183,10 @@
                     </div>
                     {{-- Wrapper overflow untuk scroll horizontal --}}
                     <div class="overflow-x-auto flex-1">
-                        <div id="lineChartWrapper" style="min-width: 600px; height: 300px; position: relative;">
+                        <div id="lineChartWrapper" style="min-width: 600px; height: 350px; position: relative;">
                             <canvas id="lineChart"></canvas>
                         </div>
                     </div>
-                    {{-- Legend Jenis Kekerasan --}}
-                    <div id="lineChartLegend" class="mt-4 flex flex-wrap gap-3"></div>
                 </div>
 
                 {{-- DOUGHNUT: Total Jenis Kekerasan --}}
@@ -288,12 +283,17 @@
                 </template>
             </div>
 
-            <div
-                class="mt-12 mb-6 flex flex-col md:flex-row justify-between items-center gap-4 bg-yellow-50 p-5 rounded-2xl border border-yellow-200">
-                <div>
-                    <h2 class="text-lg font-black text-gray-800">Tampilan Dashboard Pelapor</h2>
-                    <p class="text-sm text-gray-600">Bagian di bawah ini adalah tampilan yang dilihat oleh pelapor. Anda
-                        dapat mengubah teksnya secara dinamis.</p>
+            <div class="mt-8 mb-4 flex flex-col md:flex-row justify-between items-center gap-4 bg-gradient-to-r from-amber-50 to-yellow-50 p-6 rounded-2xl border border-yellow-200 shadow-sm">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-yellow-400 rounded-2xl flex items-center justify-center shadow-md shrink-0">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-black text-gray-800">Tampilan Dashboard Pelapor</h2>
+                        <p class="text-sm text-gray-500 mt-0.5">Bagian di bawah ini adalah tampilan yang dilihat oleh pelapor. Anda dapat mengubah teksnya secara dinamis.</p>
+                    </div>
                 </div>
                 <a href="{{ route('dashboard.edit') }}"
                     class="shrink-0 inline-flex items-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition shadow-md">
@@ -400,120 +400,6 @@
                 </div>
             </div>
         @endisset
-
-        <div class="mt-8">
-            <h3 class="text-xl md:text-2xl font-black text-gray-800 mb-5">
-                {{ $d('bentuk_title', 'Kenali Bentuk Kekerasan') }}</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-                @foreach ($bentuk_titles as $index => $title)
-                    <div
-                        class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-                        <div class="w-12 h-12 bg-red-100 text-[#800000] rounded-2xl flex items-center justify-center mb-4">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
-                                </path>
-                            </svg>
-                        </div>
-                        <h4 class="font-bold text-gray-800">{{ $title }}</h4>
-                        <p class="text-xs text-gray-500 mt-2 leading-relaxed">{{ $bentuk_descs[$index] ?? '' }}</p>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
-            <div class="bg-gradient-to-br from-[#800000] to-red-900 rounded-3xl p-8 text-white shadow-md">
-                <h3 class="text-lg md:text-xl font-bold mb-4 flex items-center gap-2">
-                    <svg class="w-6 h-6 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd"
-                            d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                            clip-rule="evenodd"></path>
-                    </svg>
-                    {{ $d('hak_title', 'Hak Anda Sebagai Pelapor/Korban') }}
-                </h3>
-                <ul class="space-y-3 text-sm opacity-90">
-                    @foreach ($hak_items as $hak)
-                        @if (trim($hak) !== '')
-                            <li class="flex items-start gap-2"><span> </span> {{ $hak }}</li>
-                        @endif
-                    @endforeach
-                </ul>
-            </div>
-            <div class="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm">
-                <h3 class="text-lg md:text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                    <svg class="w-6 h-6 text-[#800000]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    {{ $d('kontak_title', 'Kontak Bantuan & Darurat') }}
-                </h3>
-                <div class="space-y-4">
-                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-                        <div>
-                            <p class="text-[10px] text-gray-400 font-bold uppercase">Hotline Satgas (WhatsApp)</p>
-                            <p class="text-sm font-bold text-gray-700">{{ $d('kontak_wa', '0812-XXXX-XX') }}</p>
-                        </div>
-                        <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $d('kontak_wa', '0812')) }}"
-                            target="_blank"
-                            class="bg-green-500 hover:bg-green-600 text-white p-2 rounded-lg transition-colors">
-                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                <path
-                                    d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.417-.003 6.557-5.338 11.892-11.893 11.892-1.997-.001-3.951-.5-5.688-1.448l-6.305 1.652zm6.599-3.835c1.516.903 3.003 1.387 4.793 1.388 5.439 0 9.865-4.426 9.868-9.867 0-2.637-1.026-5.112-2.891-6.977-1.864-1.864-4.337-2.891-6.97-2.891-5.442 0-9.866 4.426-9.869 9.868 0 1.908.531 3.448 1.474 5.073l-.951 3.446 3.546-.94z">
-                                </path>
-                            </svg>
-                        </a>
-                    </div>
-                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-                        <div>
-                            <p class="text-[10px] text-gray-400 font-bold uppercase">Email Resmi</p>
-                            <p class="text-sm font-bold text-gray-700">{{ $d('kontak_email', 'satgas.ppks@univ.ac.id') }}
-                            </p>
-                        </div>
-                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
-                            </path>
-                        </svg>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="mt-8 bg-gradient-to-b from-white to-gray-50 rounded-3xl p-8 md:p-10 border border-gray-100 shadow-sm text-center">
-            <h3 class="text-xl md:text-2xl font-black text-gray-800 mb-2">
-                {{ $d('alur_title', 'Alur Penanganan Laporan') }}</h3>
-            <p class="text-sm text-gray-500 mb-8">{{ $d('alur_desc', 'Langkah nyata kami untuk menjaga keamanan Anda.') }}
-            </p>
-
-            <div
-                class="grid grid-cols-1 md:grid-cols-{{ count($alur_titles) > 0 ? count($alur_titles) : 4 }} gap-8 relative">
-                <div class="hidden md:block absolute top-8 left-[10%] right-[10%] h-0.5 bg-gray-100"></div>
-
-                @foreach ($alur_titles as $index => $title)
-                    <div class="relative z-10 group">
-                        <div
-                            class="w-16 h-16 {{ $index == 0 ? 'bg-[#800000] text-white border-white' : 'bg-white text-[#800000] border-[#800000]' }} rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4 border-4 shadow-md group-hover:scale-110 transition-transform">
-                            {{ $index + 1 }}
-                        </div>
-                        <h4 class="font-bold text-gray-800 text-sm">{{ $title }}</h4>
-                        <p class="text-[11px] text-gray-500 mt-1 px-4">{{ $alur_descs[$index] ?? '' }}</p>
-                    </div>
-                @endforeach
-            </div>
-
-            <div class="mt-10">
-                <a href="{{ url('/laporkan') }}"
-                    class="inline-flex items-center gap-3 bg-[#800000] hover:bg-red-900 text-white font-bold py-3 md:py-4 px-8 md:px-10 rounded-full shadow-lg transition transform hover:-translate-y-1 text-sm md:text-base">
-                    <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
-                        </path>
-                    </svg>
-                    Buat Laporan Sekarang
-                </a>
-            </div>
-        </div>
     </div>
 @endsection
 
@@ -530,16 +416,7 @@
             let currentRange = 'harian';
 
             // Palet warna yang premium untuk multi-line
-            const colorPalette = [
-                { line: '#800000', bg: 'rgba(128,0,0,0.08)' },
-                { line: '#F97316', bg: 'rgba(249,115,22,0.08)' },
-                { line: '#3B82F6', bg: 'rgba(59,130,246,0.08)' },
-                { line: '#10B981', bg: 'rgba(16,185,129,0.08)' },
-                { line: '#A855F7', bg: 'rgba(168,85,247,0.08)' },
-                { line: '#EAB308', bg: 'rgba(234,179,8,0.08)' },
-                { line: '#EC4899', bg: 'rgba(236,72,153,0.08)' },
-                { line: '#14B8A6', bg: 'rgba(20,184,166,0.08)' },
-            ];
+            const colorPalette = ['#EF4444', '#F59E0B', '#10B981', '#3B82F6', '#8B5CF6', '#EC4899', '#06B6D4', '#14B8A6', '#F43F5E', '#84CC16'];
 
             function buildLineDatasets(range) {
                 const seriesData = timeSeriesData[range]?.series ?? {};
@@ -548,45 +425,18 @@
                     return {
                         label: jenis,
                         data: seriesData[jenis],
-                        borderColor: c.line,
-                        backgroundColor: c.line,
-                        
-                        // Titik bulat
+                        borderColor: c,
+                        backgroundColor: c,
                         pointStyle: 'circle',
-                        
-                        // Warna titik: hitam jika 0
-                        pointBackgroundColor: (ctx) => ctx.raw === 0 ? '#000000' : c.line,
-                        pointBorderColor: (ctx) => ctx.raw === 0 ? '#000000' : c.line,
-                        pointRadius: (ctx) => ctx.raw === 0 ? 3 : 5,
-                        pointHoverRadius: (ctx) => ctx.raw === 0 ? 4 : 7,
-                        
-                        borderWidth: 2,
-                        tension: 0, 
+                        borderWidth: 3,
+                        tension: 0.4, 
                         fill: false,
                     };
                 });
             }
 
             function renderLegend() {
-                const legendEl = document.getElementById('lineChartLegend');
-                if (!legendEl || !lineChart) return;
-                legendEl.innerHTML = '';
-                lineChart.data.datasets.forEach((ds, i) => {
-                    const c = colorPalette[i % colorPalette.length];
-                    const item = document.createElement('div');
-                    item.className = 'flex items-center gap-1.5 cursor-pointer select-none';
-                    item.innerHTML = `
-                        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${c.line};flex-shrink:0;"></span>
-                        <span class="text-xs font-semibold text-gray-600">${ds.label}</span>
-                    `;
-                    item.addEventListener('click', () => {
-                        const meta = lineChart.getDatasetMeta(i);
-                        meta.hidden = !meta.hidden;
-                        lineChart.update();
-                        item.style.opacity = meta.hidden ? '0.4' : '1';
-                    });
-                    legendEl.appendChild(item);
-                });
+                // Not used anymore as we rely on built-in legend
             }
 
             document.addEventListener("DOMContentLoaded", function() {
@@ -609,14 +459,25 @@
                                 maintainAspectRatio: false,
                                 interaction: { mode: 'index', intersect: false },
                                 plugins: {
-                                    legend: { display: false },
+                                    legend: {
+                                        position: 'left',
+                                        labels: {
+                                            usePointStyle: true,
+                                            padding: 20,
+                                            font: {
+                                                family: "'Inter', sans-serif",
+                                                weight: '600'
+                                            }
+                                        }
+                                    },
                                     tooltip: {
-                                        backgroundColor: 'rgba(17,24,39,0.92)',
-                                        titleColor: '#f3f4f6',
-                                        bodyColor: '#d1d5db',
-                                        borderColor: 'rgba(255,255,255,0.08)',
+                                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                                        titleColor: '#1f2937',
+                                        bodyColor: '#4b5563',
+                                        borderColor: '#e5e7eb',
                                         borderWidth: 1,
                                         padding: 12,
+                                        boxPadding: 6,
                                         usePointStyle: true,
                                     }
                                 },
@@ -647,9 +508,10 @@
                     // ===== DOUGHNUT CHART (Total Jenis Kekerasan — semua data) =====
                     const ctxDoughnut = document.getElementById('doughnutChart');
                     if (ctxDoughnut) {
-                        const jenisLabels = Object.keys(allJenisKasus);
-                        const jenisValues = Object.values(allJenisKasus);
-                        const doughnutColors = colorPalette.map(c => c.line);
+                        const totalsData = timeSeriesData['_totals'] ?? {};
+                        const jenisLabels = Object.keys(totalsData);
+                        const jenisValues = Object.values(totalsData);
+                        const doughnutColors = colorPalette;
 
                         doughnutChart = new Chart(ctxDoughnut.getContext('2d'), {
                             type: 'doughnut',
@@ -668,13 +530,7 @@
                                 cutout: '72%',
                                 plugins: {
                                     legend: {
-                                        position: 'bottom',
-                                        labels: {
-                                            usePointStyle: true,
-                                            boxWidth: 8,
-                                            padding: 14,
-                                            font: { size: 11, weight: '600' },
-                                        }
+                                        display: false,
                                     },
                                     tooltip: {
                                         backgroundColor: 'rgba(17,24,39,0.92)',
@@ -733,9 +589,9 @@
                 };
                 document.querySelectorAll('.filter-btn').forEach(btn => {
                     if (btn.dataset.period === period) {
-                        btn.className = `filter-btn active flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-bold transition-all bg-[#800000] text-white shadow-md`;
+                        btn.className = `filter-btn active flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-bold transition-all bg-white text-[#800000] shadow-md`;
                     } else {
-                        btn.className = "filter-btn flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-bold transition-all text-gray-500 hover:text-gray-800 hover:bg-gray-200";
+                        btn.className = "filter-btn flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-bold transition-all text-white/80 hover:text-white hover:bg-white/20";
                     }
                 });
             }
@@ -749,6 +605,8 @@
                     obj.style.opacity = 1;
                 }, 150);
             }
+
+
         </script>
         <style>
             #count-total, #count-menunggu, #count-diproses, #count-selesai {

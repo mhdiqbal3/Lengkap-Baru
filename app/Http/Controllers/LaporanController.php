@@ -45,7 +45,7 @@ class LaporanController extends Controller
         }
 
         $search = $request->input('search');
-        $query = Laporan::with('user');
+        $query = Laporan::with(['user', 'riwayats']);
 
         if ($search) {
             $query->where(function ($q) use ($search) {
@@ -215,7 +215,8 @@ class LaporanController extends Controller
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
-            'status' => 'required|in:Menunggu Verifikasi,Sedang Diproses,Selesai,Ditolak'
+            'status' => 'required|in:Menunggu Verifikasi,Sedang Diproses,Selesai,Ditolak',
+            'catatan_penanganan' => 'nullable|string|max:2000',
         ]);
 
         $laporan = Laporan::findOrFail($id);
@@ -237,16 +238,21 @@ class LaporanController extends Controller
         if ($request->status === 'Selesai' && $laporan->status !== 'Selesai') {
             $laporan->selesai_at = now();
         }
-        
-        if ($laporan->status !== $request->status) {
-            $catatan = '';
-            if ($request->status == 'Sedang Diproses') {
+
+        $statusBerubah = $laporan->status !== $request->status;
+        $catatanInput = trim($request->catatan_penanganan ?? '');
+
+        if ($statusBerubah) {
+            // Status berubah: buat riwayat baru
+            if ($catatanInput) {
+                $catatan = $catatanInput;
+            } elseif ($request->status == 'Sedang Diproses') {
                 $catatan = 'Laporan telah diverifikasi dan akan ditindaklanjuti segera.';
             } elseif ($request->status == 'Selesai') {
                 $catatan = 'Penanganan laporan telah selesai.';
             } elseif ($request->status == 'Ditolak') {
                 $catatan = 'Laporan ditolak.';
-            } elseif ($request->status == 'Menunggu Verifikasi') {
+            } else {
                 $catatan = 'Laporan menunggu verifikasi.';
             }
 
@@ -255,6 +261,22 @@ class LaporanController extends Controller
                 'status' => $request->status,
                 'catatan' => $catatan
             ]);
+        } elseif ($request->status === 'Sedang Diproses' && $catatanInput) {
+            // Cek apakah mode edit catatan sebelumnya
+            if ($request->filled('edit_riwayat_id')) {
+                $riwayatToEdit = \App\Models\RiwayatLaporan::where('id', $request->edit_riwayat_id)
+                                    ->where('laporan_id', $laporan->id)->first();
+                if ($riwayatToEdit) {
+                    $riwayatToEdit->update(['catatan' => $catatanInput]);
+                }
+            } else {
+                // Status tidak berubah tapi admin menambahkan catatan baru
+                \App\Models\RiwayatLaporan::create([
+                    'laporan_id' => $laporan->id,
+                    'status' => 'Sedang Diproses',
+                    'catatan' => $catatanInput
+                ]);
+            }
         }
 
         $laporan->status = $request->status;
@@ -517,6 +539,33 @@ class LaporanController extends Controller
 
         imagedestroy($image);
         return 'assets/bukti/' . $fileName;
+    }
+    public function updateRiwayat(Request $request, $id)
+    {
+        $request->validate([
+            'catatan' => 'required'
+        ]);
+
+        $riwayat = \App\Models\RiwayatLaporan::findOrFail($id);
+        $riwayat->catatan = $request->catatan;
+        $riwayat->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Catatan berhasil diperbarui',
+            'catatan' => $riwayat->catatan
+        ]);
+    }
+
+    public function destroyRiwayat($id)
+    {
+        $riwayat = \App\Models\RiwayatLaporan::findOrFail($id);
+        $riwayat->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Catatan berhasil dihapus'
+        ]);
     }
 
 }

@@ -118,8 +118,26 @@ class DashboardController extends Controller
             ->pluck('jenis_kasus')
             ->toArray();
 
-        // Gabung predefined dengan yg ada di DB
-        $allJenisKasus = array_unique(array_merge($predefinedJenisKasus, $dbJenisKasus));
+        // Gabung predefined dengan yg ada di DB, case-insensitive
+        $allJenisKasus = array_values(array_unique(array_map('strtolower', array_merge($predefinedJenisKasus, $dbJenisKasus))));
+        // Restore case dari predefined
+        $lookup = [];
+        foreach (array_merge($predefinedJenisKasus, $dbJenisKasus) as $j) {
+            $lookup[strtolower($j)] = $j;
+        }
+        $allJenisKasus = array_map(fn($j) => $lookup[$j] ?? $j, $allJenisKasus);
+
+        // Hitung total per jenis kekerasan (digunakan doughnut) -- case insensitive
+        $allJenisKasusTotal = [];
+        $rawCounts = Laporan::selectRaw('jenis_kasus, count(*) as total')
+            ->whereNotNull('jenis_kasus')
+            ->where('jenis_kasus', '!=', '')
+            ->groupBy('jenis_kasus')
+            ->get();
+        foreach ($allJenisKasus as $jenis) {
+            $total = $rawCounts->filter(fn($r) => trim(strtolower($r->jenis_kasus)) === trim(strtolower($jenis)))->sum('total');
+            $allJenisKasusTotal[$jenis] = (int)$total;
+        }
 
         for ($i = 11; $i >= 0; $i--) {
             $month = $now->copy()->subMonths($i);
@@ -130,8 +148,7 @@ class DashboardController extends Controller
             $monthlyJenisKasus[$jenis] = [];
             for ($i = 11; $i >= 0; $i--) {
                 $month = $now->copy()->subMonths($i);
-                // FIX: Hitung hanya laporan BARU di bulan tersebut (bukan kumulatif)
-                $monthlyJenisKasus[$jenis][] = Laporan::where('jenis_kasus', $jenis)
+                $monthlyJenisKasus[$jenis][] = Laporan::whereRaw('LOWER(TRIM(jenis_kasus)) = ?', [strtolower(trim($jenis))])
                     ->whereYear('created_at', $month->year)
                     ->whereMonth('created_at', $month->month)
                     ->count();
@@ -151,8 +168,7 @@ class DashboardController extends Controller
             for ($i = 11; $i >= 0; $i--) {
                 $weekStart = $now->copy()->subWeeks($i)->startOfWeek();
                 $weekEnd   = $now->copy()->subWeeks($i)->endOfWeek();
-                // FIX: Hitung hanya laporan BARU di minggu tersebut (bukan kumulatif)
-                $weeklyJenisKasus[$jenis][] = Laporan::where('jenis_kasus', $jenis)
+                $weeklyJenisKasus[$jenis][] = Laporan::whereRaw('LOWER(TRIM(jenis_kasus)) = ?', [strtolower(trim($jenis))])
                     ->whereBetween('created_at', [$weekStart, $weekEnd])
                     ->count();
             }
@@ -169,17 +185,20 @@ class DashboardController extends Controller
             $dailyJenisKasus[$jenis] = [];
             for ($i = 13; $i >= 0; $i--) {
                 $day = $now->copy()->subDays($i);
-                // FIX: Hitung hanya laporan BARU di hari tersebut (bukan kumulatif)
-                $dailyJenisKasus[$jenis][] = Laporan::where('jenis_kasus', $jenis)
+                $dailyJenisKasus[$jenis][] = Laporan::whereRaw('LOWER(TRIM(jenis_kasus)) = ?', [strtolower(trim($jenis))])
                     ->whereDate('created_at', $day->toDateString())
                     ->count();
             }
         }
 
+        // Simpan total untuk doughnut (diakses dari controller)
+        $this->allJenisKasusTotal = $allJenisKasusTotal;
+
         return [
             'bulanan'  => ['labels' => $monthlyLabels,  'series' => $monthlyJenisKasus],
             'mingguan' => ['labels' => $weeklyLabels,   'series' => $weeklyJenisKasus],
             'harian'   => ['labels' => $dailyLabels,    'series' => $dailyJenisKasus],
+            '_totals'  => $allJenisKasusTotal,
         ];
     }
 

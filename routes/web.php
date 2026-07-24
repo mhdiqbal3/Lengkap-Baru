@@ -35,8 +35,61 @@ Route::get('/', function () {
     if (empty($carousels)) {
         $carousels[] = ['url' => 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=1920&auto=format&fit=crop', 'nama' => 'default1'];
     }
+    // --- DATA UNTUK GRAFIK TREN KEKERASAN (5 Tahun, Tahun ini di tengah) ---
+    $currentYear = (int) date('Y');
+    $years = [
+        $currentYear - 2,
+        $currentYear - 1,
+        $currentYear,
+        $currentYear + 1,
+        $currentYear + 2
+    ];
 
-    return view('public.depan', compact('kontenPencegahan', 'kontenPenanganan', 'kontenTentang', 'kontenKontak', 'galeris', 'carousels', 'kontenPeraturan', 'agendas'));
+    $laporans = \App\Models\Laporan::whereYear('created_at', '>=', $currentYear - 2)
+                    ->whereYear('created_at', '<=', $currentYear + 2)
+                    ->get();
+                    
+    $kontenDashboard = \App\Models\KontenHalaman::where('halaman', 'dashboard')->first();
+    $dataDashboard = $kontenDashboard && !empty($kontenDashboard->konten) ? json_decode($kontenDashboard->konten, true) : [];
+    $jenisKasuses = collect($dataDashboard['bentuk_item_titles'] ?? [
+        $dataDashboard['ks_title'] ?? 'Kekerasan Seksual',
+        $dataDashboard['kf_title'] ?? 'Kekerasan Fisik',
+        $dataDashboard['kp_title'] ?? 'Kekerasan Psikologis',
+    ]);
+
+    $datasets = [];
+    $colors = ['#EF4444', '#F59E0B', '#10B981', '#3B82F6', '#8B5CF6', '#EC4899', '#06B6D4', '#14B8A6', '#F43F5E', '#84CC16'];
+    $colorIndex = 0;
+
+    foreach ($jenisKasuses as $jenis) {
+        $data = [];
+        foreach ($years as $year) {
+            $count = $laporans->filter(function($l) use ($year, $jenis) {
+                return trim(strtolower($l->jenis_kasus)) === trim(strtolower($jenis)) &&
+                       \Carbon\Carbon::parse($l->created_at)->year == $year;
+            })->count();
+            $data[] = $count;
+        }
+        $datasets[] = [
+            'label' => $jenis,
+            'data' => $data,
+            'backgroundColor' => $colors[$colorIndex % count($colors)],
+            'borderColor' => $colors[$colorIndex % count($colors)],
+            'borderWidth' => 3,
+            'fill' => false,
+            'tension' => 0.4
+        ];
+        $colorIndex++;
+    }
+
+    $chartData = [
+        'labels' => $years,
+        'datasets' => $datasets
+    ];
+    $chartJson = json_encode($chartData);
+    // -------------------------------------------------------------
+
+    return view('public.depan', compact('kontenPencegahan', 'kontenPenanganan', 'kontenTentang', 'kontenKontak', 'galeris', 'carousels', 'kontenPeraturan', 'agendas', 'chartJson'));
 });
 
 // Rute Detail Berita (Public)
@@ -105,6 +158,8 @@ Route::middleware(['auth'])->group(function () {
     // --- KHUSUS ADMIN ---
     Route::middleware(['admin'])->group(function () {
         Route::post('/laporan/{id}/status', [LaporanController::class, 'updateStatus'])->name('laporan.update-status');
+        Route::put('/laporan/riwayat/{id}', [LaporanController::class, 'updateRiwayat'])->name('laporan.riwayat.update');
+        Route::delete('/laporan/riwayat/{id}', [LaporanController::class, 'destroyRiwayat'])->name('laporan.riwayat.destroy');
         Route::put('/laporan/{id}', [LaporanController::class, 'update'])->name('laporan.update');
         Route::delete('/laporan/{id}', [LaporanController::class, 'destroy'])->name('laporan.destroy');
         Route::post('/laporan/upload-ttd', [\App\Http\Controllers\LaporanController::class, 'uploadTtd'])->name('laporan.upload-ttd');

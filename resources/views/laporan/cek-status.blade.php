@@ -336,8 +336,8 @@
                                                     @endif
                                                 </div>
                                                 {{-- Catatan --}}
-                                                <p class="text-sm font-medium leading-relaxed break-words
-                                                    {{ $isDitolak ? 'text-red-700' : 'text-gray-700' }}">{{ $riwayat->catatan }}</p>
+                                                <div class="text-sm font-medium leading-relaxed break-words [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_b]:font-bold [&_i]:italic [&_u]:underline
+                                                    {{ $isDitolak ? 'text-red-700' : 'text-gray-700' }}">{!! $riwayat->catatan !!}</div>
                                             </div>
                                         </div>
                                         @if(!$loop->last)
