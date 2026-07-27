@@ -132,6 +132,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/laporkan', [LaporanController::class, 'create'])->name('laporkan');
     Route::post('/lapor', [LaporanController::class, 'store'])->name('lapor.store');
     Route::get('/riwayat', [LaporanController::class, 'riwayat'])->name('riwayat');
+    Route::post('/laporan/{id}/keluhan', [LaporanController::class, 'simpanKeluhan'])->name('laporan.keluhan');
 
 
     Route::get('/cek-status', [LaporanController::class, 'cekStatus'])->name('cek-status');
@@ -158,6 +159,7 @@ Route::middleware(['auth'])->group(function () {
     // --- KHUSUS ADMIN ---
     Route::middleware(['admin'])->group(function () {
         Route::post('/laporan/{id}/status', [LaporanController::class, 'updateStatus'])->name('laporan.update-status');
+        Route::post('/laporan/{id}/baca-keluhan', [LaporanController::class, 'bacaKeluhan'])->name('laporan.baca-keluhan');
         Route::put('/laporan/riwayat/{id}', [LaporanController::class, 'updateRiwayat'])->name('laporan.riwayat.update');
         Route::delete('/laporan/riwayat/{id}', [LaporanController::class, 'destroyRiwayat'])->name('laporan.riwayat.destroy');
         Route::put('/laporan/{id}', [LaporanController::class, 'update'])->name('laporan.update');

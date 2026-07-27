@@ -568,4 +568,59 @@ class LaporanController extends Controller
         ]);
     }
 
+    /**
+     * Simpan keluhan dari pelapor.
+     * Hanya bisa dilakukan oleh pemilik laporan dan status bukan "Selesai".
+     */
+    public function simpanKeluhan(Request $request, $id)
+    {
+        $request->validate([
+            'keluhan' => 'required|string',
+        ]);
+
+        $laporan = Laporan::findOrFail($id);
+
+        // Pastikan pelapor adalah pemilik laporan
+        if ($laporan->user_id !== Auth::id()) {
+            return redirect()->back()->with('error', 'Anda tidak berhak melakukan aksi ini.');
+        }
+
+        // Keluhan tidak bisa dikirim jika status sudah Selesai
+        if ($laporan->status === 'Selesai') {
+            return redirect()->back()->with('error', 'Keluhan tidak dapat dikirim karena laporan sudah selesai.');
+        }
+
+        $timestamp = now()->timezone('Asia/Makassar')->format('d M Y, H:i') . ' WITA';
+        
+        $headerKeluhan = '<div class="mb-2"><p class="text-[10px] font-black text-orange-500 uppercase tracking-widest flex items-center gap-1.5 mb-1"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Keluhan Dikirim</p><p class="text-xs text-gray-500 font-bold mb-2">' . $timestamp . '</p></div>';
+        $headerTambahan = '<div class="mb-2"><p class="text-[10px] font-black text-orange-500 uppercase tracking-widest flex items-center gap-1.5 mb-1"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Keluhan Tambahan</p><p class="text-xs text-gray-500 font-bold mb-2">' . $timestamp . '</p></div>';
+
+        // Jika sudah ada keluhan sebelumnya dan sudah dibaca, tambahkan keluhan baru di bawahnya
+        if ($laporan->keluhan && $laporan->keluhan_dibaca) {
+            $keluhanBaru = $laporan->keluhan . '<hr class="my-4 border-gray-200">' . $headerTambahan . $request->keluhan;
+        } else {
+            // Jika keluhan pertama kali
+            $keluhanBaru = $headerKeluhan . $request->keluhan;
+        }
+
+        $laporan->update([
+            'keluhan'         => $keluhanBaru,
+            'keluhan_dibaca'  => false, // Reset status baca saat ada keluhan baru
+        ]);
+
+        return redirect()->back()->with('success', 'Keluhan berhasil dikirim! Admin akan segera meninjau keluhan Anda.');
+    }
+
+    /**
+     * Tandai keluhan sudah dibaca oleh admin.
+     * Hanya bisa dilakukan oleh admin.
+     */
+    public function bacaKeluhan($id)
+    {
+        $laporan = Laporan::findOrFail($id);
+        $laporan->update(['keluhan_dibaca' => true]);
+
+        return redirect()->back()->with('success', 'Keluhan berhasil ditandai sudah dibaca.');
+    }
+
 }

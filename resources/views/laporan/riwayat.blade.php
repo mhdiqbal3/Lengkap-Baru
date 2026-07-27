@@ -81,7 +81,7 @@
                     <tbody class="divide-y divide-gray-50">
                         @if (isset($laporans))
                             @foreach ($laporans as $index => $item)
-                                <tr class="bg-white hover:bg-gray-50/50 transition-colors group" x-data="{ showView: false, showEdit: false, showDelete: false, showBukti: false, showStatus: false }">
+                                <tr class="bg-white hover:bg-gray-50/50 transition-colors group" x-data="{ showView: false, showEdit: false, showDelete: false, showBukti: false, showStatus: false, showKeluhan: false }">
                                     <td class="px-6 py-4 text-center font-medium text-gray-500">{{ $index + 1 }}</td>
                                     <td class="px-4 py-4 font-bold text-[#800000] whitespace-nowrap">{{ $item->kode_tiket }}</td>
                                     <td class="px-4 py-4 whitespace-nowrap text-gray-500" data-sort="{{ $item->created_at }}">
@@ -213,6 +213,20 @@
                                                     </path>
                                                 </svg>
                                             </button>
+
+                                            {{-- Tombol Keluhan: Muncul jika status bukan Selesai --}}
+                                            @if ($item->status !== 'Selesai')
+                                                <div class="relative flex flex-col items-center gap-1">
+                                                    <button @click="showKeluhan = true"
+                                                        class="relative p-2 rounded-lg transition-colors shadow-sm border focus:outline-none
+                                                        {{ $item->keluhan_dibaca ? 'text-gray-400 bg-gray-50 border-gray-200 hover:bg-gray-100' : ($item->keluhan ? 'text-orange-600 bg-orange-50 border-orange-200 hover:bg-orange-500 hover:text-white' : 'text-orange-600 bg-orange-50 border-orange-200 hover:bg-orange-500 hover:text-white') }}"
+                                                        title="Kirim Keluhan">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            @endif
                                         </div>
 
                                         {{-- MODAL LIHAT BUKTI GAMBAR & VIDEO --}}
@@ -986,6 +1000,116 @@
                                                 </div>
                                             </div>
                                             </template>
+
+                                        {{-- Modal Keluhan Pelapor --}}
+                                        @if ($item->status !== 'Selesai')
+                                            <template x-teleport="body">
+                                                <div x-show="showKeluhan" style="display: none;"
+                                                    class="fixed inset-0 z-[9997] flex items-center justify-center bg-gray-900/80 backdrop-blur-sm px-4 py-6"
+                                                    x-transition.opacity
+                                                    x-init="$watch('showKeluhan', val => { if (val) { setTimeout(() => initKeluhanSummernote({{ $item->id }}), 100); } })">
+                                                    <div @click.away="showKeluhan = false"
+                                                        class="bg-white rounded-[2rem] shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden transform transition-all text-left"
+                                                        x-transition.scale>
+
+                                                        {{-- Header --}}
+                                                        <div class="bg-gradient-to-r from-orange-500 to-amber-500 px-7 py-5 text-white flex justify-between items-center relative overflow-hidden shrink-0">
+                                                            <div class="absolute -top-5 -right-5 w-24 h-24 bg-white/10 rounded-full blur-2xl"></div>
+                                                            <div class="flex items-center gap-4 relative z-10">
+                                                                <div class="w-11 h-11 bg-white/20 rounded-2xl flex items-center justify-center border border-white/25 shadow-lg">
+                                                                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
+                                                                    </svg>
+                                                                </div>
+                                                                <div>
+                                                                    <span class="text-orange-100 text-[10px] font-black uppercase tracking-widest block mb-0.5">Nomor Tiket Laporan</span>
+                                                                    <h3 class="text-xl font-black drop-shadow-md tracking-tight">
+                                                                        {{ $item->kode_tiket }}
+                                                                    </h3>
+                                                                    <span class="text-orange-100/80 text-xs font-medium block mt-0.5">{{ \Carbon\Carbon::parse($item->created_at)->timezone('Asia/Makassar')->translatedFormat('d M Y, H:i') }} WITA</span>
+                                                                </div>
+                                                            </div>
+                                                            <button @click="showKeluhan = false"
+                                                                class="p-2 bg-white/20 hover:bg-white/30 rounded-xl transition-all focus:outline-none relative z-10">
+                                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                                                </svg>
+                                                            </button>
+                                                        </div>
+
+                                                        {{-- Body --}}
+                                                        <div class="flex-1 overflow-y-auto p-6 custom-scroll bg-gray-50">
+
+                                                            {{-- Tampilkan keluhan yang sudah ada (jika ada) --}}
+                                                            @if ($item->keluhan)
+                                                                <div class="mb-5 bg-white rounded-2xl border border-orange-100 p-5 shadow-sm">
+                                                                    <div class="flex justify-end items-center mb-3">
+                                                                        <div>
+                                                                            @if ($item->keluhan_dibaca)
+                                                                                <span class="inline-flex items-center gap-1.5 text-xs font-bold text-green-700 bg-green-50 border border-green-200 px-3 py-1.5 rounded-full">
+                                                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                                                                    Sudah Dibaca Admin
+                                                                                </span>
+                                                                            @else
+                                                                                <span class="inline-flex items-center gap-1.5 text-xs font-bold text-orange-600 bg-orange-50 border border-orange-200 px-3 py-1.5 rounded-full">
+                                                                                    <span class="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></span>
+                                                                                    Menunggu
+                                                                                </span>
+                                                                            @endif
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="prose prose-sm max-w-none text-gray-700 bg-gray-50 p-4 rounded-xl border border-gray-100">{!! $item->keluhan !!}</div>
+                                                                </div>
+                                                                
+                                                                @if ($item->keluhan_dibaca)
+                                                                    <p class="text-xs text-gray-500 font-medium mb-3 flex items-center gap-1.5">
+                                                                        <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                                                        Tulis keluhan baru Anda di bawah ini:
+                                                                    </p>
+                                                                @endif
+                                                            @else
+                                                                <div class="mb-4 bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
+                                                                    <svg class="w-5 h-5 text-amber-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                                                    <p class="text-sm text-amber-800 font-medium">Sampaikan keluhan Anda terkait proses penanganan laporan ini. Keluhan akan segera ditinjau oleh admin.</p>
+                                                                </div>
+                                                            @endif
+
+                                                            {{-- Form Keluhan (hanya tampil jika keluhan belum dibuat ATAU sudah dibaca admin) --}}
+                                                            @if (!$item->keluhan || $item->keluhan_dibaca)
+                                                                <form action="{{ route('laporan.keluhan', $item->id) }}" method="POST" id="form-keluhan-{{ $item->id }}">
+                                                                    @csrf
+                                                                    <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+                                                                        <div class="px-4 py-3 bg-gray-50 border-b border-gray-100">
+                                                                            <p class="text-xs font-bold text-gray-600 flex items-center gap-1.5">
+                                                                                <svg class="w-3.5 h-3.5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                                                                Tuliskan keluhan Anda:
+                                                                            </p>
+                                                                        </div>
+                                                                        <div id="keluhan-wrapper-{{ $item->id }}" class="p-1">
+                                                                            <textarea id="keluhan_editor_{{ $item->id }}" name="keluhan"></textarea>
+                                                                        </div>
+                                                                    </div>
+                                                                </form>
+                                                            @endif
+                                                        </div>
+
+                                                        {{-- Footer --}}
+                                                        <div class="px-6 py-4 border-t border-gray-100 bg-white flex justify-end items-center gap-3 shrink-0">
+                                                            @if (!$item->keluhan || $item->keluhan_dibaca)
+                                                                <button type="button"
+                                                                    onclick="document.getElementById('form-keluhan-{{ $item->id }}').submit()"
+                                                                    class="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold rounded-xl hover:from-orange-600 hover:to-amber-600 transition-all shadow-md active:scale-95 text-sm">
+                                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                                                                    </svg>
+                                                                    {{ $item->keluhan ? 'Kirim Keluhan Baru' : 'Kirim Keluhan' }}
+                                                                </button>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                        @endif
                                         
                                     </td>
                                 </tr>
@@ -1049,5 +1173,28 @@
                 }
             });
         });
+    </script>
+
+    {{-- Summernote JS untuk editor keluhan --}}
+    <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
+    <script>
+        window.initKeluhanSummernote = function(itemId) {
+            var el = document.getElementById('keluhan_editor_' + itemId);
+            if (!el) return;
+            var $el = $(el);
+            if ($el.data('summernote-initialized')) return;
+            $el.summernote({
+                height: 180,
+                dialogsInBody: true,
+                placeholder: 'Tuliskan keluhan Anda terkait penanganan laporan ini...',
+                toolbar: [
+                    ['style', ['bold', 'italic', 'underline', 'clear']],
+                    ['para',  ['ul', 'ol']],
+                    ['insert', ['link']],
+                    ['view',  ['codeview']]
+                ]
+            });
+            $el.data('summernote-initialized', true);
+        };
     </script>
 @endpush

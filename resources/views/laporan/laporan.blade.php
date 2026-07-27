@@ -249,7 +249,7 @@
                             <tr class="bg-white hover:bg-gray-50/50 transition-colors group laporan-row" 
                                 data-date="{{ \Carbon\Carbon::parse($item->created_at)->format('Y-m-d') }}"
                                 data-status="{{ $item->status }}"
-                                x-data="{ showEdit: false, showBukti: false, showDetail: false, showDelete: false }">
+                                x-data="{ showEdit: false, showBukti: false, showDetail: false, showDelete: false, showKeluhan: false }">
                                 <td class="px-6 py-4 text-center font-medium text-gray-500">{{ $index + 1 }}</td>
                                 <td class="px-4 py-4 font-bold text-[#800000] whitespace-nowrap">{{ $item->kode_tiket }}
                                 </td>
@@ -403,6 +403,25 @@
                                                 </path>
                                             </svg>
                                         </a>
+
+                                        {{-- Tombol Keluhan Admin: Tampil jika ada keluhan masuk --}}
+                                        @if ($item->keluhan)
+                                            <div class="relative">
+                                                <button @click="showKeluhan = true"
+                                                    class="relative p-2 rounded-lg transition-colors border shadow-sm focus:outline-none
+                                                    {{ $item->keluhan_dibaca ? 'text-gray-400 bg-gray-100 border-gray-200 hover:bg-gray-200' : 'text-orange-600 bg-orange-50 border-orange-200 hover:bg-orange-500 hover:text-white' }}"
+                                                    title="Lihat Keluhan Pelapor">
+                                                    {{-- Titik merah berkedip jika belum dibaca --}}
+                                                    @if (!$item->keluhan_dibaca)
+                                                        <span class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full animate-ping"></span>
+                                                        <span class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full"></span>
+                                                    @endif
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        @endif
                                     </div>
 
                                     {{-- Modal Lihat Detail Data --}}
@@ -1003,6 +1022,95 @@
                                             </div>
                                         </div>
                                     </template>
+
+                                    {{-- Modal Keluhan Admin --}}
+                                    @if ($item->keluhan)
+                                        <template x-teleport="body">
+                                            <div x-show="showKeluhan" style="display: none;"
+                                                class="fixed inset-0 z-[9997] flex items-center justify-center bg-gray-900/80 backdrop-blur-sm px-4 py-6"
+                                                x-transition.opacity
+                                                @open.window="showKeluhan = true">
+                                                <div @click.away="showKeluhan = false"
+                                                    class="bg-white rounded-[2rem] shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden transform transition-all text-left"
+                                                    x-transition.scale>
+
+                                                    {{-- Header --}}
+                                                    <div class="bg-gradient-to-r from-orange-500 to-amber-500 px-7 py-5 text-white flex justify-between items-center relative overflow-hidden shrink-0">
+                                                        <div class="absolute -top-5 -right-5 w-24 h-24 bg-white/10 rounded-full blur-2xl"></div>
+                                                        <div class="flex items-center gap-4 relative z-10">
+                                                            <div class="w-11 h-11 bg-white/20 rounded-2xl flex items-center justify-center border border-white/25 shadow-lg">
+                                                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
+                                                                </svg>
+                                                            </div>
+                                                            <div>
+                                                                <span class="text-orange-100 text-[10px] font-black uppercase tracking-widest block mb-0.5">Nomor Tiket Laporan</span>
+                                                                <h3 class="text-xl font-black drop-shadow-md tracking-tight">{{ $item->kode_tiket }}</h3>
+                                                                <span class="text-orange-100/80 text-xs font-medium block mt-0.5">{{ \Carbon\Carbon::parse($item->created_at)->timezone('Asia/Makassar')->translatedFormat('d M Y, H:i') }} WITA</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="flex items-center gap-2 relative z-10">
+                                                            <button @click="showKeluhan = false"
+                                                                class="p-2 bg-white/20 hover:bg-white/30 rounded-xl transition-all focus:outline-none">
+                                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                                                </svg>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+
+                                                    {{-- Body --}}
+                                                    <div class="flex-1 overflow-y-auto p-6 custom-scroll bg-gray-50">
+                                                        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-4">
+                                                            <div class="flex justify-between items-center mb-3">
+                                                                <p class="text-[10px] font-black text-orange-500 uppercase tracking-widest flex items-center gap-1.5 mb-0">
+                                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                                                    Isi Keluhan
+                                                                </p>
+                                                                <div>
+                                                                    @if ($item->keluhan_dibaca)
+                                                                        <span class="inline-flex items-center gap-1.5 text-xs font-bold text-green-700 bg-green-50 border border-green-200 px-3 py-1.5 rounded-full">
+                                                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                                                                            Sudah Dibaca
+                                                                        </span>
+                                                                    @else
+                                                                        <span class="inline-flex items-center gap-1.5 text-xs font-bold text-orange-600 bg-orange-50 border border-orange-200 px-3 py-1.5 rounded-full">
+                                                                            <span class="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></span>
+                                                                            Belum Dibaca
+                                                                        </span>
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                            <div class="prose prose-sm max-w-none text-gray-700 bg-gray-50 p-4 rounded-xl border border-gray-100 leading-relaxed">
+                                                                {!! $item->keluhan !!}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    {{-- Footer --}}
+                                                    <div class="px-6 py-4 border-t border-gray-100 bg-white flex justify-end items-center gap-3 shrink-0">
+                                                        @if (!$item->keluhan_dibaca)
+                                                            <form action="{{ route('laporan.baca-keluhan', $item->id) }}" method="POST" class="m-0">
+                                                                @csrf
+                                                                <button type="submit"
+                                                                    class="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold rounded-xl hover:from-green-600 hover:to-emerald-600 transition-all shadow-md active:scale-95 text-sm">
+                                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                                    </svg>
+                                                                    Tandai Sudah Dibaca
+                                                                </button>
+                                                            </form>
+                                                        @else
+                                                            <span class="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-100 text-gray-500 font-bold rounded-xl text-sm border border-gray-200">
+                                                                <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                                                                Keluhan Sudah Dibaca
+                                                            </span>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    @endif
 
                                 </td>
                             </tr>

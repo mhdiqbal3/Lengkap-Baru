@@ -29,7 +29,9 @@ class Laporan extends Model
         'deskripsi',
         'link_video',
         'bukti',
-        'status'
+        'status',
+        'keluhan',             // Isi keluhan dari pelapor (HTML Summernote)
+        'keluhan_dibaca',      // Status apakah admin sudah membaca keluhan
     ];
 
     public function user()
