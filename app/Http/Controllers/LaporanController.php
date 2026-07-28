@@ -216,7 +216,6 @@ class LaporanController extends Controller
     {
         $request->validate([
             'status' => 'required|in:Menunggu Verifikasi,Sedang Diproses,Selesai,Ditolak',
-            'catatan_penanganan' => 'nullable|string|max:2000',
         ]);
 
         $laporan = Laporan::findOrFail($id);
@@ -240,13 +239,10 @@ class LaporanController extends Controller
         }
 
         $statusBerubah = $laporan->status !== $request->status;
-        $catatanInput = trim($request->catatan_penanganan ?? '');
 
         if ($statusBerubah) {
             // Status berubah: buat riwayat baru
-            if ($catatanInput) {
-                $catatan = $catatanInput;
-            } elseif ($request->status == 'Sedang Diproses') {
+            if ($request->status == 'Sedang Diproses') {
                 $catatan = 'Laporan telah diverifikasi dan akan ditindaklanjuti segera.';
             } elseif ($request->status == 'Selesai') {
                 $catatan = 'Penanganan laporan telah selesai.';
@@ -261,22 +257,6 @@ class LaporanController extends Controller
                 'status' => $request->status,
                 'catatan' => $catatan
             ]);
-        } elseif ($request->status === 'Sedang Diproses' && $catatanInput) {
-            // Cek apakah mode edit catatan sebelumnya
-            if ($request->filled('edit_riwayat_id')) {
-                $riwayatToEdit = \App\Models\RiwayatLaporan::where('id', $request->edit_riwayat_id)
-                                    ->where('laporan_id', $laporan->id)->first();
-                if ($riwayatToEdit) {
-                    $riwayatToEdit->update(['catatan' => $catatanInput]);
-                }
-            } else {
-                // Status tidak berubah tapi admin menambahkan catatan baru
-                \App\Models\RiwayatLaporan::create([
-                    'laporan_id' => $laporan->id,
-                    'status' => 'Sedang Diproses',
-                    'catatan' => $catatanInput
-                ]);
-            }
         }
 
         $laporan->status = $request->status;
