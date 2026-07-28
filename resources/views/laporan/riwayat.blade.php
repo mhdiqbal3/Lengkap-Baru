@@ -3,7 +3,13 @@
 @section('header_title', 'Riwayat Pengaduan Saya')
 
 @section('content')
-
+    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.css" rel="stylesheet">
+    <style>
+        .note-modal-backdrop { z-index: 10001 !important; display: none !important; }
+        .note-modal { z-index: 10002 !important; }
+        .note-dropdown-menu { z-index: 10005 !important; }
+        .note-editor.note-frame .note-editing-area .note-editable { background-color: #ffffff; }
+    </style>
     <div class="max-w-[100%] mx-auto pb-10">
         {{-- Header Halaman --}}
         <div class="mb-8">
